@@ -26,12 +26,10 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <Canvas />
-        <MessageBox list={msg} />
-
-
-      </header>
+      {/* <header className="App-header">
+      </header> */}
+      <Canvas />
+      <MessageBox list={msg} />
     </div>
   );
 }
