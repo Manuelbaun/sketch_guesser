@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Image from 'react-bootstrap/Image'
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
+
+import './canvas.css';
 
 interface CanvasProps {
     width: number;
@@ -175,26 +173,24 @@ const Canvas = ({ width, height }: CanvasProps) => {
         }
     };
 
-    return <div>
+    return <div className="drawing-container">
         <canvas
             ref={canvasRef}
             height={height}
             width={width}
-        // onTouchMove={onTouchMove}
-        // onTouchStart={onTouchStart}
-        // onTouchEnd={onTouchEnd}
-        // onTouchCancel={onTouchEnd}
         />
-        <div>
+        <div className="toolbar">
             <ButtonToolbar>
-                {colors.map((color) => <Button key={color} className="rounded-circle" style={{
-                    backgroundColor: color,
-                    borderColor: color,
-                    height: 40,
-                    width: 40,
-                    margin: "0.2em"
+                {colors.map((color) => <Button key={color}
+                    variant="dark"
+                    className="rounded-circle"
+                    style={{
+                        backgroundColor: color,
+                        height: 40,
+                        width: 40,
+                        margin: "0.2em"
 
-                }}
+                    }}
                     onClick={() => setColor(color)}
                 />)}
 

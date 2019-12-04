@@ -1,0 +1,21 @@
+.message-input {
+  font-size: 50;
+}
+.message-input .time {
+  color: red;
+}
+.message-input .user {
+  color: blue;
+}
+.message-input .message {
+  color: black;
+}
+
+.message-container {
+  border-radius: 12px;
+  border: 1px solid black;
+}
+
+.message-container .container .header {
+  border-bottom: 12px solid black;
+}
