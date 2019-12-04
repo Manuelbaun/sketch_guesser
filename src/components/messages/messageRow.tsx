@@ -18,11 +18,13 @@ const MessageRow = (option: Message) => {
     if (h > 12) h -= 12;
     else if (h === 0) h = 12;
 
-    return (<Row key={option.time.getTime().toString() + option.user}>
-        <Col xs={3} md={3} >{h}:{m}:{s}</Col>
-        <Col xs={3} md={4} >{option.user}</Col>
-        <Col xs={5} md={5} >{option.message} </Col>
-    </Row>
+
+    return (
+        <tr key={option.time.getTime().toString() + option.user}>
+            <td >{h}:{m}:{s}</td>
+            <td >{option.user}</td>
+            <td >{option.message} </td>
+        </tr>
     )
 }
 

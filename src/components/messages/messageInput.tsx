@@ -24,10 +24,12 @@ const MessageInput = () => {
         setWord(event.target.value);
     }, [word]);
 
-    return <Form onSubmit={handleSubmit}>
+    return <Form onSubmit={handleSubmit} >
         <InputGroup className="mb-3">
             <InputGroup.Prepend>
-                <InputGroup.Text id="basic-addon1">Guess</InputGroup.Text>
+                <InputGroup.Text
+                    id="basic-addon1"
+                >Guess</InputGroup.Text>
             </InputGroup.Prepend>
             <FormControl
                 placeholder="your guess here"
@@ -36,7 +38,10 @@ const MessageInput = () => {
                 aria-describedby="basic-addon1"
                 onChange={handleChange}
             />
-            <Button variant="primary" type="submit" disabled={word.length === 0} > send </Button>
+            <Button
+                variant="dark"
+                type="submit"
+                disabled={word.length === 0} > send </Button>
         </InputGroup>
 
     </Form>

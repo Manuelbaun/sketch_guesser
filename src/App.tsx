@@ -1,8 +1,8 @@
 import React from 'react';
-import './App.css';
 import Canvas from './components/drawing/canvas';
 import MessageBox from './components/messages/messageBox';
 import Message from './components/messages/message.interface';
+import './App.css';
 
 
 const msg: Array<Message> = [{

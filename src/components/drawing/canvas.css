@@ -1,35 +1,37 @@
 .drawing-container {
-  width: 100%;
+	/* background-color: #323232; */
+	width: 100%;
 }
 
 .drawing-container canvas {
-  width: 100%;
-  background-image: -webkit-repeating-radial-gradient(
-    center center,
-    rgba(0, 0, 0, 0.2),
-    rgba(0, 0, 0, 0.2) 1px,
-    transparent 1px,
-    transparent 100%
-  );
-  background-size: 1rem 1rem;
-  border: 2px solid #ffffff;
-  margin-left: auto;
-  margin-right: auto;
+	width: 100%;
+	background-image: -webkit-repeating-radial-gradient(
+		center center,
+		rgba(0, 0, 0, 0.2),
+		rgba(0, 0, 0, 0.2) 1px,
+		transparent 1px,
+		transparent 95%
+	);
+	background-size: 1rem 1rem;
+	/* border: 2px solid #ffffff; */
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .drawing-container .toolbar {
-  border: 2px solid #ffffff;
+	/* border: 2px solid #ffffff; */
+	/* background-color: #434343; */
 }
 
 .drawing-container .toolbar button {
-  transition: all 0.4s ease 0s;
+	transition: all 0.4s ease 0s;
 }
 
 .drawing-container .toolbar button:hover {
-  background: #434343;
-  letter-spacing: 1px;
-  -webkit-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
-  -moz-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
-  box-shadow: 5px 40px -10px rgba(0, 0, 0, 0.57);
-  transition: all 0.4s ease 0s;
+	background: #434343;
+	letter-spacing: 1px;
+	-webkit-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+	-moz-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+	box-shadow: 5px 40px -10px rgba(0, 0, 0, 0.57);
+	transition: all 0.4s ease 0s;
 }
