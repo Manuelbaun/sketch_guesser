@@ -1,31 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MessageRow from './messageRow';
-import Message from './message.interface';
+import Message from '../models/message';
 
 import MessageInput from './messageInput';
 import './message.css';
+import MessageService from '../../service/message.service';
 
 interface MessageListProps {
-	list: Array<Message>;
+	messageService: MessageService;
+	localUserName: string;
 }
 
-// TODO: header
 // - get local user to check
-const MessageBox: React.FC<MessageListProps> = ({ list }) => {
-	if (list.length > 0) {
-		return (
-			<div className="message-container">
-				<MessageInput />
-				<div style={{ backgroundColor: '#343a40' }}>
-					{list.map((message) => {
-						return MessageRow(message, message.user !== 'Hans Klaus');
-					})}
-				</div>
+const MessageBox: React.FC<MessageListProps> = ({ messageService, localUserName }) => {
+	const [ messageList, setMessageList ] = useState(messageService.getMessages());
+
+	// subscribe to message
+	useEffect(() => {
+		const sub = messageService.subscribe((messages: Message[]) => {
+			setMessageList(messages);
+		});
+
+		// unsubscribe when component is destroyed
+		return () => sub.unsubscribe();
+	}, []);
+
+	return (
+		<div className="message-container">
+			<MessageInput onSubmit={(msg) => messageService.sendMessage(msg)} />
+
+			<div style={{ backgroundColor: '#343a40' }}>
+				{messageList.map((message) => {
+					return MessageRow(message, message.user !== localUserName);
+				})}
 			</div>
-		);
-	} else {
-		return <div>No message found</div>;
-	}
+		</div>
+	);
 };
 
 export default MessageBox;

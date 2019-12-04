@@ -1,14 +1,11 @@
 import React from 'react';
-import Message from './message.interface';
+import Message from '../models/message';
 
 import './message.css';
 
 function addZero(t: number | string) {
 	if (t < 10) t = '0' + t;
 	return t;
-}
-interface MessageRowInterface extends Message {
-	incoming: boolean;
 }
 
 const MessageRow = (props: Message, incoming: boolean) => {

@@ -23,7 +23,7 @@
     "allowJs": true,
 
 
-    "maxNodeModuleJsDepth": 1,
+    "maxNodeModuleJsDepth": 2,
   },
   "include": [
     "src"

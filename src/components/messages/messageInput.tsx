@@ -4,17 +4,21 @@ import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 
-const MessageInput = () => {
+interface MessageInputInterface {
+	onSubmit(msg: string): void;
+}
+
+const MessageInput: React.FC<MessageInputInterface> = (props) => {
 	const [ word, setWord ] = useState('');
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		props.onSubmit(word);
 		setWord('');
 	};
 
 	const handleChange = (event) => {
 		event.preventDefault();
-		console.log(event.target.value);
 		setWord(event.target.value);
 	};
 
