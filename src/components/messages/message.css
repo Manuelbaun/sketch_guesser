@@ -23,6 +23,12 @@
 .message-details {
 	font-weight: 100;
 }
+
+.message-details .user,
+.time {
+	font-size: 0.7em;
+}
+
 .box-wrapper {
 	padding: 0.5rem 1rem;
 }
@@ -40,9 +46,6 @@
 	position: relative;
 }
 
-.incoming {
-}
-
 .incoming:before {
 	content: "";
 	width: 0px;
@@ -56,8 +59,18 @@
 }
 
 .outgoing {
-	margin-left: auto;
-	margin-right: 0;
+	margin-left: auto !important;
+	margin-right: 0 !important;
+}
+
+.outgoing .message-details .user {
+	display: block;
+	text-align: right;
+}
+
+.outgoing .message-details .time {
+	display: block;
+	text-align: right;
 }
 
 .outgoing:before {
