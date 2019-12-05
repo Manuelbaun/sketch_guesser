@@ -1,7 +1,6 @@
 import * as Y from 'yjs';
 import Message from '../models/message';
 import Player from '../models/player';
-import DrawingPath from '../models/drawingPath';
 
 export default class Store {
 	private _doc = new Y.Doc();
@@ -10,7 +9,7 @@ export default class Store {
 		return this._doc;
 	}
 
-	private _drawState = this._doc.getArray<DrawingPath>('drawing');
+	private _drawState = this._doc.getArray<any>('drawing');
 	public get drawState() {
 		return this._drawState;
 	}

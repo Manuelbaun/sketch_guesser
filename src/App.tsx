@@ -11,7 +11,7 @@ import sha256 from 'sha256';
 import GameEngine from './service/gameEngine';
 import MessageService from './service/message.service';
 import CountDown from './components/countDown/countDown';
-import DrawingEngine from './components/drawing/drawingEngine';
+import DrawEngine from './components/drawing/drawEngine';
 
 const msg: Array<Message> = [
 	{
@@ -40,7 +40,7 @@ const App: React.FC = () => {
 
 
 	const gameEngine = new GameEngine(store);
-	const drawingEngine = new DrawingEngine({ store: store.drawState });
+	const drawingEngine = new DrawEngine({ store: store.drawState });
 
 	gameEngine.createGame({
 		gameID: 'home',

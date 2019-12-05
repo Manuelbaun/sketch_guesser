@@ -6,6 +6,11 @@ interface DrawingPathInterface {
 	origin: Coordinate;
 }
 
+/**
+ * Y currently cant work with classes pushing to an array directly
+ * only via an object, wrapping it. 
+ * So this class stays for one unused
+ */
 export default class DrawingPath {
 	element = new Y.Map();
 	currentPath;

@@ -1,19 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-
-import * as Y from 'yjs';
+import DrawEngine from './drawEngine';
+import { Coordinate } from './types';
 
 import './canvas.css';
-import DrawingEngine from './drawingEngine';
-import { Coordinate } from './types';
-import DrawingPath from '../../models/drawingPath';
-
-export interface CanvasProps {
-	width?: number;
-	height?: number;
-	drawingEngine: DrawingEngine;
-}
 
 const colorPalette = [
 	'#e6194B',
@@ -30,12 +21,18 @@ const colorPalette = [
 	'#ffffff'
 ];
 
+// TODO: Remove all listener, when user is not the current presenter
+
+export interface CanvasProps {
+	width?: number;
+	height?: number;
+	drawingEngine: DrawEngine;
+}
 const Canvas: React.FC<CanvasProps> = ({ width, height, drawingEngine }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const [ isPainting, setIsPainting ] = useState(false);
 	const [ color, setColor ] = useState(colorPalette[0]);
-	console.log(color);
 
 	const startPaint = useCallback(
 		({ clientX, clientY }) => {
@@ -217,8 +214,6 @@ const Canvas: React.FC<CanvasProps> = ({ width, height, drawingEngine }) => {
 			y: (y - canvas.offsetTop) / canvasRect.height
 		};
 	};
-
-	// console.log(drawingEngine.getElement(0));
 
 	return (
 		<div className="drawing-container">
