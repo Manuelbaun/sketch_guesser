@@ -30,7 +30,9 @@ const MessageBox: React.FC<MessageListProps> = ({ messageService, localUserName 
 			<div className="message-container">
 				<div style={{ backgroundColor: '#343a40' }}>
 					{messageList.map((message) => {
-						return MessageRow(message, message.user !== localUserName);
+						const key = message.time.getTime().toString() + message.user;
+
+						return <MessageRow key={key} message={message} incoming={message.user !== localUserName} />;
 					})}
 				</div>
 			</div>

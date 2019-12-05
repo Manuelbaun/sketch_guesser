@@ -13,7 +13,7 @@ interface MessageRowProps {
 	incoming: boolean;
 }
 
-const MessageRow = (props: MessageRowProps) => {
+const MessageRow: React.FC<MessageRowProps> = (props) => {
 	const { message, incoming } = props;
 	var h = message.time.getHours();
 	var m = addZero(message.time.getMinutes());
@@ -23,18 +23,17 @@ const MessageRow = (props: MessageRowProps) => {
 	else if (h === 0) h = 12;
 
 	const layoutClass = incoming ? 'incoming' : 'outgoing';
+	const time = `${h}:${m}:${s}`;
 
 	return (
-		<div className="box-wrapper" key={message.time.getTime().toString() + message.user}>
+		<div className="box-wrapper">
 			<div className={'box ' + layoutClass}>
 				<div className="message-details">
-					<span>
-						{h}:{m}:{s}{' '}
-					</span>{' '}
+					<span>{time}</span>
 					--
 					<span> {message.user} </span>
 				</div>
-				<div>{props.message}</div>
+				<div>{message.message}</div>
 			</div>
 		</div>
 	);

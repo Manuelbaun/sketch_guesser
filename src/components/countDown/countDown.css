@@ -2,6 +2,13 @@
 	color: #ffffff;
 	font-weight: bold;
 	font-size: 2em;
+	position: absolute;
+	top: 0;
+	left: 50%;
 
-	border-bottom: 1px solid #ffffff;
+	/* border: 1px solid #ffffff; */
+	/* width: 2em; */
+	/* height: 2em; */
+
+	border-radius: 50%;
 }
