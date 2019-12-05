@@ -9,7 +9,7 @@ export default class Store {
 		return this._doc;
 	}
 
-	private _drawState = this._doc.getArray<any>('drawing');
+	private _drawState = this._doc.getArray('drawing');
 	public get drawState() {
 		return this._drawState;
 	}
@@ -34,30 +34,35 @@ export default class Store {
 		return this._player;
 	}
 
+	onDataSend = (data: string | Uint8Array) => {
+		console.log('send data store');
+	};
+
 	constructor() {
 		this._doc.on('update', (update, agr1) => {
 			console.log('DocumentUpdate');
-			// this.onEmitUpdate && this.onEmitUpdate(update);
+			this.onDataSend(update);
 		});
 
-		// this.drawState.observe((event, arg1) => {
-		// 	console.log('drawState');
-		// });
+		this.drawState.observeDeep((event, arg1) => {
+			console.log('drawState');
+		});
 
-		// this.messageState.observe((event, arg1) => {
-		// 	console.log('messageState Update');
-		// });
-		// this.clock.observe((event, arg1) => {
-		// 	console.log('ClockUpdate Update');
-		// });
+		this.messageState.observe((event, arg1) => {
+			console.log('messageState Update');
+		});
+		this.clock.observe((event, arg1) => {
+			console.log('ClockUpdate Update');
+		});
 
-		// this.gameState.observe((event, arg1) => {
-		// 	console.log('gameState Update');
-		// });
+		this.gameState.observe((event, arg1) => {
+			console.log('gameState Update');
+		});
 	}
 
 	onIncomingUpdate(update) {
 		const uintArray = new Uint8Array(update);
+		console.log('apply data', uintArray.length);
 		Y.applyUpdate(this._doc, uintArray);
 	}
 

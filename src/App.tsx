@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Canvas from './components/drawing/canvas';
 import MessageBox from './components/messages/messageBox';
 import Message from './models/message';
@@ -13,34 +13,18 @@ import MessageService from './service/message.service';
 import CountDown from './components/countDown/countDown';
 import DrawEngine from './components/drawing/drawEngine';
 
-const msg: Array<Message> = [
-	{
-		time: new Date(),
-		user: 'Benno',
-		message: 'Hallo all ok'
-	},
-	{
-		time: new Date(),
-		user: 'Hans Klaus',
-		message: 'Ein Llanger test sonst kok'
-	},
-	{
-		time: new Date(),
-		user: 'Franz',
-		message: 'Hallo all ok'
-	}
-];
+import NetfluxTest from './service/netflux';
+var chance = require('chance')();
+
+let net: NetfluxTest;
 
 const App: React.FC = () => {
 	const store = new Store();
 	const messageService = new MessageService(store.messageState, 'Hans');
-
-	const [ fullScreen, setFullScreen ] = useState(false);
-	store.messageState.push(msg);
-
-
 	const gameEngine = new GameEngine(store);
 	const drawingEngine = new DrawEngine({ store: store.drawState });
+
+	const [ fullScreen, setFullScreen ] = useState(false);
 
 	gameEngine.createGame({
 		gameID: 'home',
@@ -53,6 +37,30 @@ const App: React.FC = () => {
 
 	gameEngine.setGuessWord('test');
 	gameEngine.startRound();
+	const name = chance.name();
+
+	const joinGame = useCallback((gameID: string) => {
+		console.log('GameID', gameID);
+		net = new NetfluxTest({
+			name: name,
+			groupId: gameID,
+			onDataReceived: (data) => {
+				if (typeof data === 'string') {
+					console.log(data);
+				} else {
+					
+					store.onIncomingUpdate(data); // Uint8Array
+				}
+			}
+		});
+		store.onDataSend = (data) => {
+			net.send(data);
+			console.log('send outside');
+		};
+	}, []);
+
+	joinGame('hans');
+
 	return (
 		<div className="App">
 			{/* <button onClick={() => setFullScreen(true)}>Go Fullscreen</button> */}

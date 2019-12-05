@@ -27,7 +27,7 @@
 		"rxjs": "^6.5.3",
 		"sha256": "^0.2.0",
 		"typescript": "3.7.2",
-		"yjs": "^13.0.0-97"
+		"yjs": "^13.0.0-102"
 	},
 	"scripts": {
 		"start": "react-scripts start",

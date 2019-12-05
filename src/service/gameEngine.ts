@@ -66,7 +66,7 @@ export default class GameEngine {
 
 		if (this.roundStarted) return;
 		this.roundStarted = true;
-		this.clock.set('time', 60);
+		this.clock.set('time', 2);
 		const timer = setInterval(() => {
 			const clock = this.clock.get('time');
 			this.clock.set('time', clock - 1);

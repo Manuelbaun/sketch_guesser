@@ -8,6 +8,24 @@ interface MessageServiceInterface {
 	getMessages: Function;
 }
 
+const msg: Array<Message> = [
+	{
+		time: new Date(),
+		user: 'Benno',
+		message: 'Hallo all ok'
+	},
+	{
+		time: new Date(),
+		user: 'Hans Klaus',
+		message: 'Ein Llanger test sonst kok'
+	},
+	{
+		time: new Date(),
+		user: 'Franz',
+		message: 'Hallo all ok'
+	}
+];
+
 export default class MessageService extends Subject<Message[]> implements MessageServiceInterface {
 	messageState = new Y.Array<Message>();
 	name: string;
@@ -19,6 +37,8 @@ export default class MessageService extends Subject<Message[]> implements Messag
 		this.messageState.observe((event) => {
 			console.log('messageState Update');
 		});
+
+		this.messageState.push(msg);
 	}
 
 	sendMessage(msg: string) {

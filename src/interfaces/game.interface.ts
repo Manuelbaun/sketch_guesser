@@ -1,5 +1,3 @@
-import Player from '../models/player';
-
 export default interface GameInterface {
 	gameID: string;
 	currentMasterID: string;
