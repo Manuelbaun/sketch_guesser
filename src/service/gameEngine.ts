@@ -1,12 +1,14 @@
 import * as Y from 'yjs';
 import sha256 from 'sha256';
-import GameInterface from './game.interface';
+
 import Store from './store';
+import GameInterface from '../interfaces/game.interface';
 
 interface GameEngineStoreInterface {
 	gameState;
 	clock;
 }
+
 export default class GameEngine {
 	gameState = new Y.Map<any>();
 	clock;
@@ -64,6 +66,7 @@ export default class GameEngine {
 
 		if (this.roundStarted) return;
 		this.roundStarted = true;
+		this.clock.set('time', 60);
 		const timer = setInterval(() => {
 			const clock = this.clock.get('time');
 			this.clock.set('time', clock - 1);

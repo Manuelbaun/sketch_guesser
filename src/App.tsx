@@ -40,11 +40,13 @@ const App: React.FC = () => {
 	state.messageState.push(msg);
 
 	gameEngine.createGame({
+		gameID: 'home',
 		codeWord: '',
 		codeWordHash: '',
 		currentRound: 1,
 		rounds: 3,
-		players: 5
+		players: 5,
+		currentMasterID: ''
 	});
 
 	gameEngine.setGuessWord('test');

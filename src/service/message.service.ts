@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
-import Message, { MessageInterface } from '../models/message';
+import Message from '../models/message';
 
 interface MessageServiceInterface {
 	messageState: any;
@@ -8,8 +8,8 @@ interface MessageServiceInterface {
 	getMessages: Function;
 }
 
-export default class MessageService extends Subject<MessageInterface[]> implements MessageServiceInterface {
-	messageState = new Y.Array<MessageInterface>();
+export default class MessageService extends Subject<Message[]> implements MessageServiceInterface {
+	messageState = new Y.Array<Message>();
 	name: string;
 
 	constructor(messageState, name: string) {

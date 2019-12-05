@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import MessageRow from './messageRow';
 import Message from '../../models/message';
-
 import MessageInput from './messageInput';
-import './message.css';
 import MessageService from '../../service/message.service';
+import './message.css';
 
 interface MessageListProps {
 	messageService: MessageService;

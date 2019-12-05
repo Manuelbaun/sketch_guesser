@@ -1,14 +1,14 @@
 import * as Y from 'yjs';
-import { MessageInterface } from '../models/message';
-import GameInterface from './game.interface';
+import Message from '../models/message';
 
 export default class Store {
 	private _doc = new Y.Doc();
 	get doc() {
 		return this._doc;
 	}
+
 	drawState = this._doc.getArray('drawing');
-	messageState = this._doc.getArray<MessageInterface>('messages');
+	messageState = this._doc.getArray<Message>('messages');
 	gameState = this._doc.getMap('gameState');
 	clock = this._doc.getMap('clock');
 

@@ -8,10 +8,16 @@ function addZero(t: number | string) {
 	return t;
 }
 
-const MessageRow = (props: Message, incoming: boolean) => {
-	var h = props.time.getHours();
-	var m = addZero(props.time.getMinutes());
-	var s = addZero(props.time.getSeconds());
+interface MessageRowProps {
+	message: Message;
+	incoming: boolean;
+}
+
+const MessageRow = (props: MessageRowProps) => {
+	const { message, incoming } = props;
+	var h = message.time.getHours();
+	var m = addZero(message.time.getMinutes());
+	var s = addZero(message.time.getSeconds());
 
 	if (h > 12) h -= 12;
 	else if (h === 0) h = 12;
@@ -19,14 +25,14 @@ const MessageRow = (props: Message, incoming: boolean) => {
 	const layoutClass = incoming ? 'incoming' : 'outgoing';
 
 	return (
-		<div className="box-wrapper" key={props.time.getTime().toString() + props.user}>
+		<div className="box-wrapper" key={message.time.getTime().toString() + message.user}>
 			<div className={'box ' + layoutClass}>
 				<div className="message-details">
 					<span>
 						{h}:{m}:{s}{' '}
 					</span>{' '}
 					--
-					<span> {props.user} </span>
+					<span> {message.user} </span>
 				</div>
 				<div>{props.message}</div>
 			</div>

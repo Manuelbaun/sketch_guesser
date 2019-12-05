@@ -4,7 +4,7 @@ import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 
 import './canvas.css';
 
-interface CanvasProps {
+export interface CanvasProps {
 	width: number;
 	height: number;
 }
