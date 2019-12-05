@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import MessageRow from './messageRow';
-import Message from '../models/message';
+import Message from '../../models/message';
 
 import MessageInput from './messageInput';
 import './message.css';
@@ -26,13 +26,14 @@ const MessageBox: React.FC<MessageListProps> = ({ messageService, localUserName 
 	}, []);
 
 	return (
-		<div className="message-container">
+		<div>
 			<MessageInput onSubmit={(msg) => messageService.sendMessage(msg)} />
-
-			<div style={{ backgroundColor: '#343a40' }}>
-				{messageList.map((message) => {
-					return MessageRow(message, message.user !== localUserName);
-				})}
+			<div className="message-container">
+				<div style={{ backgroundColor: '#343a40' }}>
+					{messageList.map((message) => {
+						return MessageRow(message, message.user !== localUserName);
+					})}
+				</div>
 			</div>
 		</div>
 	);

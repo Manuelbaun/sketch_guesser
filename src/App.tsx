@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Canvas from './components/drawing/canvas';
 import MessageBox from './components/messages/messageBox';
-import Message from './components/models/message';
+import Message from './models/message';
+import Fullscreen from 'react-full-screen';
+
 import './App.css';
-import State from './service/state';
+import Store from './service/store';
 
 import sha256 from 'sha256';
 import GameEngine from './service/gameEngine';
 import MessageService from './service/message.service';
+import CountDown from './components/countDown/countDown';
 
 const msg: Array<Message> = [
 	{
@@ -28,15 +31,15 @@ const msg: Array<Message> = [
 ];
 
 const App: React.FC = () => {
-	const state = new State();
-	const gameEngine = new GameEngine(state.gameState);
+	const state = new Store();
+	const gameEngine = new GameEngine(state);
 	const messageService = new MessageService(state.messageState, 'Hans');
 
-	
+	const [ fullScreen, setFullScreen ] = useState(false);
+
 	state.messageState.push(msg);
 
 	gameEngine.createGame({
-		clock: 60,
 		codeWord: '',
 		codeWordHash: '',
 		currentRound: 1,
@@ -44,14 +47,18 @@ const App: React.FC = () => {
 		players: 5
 	});
 
-	gameEngine.setWord('test');
-
+	gameEngine.setGuessWord('test');
+	gameEngine.startRound();
 	return (
 		<div className="App">
-			{/* <header className="App-header">
-      </header> */}
-			<Canvas />
-			<MessageBox messageService={messageService} localUserName={'Hans'} />
+			<button onClick={() => setFullScreen(true)}>Go Fullscreen</button>
+
+			<Fullscreen enabled={fullScreen} onChange={(isFull) => setFullScreen(isFull)}>
+				<CountDown gameEngine={gameEngine} />
+
+				<Canvas />
+				<MessageBox messageService={messageService} localUserName={'Hans'} />
+			</Fullscreen>
 		</div>
 	);
 };

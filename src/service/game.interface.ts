@@ -4,5 +4,4 @@ export default interface GameInterface {
 	players: number;
 	codeWord: string;
 	codeWordHash: string | number[];
-	clock: number;
 };

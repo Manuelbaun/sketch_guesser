@@ -1,5 +1,5 @@
 import React from 'react';
-import Message from '../models/message';
+import Message from '../../models/message';
 
 import './message.css';
 

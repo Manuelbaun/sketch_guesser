@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
-import Message, { MessageInterface } from '../components/models/message';
+import Message, { MessageInterface } from '../models/message';
 
 interface MessageServiceInterface {
 	messageState: any;
@@ -33,10 +33,10 @@ export default class MessageService extends Subject<MessageInterface[]> implemen
 			}
 		]);
 
-		this.next(this.messageState.toArray());
+		this.next(this.messageState.toArray().reverse());
 	}
 
 	getMessages(): Message[] {
-		return this.messageState.toArray();
+		return this.messageState.toArray().reverse();
 	}
 }
