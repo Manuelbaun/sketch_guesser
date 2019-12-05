@@ -45,7 +45,6 @@ const App: React.FC = () => {
 		codeWordHash: '',
 		currentRound: 1,
 		rounds: 3,
-		players: 5,
 		currentMasterID: ''
 	});
 
