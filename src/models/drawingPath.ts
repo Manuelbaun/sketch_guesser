@@ -1,10 +1,5 @@
 import * as Y from 'yjs';
-
-// Relative position between 0..1
-type Coordinate = {
-	x: number;
-	y: number;
-};
+import { Coordinate } from '../components/drawing/types';
 
 interface DrawingPathInterface {
 	color: string;
@@ -16,10 +11,10 @@ export default class DrawingPath {
 	currentPath;
 
 	constructor(props: DrawingPathInterface) {
+		this.currentPath = new Y.Array();
 		this.element.set('color', props.color);
 		this.element.set('origin', props.origin);
 		this.element.set('type', 'path');
-		this.currentPath = new Y.Array();
 		this.element.set('path', this.currentPath);
 	}
 

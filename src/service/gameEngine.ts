@@ -71,7 +71,7 @@ export default class GameEngine {
 			const clock = this.clock.get('time');
 			this.clock.set('time', clock - 1);
 
-			if (clock <= 0) {
+			if (clock <= 1) {
 				clearInterval(timer);
 				this.roundStarted = false;
 			}

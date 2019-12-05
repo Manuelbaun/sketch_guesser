@@ -2,90 +2,91 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 
+import * as Y from 'yjs';
+
 import './canvas.css';
+import DrawingEngine from './drawingEngine';
+import { Coordinate } from './types';
+import DrawingPath from '../../models/drawingPath';
 
 export interface CanvasProps {
-	width: number;
-	height: number;
+	width?: number;
+	height?: number;
+	drawingEngine: DrawingEngine;
 }
 
-// Relative position between 0..1
-type Coordinate = {
-	x: number;
-	y: number;
-};
+const colorPalette = [
+	'#e6194B',
+	'#f58231',
+	'#ffe119',
+	'#bfef45',
+	'#3cb44b',
+	'#42d4f4',
+	'#4363d8',
+	'#911eb4',
+	'#f032e6',
+	'#a9a9a9',
+	'#000000',
+	'#ffffff'
+];
 
-const Canvas = ({ width, height }: CanvasProps) => {
-	const colors = [
-		'#e6194B',
-		'#f58231',
-		'#ffe119',
-		'#bfef45',
-		'#3cb44b',
-		'#42d4f4',
-		'#4363d8',
-		'#911eb4',
-		'#f032e6',
-		'#a9a9a9',
-		'#000000',
-		'#ffffff'
-	];
-
+const Canvas: React.FC<CanvasProps> = ({ width, height, drawingEngine }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+
 	const [ isPainting, setIsPainting ] = useState(false);
-	const [ color, setColor ] = useState('red');
-	const [ pointerPosition, setPointerPosition ] = useState<Coordinate | undefined>(undefined);
+	const [ color, setColor ] = useState(colorPalette[0]);
+	console.log(color);
 
-	// Setup callback function
-	const startPaint = useCallback(({ clientX, clientY }) => {
-		const coordinates = calculateCoordinates(clientX, clientY);
-		if (coordinates) {
-			setPointerPosition(coordinates);
-			setIsPainting(true);
-		}
-	}, []);
-
-	const startPaintTouch = useCallback((event) => {
-		if (event.touches.length === 1) {
-			const { clientX, clientY } = event.touches[0];
-			const coordinates = calculateCoordinates(clientX, clientY);
-			if (coordinates) {
-				setPointerPosition(coordinates);
+	const startPaint = useCallback(
+		({ clientX, clientY }) => {
+			const origin = calculateCoordinates(clientX, clientY);
+			if (origin) {
 				setIsPainting(true);
+				drawingEngine.addNewPath(origin, color);
 			}
-		}
-	}, []);
+		},
+		[ color ]
+	);
+
+	const startPaintTouch = useCallback(
+		(event) => {
+			const { clientX, clientY } = event.touches[0];
+			const origin = calculateCoordinates(clientX, clientY);
+			if (origin) {
+				setIsPainting(true);
+				drawingEngine.addNewPath(origin, color);
+			}
+		},
+		[ color ]
+	);
 
 	const paintTouch = useCallback(
 		(event) => {
 			const { clientX, clientY } = event.touches[0];
 			if (isPainting) {
-				const newMousePosition = calculateCoordinates(clientX, clientY);
-				if (pointerPosition && newMousePosition) {
-					drawLine(pointerPosition, newMousePosition);
-					setPointerPosition(newMousePosition);
+				const newCoordinates = calculateCoordinates(clientX, clientY);
+				if (newCoordinates) {
+					drawingEngine.appendCoordinates(newCoordinates);
 				}
 			}
 		},
-		[ isPainting, pointerPosition ]
+		[ isPainting ]
 	);
 
 	const paint = useCallback(
 		({ clientX, clientY }) => {
 			if (isPainting) {
-				const newMousePosition = calculateCoordinates(clientX, clientY);
-				if (pointerPosition && newMousePosition) {
-					drawLine(pointerPosition, newMousePosition);
-					setPointerPosition(newMousePosition);
+				const newCoordinates = calculateCoordinates(clientX, clientY);
+				if (newCoordinates) {
+					drawingEngine.appendCoordinates(newCoordinates);
 				}
 			}
 		},
-		[ isPainting, pointerPosition ]
+		[ isPainting ]
 	);
 
 	const exitPaint = useCallback(() => {
 		setIsPainting(false);
-		setPointerPosition(undefined);
 	}, []);
 
 	const clearCanvas = useCallback(() => {
@@ -94,11 +95,13 @@ const Canvas = ({ width, height }: CanvasProps) => {
 		const canvas: HTMLCanvasElement = canvasRef.current;
 		const context = canvas.getContext('2d');
 		if (context) {
+			drawingEngine.clearPaths();
 			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 		}
 	}, []);
 
 	// setup useEffect
+
 	useEffect(
 		() => {
 			if (!canvasRef.current) return;
@@ -112,7 +115,7 @@ const Canvas = ({ width, height }: CanvasProps) => {
 				canvas.removeEventListener('touchstart', startPaintTouch);
 			};
 		},
-		[ startPaint, startPaintTouch ]
+		[ startPaint ]
 	);
 
 	useEffect(
@@ -150,25 +153,55 @@ const Canvas = ({ width, height }: CanvasProps) => {
 		[ exitPaint ]
 	);
 
-	const drawLine = (startPos: Coordinate, endPos: Coordinate) => {
-		if (!canvasRef.current) return;
+	// Draw Canvas!
+	drawingEngine.subscribe((paths) => {
+		if (paths.length === 0) clearCanvas();
+		const lastPath = paths[paths.length - 1];
+		if (lastPath) drawPath(lastPath);
+	});
 
+	/**
+	 * Needs to be an Y.Map! with structure DrawingPath
+	 * @param drawElement 
+	 * 
+	 * @example
+	 * {
+	 * 	color: string
+	 *	origin: Coordinate
+	 *	path : Array<Coordinate>
+	 * }
+	 */
+
+	// TODO: Should only draw the last point
+	// and not the whole draw line... => needs refactor with drawingEngine
+	const drawPath = (drawElement) => {
+		if (!canvasRef.current) return;
 		const canvas: HTMLCanvasElement = canvasRef.current;
 		const context = canvas.getContext('2d');
-		if (context) {
+
+		if (context != null) {
+			const color = drawElement.get('color');
+			const origin = drawElement.get('origin');
+			const path = drawElement.get('path');
+
 			context.strokeStyle = color;
+			context.shadowColor = color;
 			context.lineJoin = 'round';
 			context.lineWidth = 5;
-			const xStart = startPos.x * canvas.width;
-			const yStart = startPos.y * canvas.height;
-			const xEnd = endPos.x * canvas.width;
-			const yEnd = endPos.y * canvas.height;
+			const xStart = origin.x * canvas.width;
+			const yStart = origin.y * canvas.height;
 
 			context.beginPath();
 			context.moveTo(xStart, yStart);
-			context.lineTo(xEnd, yEnd);
-			context.closePath();
+			// console.log(path.toArray());
+			path.forEach((c: Coordinate) => {
+				const x = c.x * canvas.width;
+				const y = c.y * canvas.height;
+				context.lineTo(x, y);
+			});
+
 			context.stroke();
+			context.closePath();
 		}
 	};
 
@@ -185,12 +218,14 @@ const Canvas = ({ width, height }: CanvasProps) => {
 		};
 	};
 
+	// console.log(drawingEngine.getElement(0));
+
 	return (
 		<div className="drawing-container">
 			<canvas ref={canvasRef} height={height} width={width} />
 			<div className="toolbar">
 				<ButtonToolbar>
-					{colors.map((color) => (
+					{colorPalette.map((color) => (
 						<Button
 							key={color}
 							variant="dark"
@@ -215,9 +250,8 @@ const Canvas = ({ width, height }: CanvasProps) => {
 						width: 50,
 						margin: '0.2em'
 					}}
-					onClick={() => clearCanvas()}
+					onClick={() => drawingEngine.clearPaths()}
 				>
-					{' '}
 					X
 				</Button>
 			</div>
