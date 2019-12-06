@@ -1,17 +1,18 @@
 import { WebGroup, WebGroupState } from 'netflux';
 
-interface NetfluxTestOptions {
+interface NetFluxTestOptions {
 	name: string;
 	groupId: string;
-	onDataReceived: Function;
 }
 
 export default class NetfluxTest {
 	wg: WebGroup;
-	constructor(options: NetfluxTestOptions) {
+	onDataReceived: Function;
+	constructor(options: NetFluxTestOptions) {
 		// Create instance and set callbacks
 		this.wg = new WebGroup({
-			signalingServer: 'ws://localhost:8010'
+			signalingServer: 'ws://192.168.178.149:8010',
+			autoRejoin: true
 		});
 
 		this.wg.onMemberJoin = (id) => {
@@ -24,9 +25,11 @@ export default class NetfluxTest {
 			console.log(`Member ${id} has left. Remained members are: `, this.wg.members);
 		};
 
+		this.wg.onMyId = (id) => console.log('On my ID called');
+
 		this.wg.onMessage = (id, data) => {
 			// console.log(`Message from ${id} group member`, data);
-			options.onDataReceived(data);
+			this.onDataReceived(data);
 		};
 
 		this.wg.onStateChange = (state) => {
@@ -39,7 +42,8 @@ export default class NetfluxTest {
 					// Do something... for example invite a bot...
 					// this.wg.invite('BOT_SERVER_WEB_SOCKET_URL');
 					// Or send message to all peers
-					this.wg.send('Hello everybody. I have just joined the group.');
+					this.wg.send(`Hello everybody. I "${options.name}" have just joined the group.`);
+					this.onJoined();
 					break;
 				case WebGroupState.LEFT:
 					// this.wg.key === ''
@@ -56,6 +60,8 @@ export default class NetfluxTest {
 		//  Join the group
 		this.wg.join(options.groupId);
 	}
+
+	onJoined = () => {};
 	leave() {
 		this.wg.leave();
 	}

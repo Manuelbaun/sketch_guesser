@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import './countDown.css';
-import GameEngine from '../../service/gameEngine';
+import GameEngine from '../../engine/game.engine';
 
 interface CountDownInterface {
 	gameEngine: GameEngine;

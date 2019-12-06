@@ -1,22 +1,25 @@
 import * as Y from 'yjs';
-import { Coordinate, DrawPath } from './types';
+import { Coordinate, DrawPath } from '../components/drawing/types';
 import { Subject } from 'rxjs/internal/Subject';
-
-interface DrawingEngineProps {
-	store: any;
-}
 
 // const requestAnimationFrame = window.requestAnimationFrame || setTimeout;
 
 export default class DrawEngine extends Subject<DrawPath[]> {
-	store = new Y.Array<DrawPath>();
+	yDoc = new Y.Doc();
+	store = this.yDoc.getArray<DrawPath>('drawState');
 
-	constructor(props: DrawingEngineProps) {
+	constructor() {
 		super();
-		this.store = props.store;
+
+		this.yDoc.on('update', (update) => {
+			this.onUpdate(update);
+		});
+
+		// TODO: think again
 		this.store.observeDeep(() => {
 			this.next(this.store.toArray());
 		});
+		console.log('MessageEngine init');
 	}
 
 	// Overwrite!!
@@ -24,6 +27,14 @@ export default class DrawEngine extends Subject<DrawPath[]> {
 
 	currentDrawElement;
 	currentDrawPath;
+
+	applyUpdate(update) {
+		Y.applyUpdate(this.yDoc, update);
+	}
+
+	onUpdate = (update: Uint8Array): void => {
+		throw new Error('Please wire the onEmitGameUpdates up');
+	};
 
 	// FIX: Sadly a class cant be pushed to a Y.Array,
 	// except wrapped with an object => Sync behavior unknown so far?

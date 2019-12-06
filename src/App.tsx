@@ -1,76 +1,85 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import Canvas from './components/drawing/canvas';
 import MessageBox from './components/messages/messageBox';
-import Message from './models/message';
 import Fullscreen from 'react-full-screen';
 
-import './App.css';
-import Store from './service/store';
-
-import sha256 from 'sha256';
-import GameEngine from './service/gameEngine';
-import MessageService from './service/message.service';
+import * as Y from 'yjs';
+import GameEngine from './engine/game.engine';
+import MessageEngine from './engine/message.engine';
 import CountDown from './components/countDown/countDown';
-import DrawEngine from './components/drawing/drawEngine';
+import DrawEngine from './engine/draw.engine';
 
-import NetfluxTest from './service/netflux';
+import './service/yjs.playground';
+
+import './App.css';
+import PeerManager from './service/peerManager';
+import P2PGraph from './components/p2pGraph/p2pGraph';
+import P2PGraphEngine from './components/p2pGraph/p2pGraph.engine';
+
 var chance = require('chance')();
+const name = chance.name();
 
-let net: NetfluxTest;
+const gameEngine = new GameEngine();
+const drawingEngine = new DrawEngine();
+const messageEngine = new MessageEngine(name);
+const p2pGraphEngine = new P2PGraphEngine();
+
+const peer = new PeerManager(
+	'',
+	{
+		debug: 2,
+		host: '192.168.178.149',
+		port: 9000
+	},
+	p2pGraphEngine,
+	{
+		onCurrentStateRequest: (peer) => {},
+		onDataReceived: (message) => {
+			console.log('On Received', message.type);
+			const payload = new Uint8Array(message.payload);
+			if (message.type === 'game') {
+				gameEngine.applyUpdate(payload);
+			} else if (message.type === 'draw') {
+				drawingEngine.applyUpdate(payload);
+			} else if (message.type === 'message') {
+				messageEngine.applyUpdate(payload);
+			}
+		}
+	}
+);
 
 const App: React.FC = () => {
-	const store = new Store();
-	const messageService = new MessageService(store.messageState, 'Hans');
-	const gameEngine = new GameEngine(store);
-	const drawingEngine = new DrawEngine({ store: store.drawState });
+	gameEngine.onUpdate = (update) => peer.broadcast('game', update);
+	drawingEngine.onUpdate = (update) => peer.broadcast('draw', update);
+	messageEngine.onUpdate = (update) => peer.broadcast('message', update);
 
-	const [ fullScreen, setFullScreen ] = useState(false);
-
-	gameEngine.createGame({
-		gameID: 'home',
-		codeWord: '',
-		codeWordHash: '',
-		currentRound: 1,
-		rounds: 3,
-		currentMasterID: ''
-	});
+	setTimeout(() => {
+		gameEngine.setGameProps({
+			gameID: 'home',
+			codeWord: '',
+			codeWordHash: '',
+			currentRound: 1,
+			rounds: 3,
+			currentMasterID: ''
+		});
+	}, 2000);
 
 	gameEngine.setGuessWord('test');
-	gameEngine.startRound();
-	const name = chance.name();
+	// gameEngine.startRound();
 
-	const joinGame = useCallback((gameID: string) => {
-		console.log('GameID', gameID);
-		net = new NetfluxTest({
-			name: name,
-			groupId: gameID,
-			onDataReceived: (data) => {
-				if (typeof data === 'string') {
-					console.log(data);
-				} else {
-					
-					store.onIncomingUpdate(data); // Uint8Array
-				}
-			}
-		});
-		store.onDataSend = (data) => {
-			net.send(data);
-			console.log('send outside');
-		};
-	}, []);
-
-	joinGame('hans');
+	// joinGame('hans');
+	console.log('---------Render App-------------');
 
 	return (
 		<div className="App">
 			{/* <button onClick={() => setFullScreen(true)}>Go Fullscreen</button> */}
 
-			<Fullscreen enabled={fullScreen} onChange={(isFull) => setFullScreen(isFull)}>
-				<CountDown gameEngine={gameEngine} />
+			<CountDown gameEngine={gameEngine} />
 
-				<Canvas drawingEngine={drawingEngine} />
-				<MessageBox messageService={messageService} localUserName={'Hans'} />
-			</Fullscreen>
+			<Canvas drawingEngine={drawingEngine} />
+			<MessageBox messageService={messageEngine} localUserName={name} />
+
+			<P2PGraph engine={p2pGraphEngine} />
 		</div>
 	);
 };

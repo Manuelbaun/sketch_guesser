@@ -67,8 +67,6 @@ function runPlayground() {
 		message: 'Hallo'
 	};
 	console.log('Add Object to local doc', msg);
-	local.add(msg);
-	local.set('time', 123);
 
 	local.setObject({
 		gameID: 123,
@@ -81,8 +79,9 @@ function runPlayground() {
 		name: 'Hans'
 		// ts: Date.now()
 	});
-	// local.add(msg);
-	// local.add(msg);
+
+	local.add(msg);
+	local.set('time', 123);
 }
 
 class Test {
@@ -171,4 +170,4 @@ function example3() {
 
 // play();
 // example3();
-runPlayground();
+// runPlayground();
