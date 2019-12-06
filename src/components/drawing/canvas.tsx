@@ -28,6 +28,7 @@ export interface CanvasProps {
 	height?: number;
 	drawingEngine: DrawEngine;
 }
+
 const Canvas: React.FC<CanvasProps> = ({ width, height, drawingEngine }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 

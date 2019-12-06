@@ -1,5 +1,6 @@
 import Peer from 'peerjs';
 import P2PGraphEngine from '../components/p2pGraph/p2pGraph.engine';
+import { DocUpdate } from '../interfaces/engine.interface';
 
 interface PeerManagerOptions {
 	onCurrentStateRequest: Function;
@@ -156,13 +157,10 @@ export default class PeerManager extends Peer {
 		 * Send a signal via the peer connection and add it to the log.
 		 * This will only occur if the connection is still alive.
 		 */
-	broadcast(type, payload) {
+	broadcast(update: DocUpdate) {
 		this.allConnections.forEach((conn, key, map) => {
 			if (conn.open) {
-				conn.send({
-					type,
-					payload
-				});
+				conn.send(update);
 			}
 		});
 	}

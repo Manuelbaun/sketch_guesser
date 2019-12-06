@@ -15,6 +15,7 @@ import './App.css';
 import PeerManager from './service/peerManager';
 import P2PGraph from './components/p2pGraph/p2pGraph';
 import P2PGraphEngine from './components/p2pGraph/p2pGraph.engine';
+import { DocUpdateTypes } from './interfaces/engine.interface';
 
 var chance = require('chance')();
 const name = chance.name();
@@ -34,29 +35,32 @@ const peer = new PeerManager(
 	p2pGraphEngine,
 	{
 		onCurrentStateRequest: (peer) => {},
-		onDataReceived: (message) => {
-			console.log('On Received', message.type);
-			const payload = new Uint8Array(message.payload);
-			if (message.type === 'game') {
-				gameEngine.applyUpdate(payload);
-			} else if (message.type === 'draw') {
-				drawingEngine.applyUpdate(payload);
-			} else if (message.type === 'message') {
-				messageEngine.applyUpdate(payload);
+		onDataReceived: (update) => {
+			switch (update.type) {
+				case DocUpdateTypes.DRAW:
+					drawingEngine.applyUpdate(update);
+					break;
+				case DocUpdateTypes.GAME:
+					gameEngine.applyUpdate(update);
+					break;
+				case DocUpdateTypes.MESSAGE:
+					messageEngine.applyUpdate(update);
+					break;
+				default:
+					console.error('Unsupported Transmitting Type:' + update.type);
 			}
 		}
 	}
 );
 
 const App: React.FC = () => {
-	gameEngine.onUpdate = (update) => peer.broadcast('game', update);
-	drawingEngine.onUpdate = (update) => peer.broadcast('draw', update);
-	messageEngine.onUpdate = (update) => peer.broadcast('message', update);
+	gameEngine.onUpdate = (update) => peer.broadcast(update);
+	drawingEngine.onUpdate = (update) => peer.broadcast(update);
+	messageEngine.onUpdate = (update) => peer.broadcast(update);
 
 	setTimeout(() => {
 		gameEngine.setGameProps({
 			gameID: 'home',
-			codeWord: '',
 			codeWordHash: '',
 			currentRound: 1,
 			rounds: 3,
@@ -64,18 +68,14 @@ const App: React.FC = () => {
 		});
 	}, 2000);
 
-	gameEngine.setGuessWord('test');
-	// gameEngine.startRound();
+	gameEngine.guessWord = 'test';
+	gameEngine.startRound();
 
-	// joinGame('hans');
 	console.log('---------Render App-------------');
 
 	return (
 		<div className="App">
-			{/* <button onClick={() => setFullScreen(true)}>Go Fullscreen</button> */}
-
 			<CountDown gameEngine={gameEngine} />
-
 			<Canvas drawingEngine={drawingEngine} />
 			<MessageBox messageService={messageEngine} localUserName={name} />
 

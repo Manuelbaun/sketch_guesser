@@ -23,18 +23,19 @@ const P2PGraph: React.FC<P2PGraphInterface> = ({ engine }) => {
 				name: 'You'
 			});
 
-			engine.onPeerConnected = (peer) => {
+			engine.onPeerConnected = (peerID) => {
 				// Add two peers
 				graph.add({
-					id: peer,
-					name: peer
+					id: peerID,
+					name: peerID
 				});
-				graph.connect('local', peer);
+				graph.connect('local', peerID);
 			};
 
-			engine.onPeerDisconnected = (peer) => {
+			engine.onPeerDisconnected = (peerID) => {
 				// Add two peers
-				graph.disconnect('local', peer);
+				graph.disconnect('local', peerID);
+				graph.remove(peerID);
 			};
 		},
 		[ el ]

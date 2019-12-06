@@ -1,18 +1,24 @@
 import * as Y from 'yjs';
-import { Subject } from 'rxjs';
+import { Subject } from 'rxjs/internal/Subject';
 import Message from '../models/message';
+import { DocUpdate, EngineInterface, DocUpdateTypes } from '../interfaces/engine.interface';
 
-export default class MessageEngine extends Subject<Message[]> {
+export default class MessageEngine extends Subject<Message[]> implements EngineInterface {
 	yDoc = new Y.Doc();
-
 	messageState = this.yDoc.getArray<Message>('messages');
 	name: string;
 
 	constructor(userName: string) {
 		super();
+
 		this.yDoc.on('update', (update) => {
-			this.onUpdate(update);
+			const docUpdate: DocUpdate = {
+				type: DocUpdateTypes.MESSAGE,
+				payload: update
+			};
+			this.onUpdate(docUpdate);
 		});
+
 		this.name = userName;
 
 		this.messageState.observe((event) => {
@@ -23,11 +29,11 @@ export default class MessageEngine extends Subject<Message[]> {
 		console.log('MessageEngine init');
 	}
 
-	applyUpdate(update) {
-		Y.applyUpdate(this.yDoc, update);
+	applyUpdate(update: DocUpdate) {
+		Y.applyUpdate(this.yDoc, new Uint8Array(update.payload));
 	}
 
-	onUpdate = (update: Uint8Array): void => {
+	onUpdate = (update: DocUpdate): void => {
 		throw new Error('Please wire the onEmitGameUpdates up');
 	};
 

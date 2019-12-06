@@ -1,20 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import GameEngine, { GameEngineEvents } from '../../engine/game.engine';
 
 import './countDown.css';
-import GameEngine from '../../engine/game.engine';
 
 interface CountDownInterface {
 	gameEngine: GameEngine;
 }
 
 const CountDown: React.FC<CountDownInterface> = ({ gameEngine }) => {
-	const [ time, setTime ] = useState(gameEngine.clock.get('time'));
+	const [ time, setTime ] = useState(gameEngine.currentTime);
 
-	gameEngine.clock.observe((event) => {
-		const _time = gameEngine.clock.get('time');
-		setTime(_time);
-	});
-
+	useEffect(() => {
+		const updateTime = (time) => setTime(time);
+		gameEngine.on(GameEngineEvents.CLOCK, updateTime);
+		return () => {
+			gameEngine.off(GameEngineEvents.CLOCK, updateTime);
+		};
+	}, []);
 	return <div className="count-down"> {time}</div>;
 };
 
