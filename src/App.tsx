@@ -11,17 +11,19 @@ import './service/yjs.playground';
 import './App.css';
 import Menu from './components/menu/menu';
 import CommunicationServiceImpl from './service/communication/communication.service';
-import StorageEngine from './engine/storage.engine';
+import CacheEngine from './engine/cache.engine';
 
 var chance = require('chance')();
 const name = chance.name();
 
+// establish connection between peers
 const commService = new CommunicationServiceImpl();
-const store = new StorageEngine(commService);
+// setup the cache via yjs and creates the doc.
+const cache = new CacheEngine(commService);
 
-const gameEngine = new GameEngine(commService);
-const drawingEngine = new DrawEngine(commService);
-const messageEngine = new MessageEngine(name, commService, store);
+const gameEngine = new GameEngine(cache);
+const drawingEngine = new DrawEngine(cache);
+const messageEngine = new MessageEngine(name, cache);
 
 const App: React.FC = () => {
 	const startGame = () => {
@@ -39,7 +41,9 @@ const App: React.FC = () => {
 
 	return (
 		<React.Fragment>
-			<Menu onStartGame={startGame} comm={commService} />
+			<div>
+				<Menu onStartGame={startGame} comm={commService} />
+			</div>
 			<div className="App">
 				<CountDown gameEngine={gameEngine} />
 				<Canvas drawingEngine={drawingEngine} />

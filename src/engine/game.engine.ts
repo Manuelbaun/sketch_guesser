@@ -1,9 +1,7 @@
 import * as Y from 'yjs';
 import sha256 from 'sha256';
-import { Subscription } from 'rxjs';
 import { EventEmitter } from 'events';
-import { filter } from 'rxjs/operators';
-import { Data, DataTypes, CommunicationServiceInterface } from '../service/communication/communication.type';
+import { CacheEngineInterface } from './cache.engine';
 
 export enum GameEngineEvents {
 	CLOCK = 'CLOCK',
@@ -28,39 +26,20 @@ export type GameState = {
 };
 
 export default class GameEngine {
-	private yDoc = new Y.Doc();
-	private gameState = this.yDoc.getMap('gameState');
-	private clock = this.yDoc.getMap('clock');
+	private gameState;
+	private clock;
 	private emitter: EventEmitter = new EventEmitter();
 
-	constructor(comm: CommunicationServiceInterface) {
-		this.yDoc.on('update', (update) => {
-			const data: Data = {
-				type: DataTypes.GAME,
-				payload: update
-			};
-			comm.sendDataAll(data);
-		});
+	constructor(store: CacheEngineInterface) {
+		this.gameState = store.gameState;
+		this.clock = store.clock;
 
-		// subscribe to game data with filter
-		const _filter = (data: Data) => data.type === DataTypes.GAME;
-		this.sub = comm.dataStream.pipe(filter(_filter)).subscribe({
-			next: (data) => Y.applyUpdate(this.yDoc, data.payload)
-		});
-
-		// this.gameState.observe((event) => {
-		// 	for (const entry of this.gameState.entries()) {
-		// 		console.log('GameState Change', entry);
-		// 	}
-		// });
 		this.clock.observe((event) => {
 			this.emitter.emit(GameEngineEvents.CLOCK, this.currentTime);
 		});
 
 		console.log('GameEngine init');
 	}
-
-	private sub: Subscription;
 
 	// emitter wrapper
 	on(type: GameEngineEvents, listener: (...args: any[]) => void) {
@@ -105,7 +84,7 @@ export default class GameEngine {
 	set guessWord(word: string) {
 		if (!this.gameState) return;
 
-		this.yDoc.transact(() => {
+		this.gameState.doc.transact(() => {
 			this.gameState.set('codeWordHash', sha256(word));
 		});
 	}
@@ -114,7 +93,9 @@ export default class GameEngine {
 	gameStarted = false;
 	startGame(game: GameState) {
 		this.gameStarted = true;
-		this.yDoc.transact(() => {
+
+		// TODO: check whether this has to change
+		this.gameState.doc.transact(() => {
 			for (const key in game) {
 				this.gameState.set(key, game[key]);
 			}

@@ -1,9 +1,10 @@
 import { Subject } from 'rxjs';
 
 export enum DataTypes {
+	DOC_STATE,
 	DRAW,
 	MESSAGE,
-	GAME
+	GAME,
 }
 
 export interface DataRaw {

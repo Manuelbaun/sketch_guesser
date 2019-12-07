@@ -1,31 +1,16 @@
 import * as Y from 'yjs';
-import { Subscription, Subject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { Coordinate, DrawPath } from '../components/drawing/types';
-import { Data, DataTypes, CommunicationServiceInterface } from '../service/communication/communication.type';
-
-// const requestAnimationFrame = window.requestAnimationFrame || setTimeout;
+import { CacheEngineInterface } from './cache.engine';
 
 export default class DrawEngine extends Subject<DrawPath[]> {
-	private yDoc = new Y.Doc();
-	private _drawPathStore = this.yDoc.getArray<DrawPath>('drawState');
+	private _drawPathStore;
+	private currentDrawElement;
+	private currentDrawPath;
 
-	constructor(comm: CommunicationServiceInterface) {
+	constructor(store: CacheEngineInterface) {
 		super();
-
-		this.yDoc.on('update', (update) => {
-			const data: Data = {
-				type: DataTypes.DRAW,
-				payload: update
-			};
-			comm.sendDataAll(data);
-		});
-
-		// subscribe to game data with filter
-		const _filter = (data: Data) => data.type === DataTypes.MESSAGE;
-		this.sub = comm.dataStream.pipe(filter(_filter)).subscribe({
-			next: (data) => Y.applyUpdate(this.yDoc, data.payload)
-		});
+		this._drawPathStore = store.drawPathStore;
 
 		// TODO: think again
 		this._drawPathStore.observeDeep(() => {
@@ -34,9 +19,6 @@ export default class DrawEngine extends Subject<DrawPath[]> {
 
 		console.log('MessageEngine init');
 	}
-	sub: Subscription;
-	currentDrawElement;
-	currentDrawPath;
 
 	// FIX: Sadly a class cant be pushed to a Y.Array,
 	// it will be just an json object with no methods, when build back
@@ -62,7 +44,6 @@ export default class DrawEngine extends Subject<DrawPath[]> {
 		return {
 			color: path.get('color'),
 			origin: path.get('origin'),
-			// @ts-ignore
 			path: path.get('path').toArray()
 		};
 	}
