@@ -154,8 +154,13 @@ const Canvas: React.FC<CanvasProps> = ({ width, height, drawingEngine }) => {
 	// Draw Canvas!
 	drawingEngine.subscribe((paths) => {
 		if (paths.length === 0) clearCanvas();
-		const lastPath = paths[paths.length - 1];
-		if (lastPath) drawPath(lastPath);
+
+		// const lastPath = paths[paths.length - 1];
+		// if (lastPath) drawPath(lastPath);
+
+		paths.forEach((path) => {
+			drawPath(path);
+		});
 	});
 
 	/**
