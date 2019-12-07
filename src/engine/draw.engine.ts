@@ -1,7 +1,8 @@
 import * as Y from 'yjs';
 import { Coordinate, DrawPath } from '../components/drawing/types';
 import { Subject } from 'rxjs/internal/Subject';
-import { EngineInterface, DocUpdate, DocUpdateTypes } from '../interfaces/engine.interface';
+import { EngineInterface } from '../interfaces/engine.interface';
+import { Data, DataTypes } from '../service/communication/communication.type';
 
 // const requestAnimationFrame = window.requestAnimationFrame || setTimeout;
 
@@ -13,8 +14,8 @@ export default class DrawEngine extends Subject<DrawPath[]> implements EngineInt
 		super();
 
 		this.yDoc.on('update', (update) => {
-			const docUpdate: DocUpdate = {
-				type: DocUpdateTypes.DRAW,
+			const docUpdate: Data = {
+				type: DataTypes.DRAW,
 				payload: update
 			};
 			this.onUpdate(docUpdate);
@@ -30,11 +31,11 @@ export default class DrawEngine extends Subject<DrawPath[]> implements EngineInt
 	currentDrawElement;
 	currentDrawPath;
 
-	applyUpdate(update: DocUpdate) {
-		Y.applyUpdate(this.yDoc, new Uint8Array(update.payload));
+	applyUpdate(update: Uint8Array) {
+		Y.applyUpdate(this.yDoc, update);
 	}
 
-	onUpdate = (update: DocUpdate): void => {
+	onUpdate = (update: Data): void => {
 		throw new Error('Please wire the onUpdate up');
 	};
 

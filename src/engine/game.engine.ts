@@ -1,23 +1,29 @@
 import * as Y from 'yjs';
 import sha256 from 'sha256';
-import { EngineInterface, DocUpdate, DocUpdateTypes } from '../interfaces/engine.interface';
 import { EventEmitter } from 'events';
+import { EngineInterface } from '../interfaces/engine.interface';
+import { Data, DataTypes } from '../service/communication/communication.type';
 
 export enum GameEngineEvents {
 	CLOCK = 'CLOCK',
+	STATE_CHANGE = 'STATE_CHANGE'
+}
+
+export enum GameStates {
 	NEXT_ROUND = 'NEXT_ROUND',
 	MASTER_CHANGED = 'MASTER_CHANGED',
 	CHOOSE_WORD = 'CHOOSE_WORD',
-	GAME_STARTED = 'GAME_STARTED',
-	GAME_FINISHED = 'GAME_FINISHED'
+	WAITING = 'WAITING',
+	STARTED = 'STARTED',
+	FINISHED = 'FINISHED'
 }
 
 export type GameState = {
-	gameID: string;
 	currentMasterID: string;
-	rounds: number;
 	currentRound: number;
+	rounds: number;
 	codeWordHash: string;
+	state: GameStates;
 };
 
 export default class GameEngine implements EngineInterface {
@@ -28,8 +34,8 @@ export default class GameEngine implements EngineInterface {
 
 	constructor() {
 		this.yDoc.on('update', (update) => {
-			const docUpdate: DocUpdate = {
-				type: DocUpdateTypes.GAME,
+			const docUpdate: Data = {
+				type: DataTypes.GAME,
 				payload: update
 			};
 			this.onUpdate(docUpdate);
@@ -47,11 +53,11 @@ export default class GameEngine implements EngineInterface {
 	}
 
 	// Functional the handle the doc
-	applyUpdate(update: DocUpdate) {
-		Y.applyUpdate(this.yDoc, new Uint8Array(update.payload));
+	applyUpdate(update: Uint8Array) {
+		Y.applyUpdate(this.yDoc, update);
 	}
 
-	onUpdate = (update: DocUpdate): void => {
+	onUpdate = (update: Data): void => {
 		throw new Error('Please wire the onEmitGameUpdates up');
 	};
 
@@ -82,14 +88,6 @@ export default class GameEngine implements EngineInterface {
 		return this.gameState.get('currentMasterID');
 	}
 
-	setGameProps(game: GameState) {
-		this.yDoc.transact(() => {
-			for (const key in game) {
-				this.gameState.set(key, game[key]);
-			}
-		});
-	}
-
 	private _name: string;
 	set name(name: string) {
 		this._name = name;
@@ -112,7 +110,15 @@ export default class GameEngine implements EngineInterface {
 	}
 
 	roundStarted = false;
-	startRound() {
+	gameStarted = false;
+	startGame(game: GameState) {
+		this.gameStarted = true;
+		this.yDoc.transact(() => {
+			for (const key in game) {
+				this.gameState.set(key, game[key]);
+			}
+		});
+
 		if (this.gameState.get('currentRound') >= this.gameState.get('rounds')) return;
 
 		if (this.roundStarted) return;
@@ -129,4 +135,6 @@ export default class GameEngine implements EngineInterface {
 			}
 		}, 1000);
 	}
+
+	nextRound() {}
 }

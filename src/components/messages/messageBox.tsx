@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MessageRow from './messageRow';
 import Message from '../../models/message';
-import MessageInput from './messageInput';
+import Input from '../../commonComponents/input';
 import MessageEngine from '../../engine/message.engine';
 import './message.css';
 
@@ -29,7 +29,10 @@ const MessageBox: React.FC<MessageListProps> = ({ messageService, localUserName 
 
 	return (
 		<div>
-			<MessageInput onSubmit={(msg) => messageService.sendMessage(msg)} />
+			<Input
+				onSubmit={(msg) => messageService.sendMessage(msg)}
+				options={{ placeholder: 'your guess here', label: 'Guess', buttonLabel: 'Send' }}
+			/>
 			<div className="message-container">
 				<div style={{ backgroundColor: '#343a40' }}>
 					{messageList.map((message) => {

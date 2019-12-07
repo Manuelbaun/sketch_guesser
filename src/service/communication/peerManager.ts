@@ -1,6 +1,6 @@
 import Peer from 'peerjs';
-import P2PGraphEngine from '../components/p2pGraph/p2pGraph.engine';
-import { DocUpdate } from '../interfaces/engine.interface';
+import P2PGraphEngine from '../../components/menu/p2pGraph.engine';
+import { Data } from './communication.type';
 
 interface PeerManagerOptions {
 	onCurrentStateRequest: Function;
@@ -28,13 +28,7 @@ export default class PeerManager extends Peer {
 
 	connectFullMesh(): void {
 		this.allPeers.forEach((peer) => {
-			this.join(peer)
-				.then(() => {
-					console.log('connected to ' + peer);
-				})
-				.catch(() => {
-					console.log('error connecting to' + peer);
-				});
+			this.join(peer);
 		});
 	}
 
@@ -157,7 +151,7 @@ export default class PeerManager extends Peer {
 		 * Send a signal via the peer connection and add it to the log.
 		 * This will only occur if the connection is still alive.
 		 */
-	broadcast(update: DocUpdate) {
+	broadcast(update: Data) {
 		this.allConnections.forEach((conn, key, map) => {
 			if (conn.open) {
 				conn.send(update);

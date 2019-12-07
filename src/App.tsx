@@ -1,86 +1,79 @@
 import React from 'react';
 import Canvas from './components/drawing/canvas';
 import MessageBox from './components/messages/messageBox';
-import Fullscreen from 'react-full-screen';
-
-import * as Y from 'yjs';
-import GameEngine from './engine/game.engine';
-import MessageEngine from './engine/message.engine';
 import CountDown from './components/countDown/countDown';
+import P2PGraphEngine from './components/menu/p2pGraph.engine';
+import MessageEngine from './engine/message.engine';
 import DrawEngine from './engine/draw.engine';
+import GameEngine, { GameStates } from './engine/game.engine';
 
 import './service/yjs.playground';
 
+import PeerManager2 from './service/communication/peer_manager';
+import { DataTypes } from './service/communication/communication.type';
+
 import './App.css';
-import PeerManager from './service/peerManager';
-import P2PGraph from './components/p2pGraph/p2pGraph';
-import P2PGraphEngine from './components/p2pGraph/p2pGraph.engine';
-import { DocUpdateTypes } from './interfaces/engine.interface';
+import Menu from './components/menu/menu';
 
 var chance = require('chance')();
 const name = chance.name();
 
+const peerManager: PeerManager2 = new PeerManager2({
+	debug: 2,
+	host: '192.168.178.149',
+	port: 9000
+});
+
+peerManager.subscribeToDataStream({
+	next: (data) => {
+		switch (data.type) {
+			case DataTypes.DRAW:
+				drawingEngine.applyUpdate(data.payload);
+				break;
+			case DataTypes.GAME:
+				gameEngine.applyUpdate(data.payload);
+				break;
+			case DataTypes.MESSAGE:
+				messageEngine.applyUpdate(data.payload);
+				break;
+			default:
+				console.error('Unsupported Transmitting Type:' + data.type);
+		}
+	}
+});
+
 const gameEngine = new GameEngine();
 const drawingEngine = new DrawEngine();
 const messageEngine = new MessageEngine(name);
-const p2pGraphEngine = new P2PGraphEngine();
-
-const peer = new PeerManager(
-	'',
-	{
-		debug: 2,
-		host: '192.168.178.149',
-		port: 9000
-	},
-	p2pGraphEngine,
-	{
-		onCurrentStateRequest: (peer) => {},
-		onDataReceived: (update) => {
-			switch (update.type) {
-				case DocUpdateTypes.DRAW:
-					drawingEngine.applyUpdate(update);
-					break;
-				case DocUpdateTypes.GAME:
-					gameEngine.applyUpdate(update);
-					break;
-				case DocUpdateTypes.MESSAGE:
-					messageEngine.applyUpdate(update);
-					break;
-				default:
-					console.error('Unsupported Transmitting Type:' + update.type);
-			}
-		}
-	}
-);
+const p2pGraphEngine = new P2PGraphEngine(peerManager.connectionStream);
 
 const App: React.FC = () => {
-	gameEngine.onUpdate = (update) => peer.broadcast(update);
-	drawingEngine.onUpdate = (update) => peer.broadcast(update);
-	messageEngine.onUpdate = (update) => peer.broadcast(update);
+	gameEngine.onUpdate = (update) => peerManager.send(update);
+	drawingEngine.onUpdate = (update) => peerManager.send(update);
+	messageEngine.onUpdate = (update) => peerManager.send(update);
 
-	setTimeout(() => {
-		gameEngine.setGameProps({
-			gameID: 'home',
+	const startGame = () => {
+		gameEngine.guessWord = 'test';
+		gameEngine.startGame({
 			codeWordHash: '',
 			currentRound: 1,
 			rounds: 3,
-			currentMasterID: ''
+			currentMasterID: '',
+			state: GameStates.WAITING
 		});
-	}, 2000);
-
-	gameEngine.guessWord = 'test';
-	gameEngine.startRound();
+	};
 
 	console.log('---------Render App-------------');
 
 	return (
-		<div className="App">
-			<CountDown gameEngine={gameEngine} />
-			<Canvas drawingEngine={drawingEngine} />
-			<MessageBox messageService={messageEngine} localUserName={name} />
-
-			<P2PGraph engine={p2pGraphEngine} />
-		</div>
+		<React.Fragment>
+			<Menu onStartGame={startGame} p2pGraphEngine={p2pGraphEngine} />
+			<div className="App">
+				<CountDown gameEngine={gameEngine} />
+				<Canvas drawingEngine={drawingEngine} />
+				<MessageBox messageService={messageEngine} localUserName={name} />
+			</div>
+		</React.Fragment>
 	);
 };
 
