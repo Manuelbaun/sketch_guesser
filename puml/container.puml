@@ -1,0 +1,33 @@
+@startuml ContainerDiagram
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/release/1-0/C4_Container.puml
+
+Person(user, "User")
+
+System_Boundary(c1, "Peer-To-Peer-Gameapp") {
+    Container(web_app, "Web App", "HTML", "Delivers static content")
+    Container(spa, "SinglePageApplication/PWA", "React/TypeScript", "Provides the game")
+    ContainerDb(db, "NoSQL Database", "JSON (key: value)", "Persists data")
+
+    System(signaling, "Signaling-Server", "TypeScript")
+}
+
+System_Ext(stun, "STUN-/TURN-Server")
+System_Ext(cloud, "Peer Cloud", "Multiple peers")
+
+ContainerDb(storage, "Local Storage", "JSON", "Persists data on the harddisk")
+
+Rel(user, spa, "Plays the game")
+Rel(user, web_app, "Visit sketchguessr.io", "https")
+Rel(web_app, spa, "Delivers to the player's browser")
+
+Rel(spa, db, "Read/Write")
+Rel(signaling, spa, "SDP-Offer/-Answer exchange", "Websocket")
+Rel(spa, signaling, "SDP-Offer/-Answer exchange", "Websocket")
+
+Rel(db, storage, "Persists")
+
+Rel(cloud, spa, "WebRTC", "JSON")
+Rel(spa, cloud, "WebRTC", "JSON")
+Rel(spa, stun, "Requests", "HTTP")
+
+@enduml
