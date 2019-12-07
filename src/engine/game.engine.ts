@@ -1,8 +1,9 @@
 import * as Y from 'yjs';
 import sha256 from 'sha256';
+import { Subscription } from 'rxjs';
 import { EventEmitter } from 'events';
-import { EngineInterface } from '../interfaces/engine.interface';
-import { Data, DataTypes } from '../service/communication/communication.type';
+import { filter } from 'rxjs/operators';
+import { Data, DataTypes, CommunicationServiceInterface } from '../service/communication/communication.type';
 
 export enum GameEngineEvents {
 	CLOCK = 'CLOCK',
@@ -26,20 +27,27 @@ export type GameState = {
 	state: GameStates;
 };
 
-export default class GameEngine implements EngineInterface {
+export default class GameEngine {
 	private yDoc = new Y.Doc();
 	private gameState = this.yDoc.getMap('gameState');
 	private clock = this.yDoc.getMap('clock');
 	private emitter: EventEmitter = new EventEmitter();
 
-	constructor() {
+	constructor(comm: CommunicationServiceInterface) {
 		this.yDoc.on('update', (update) => {
-			const docUpdate: Data = {
+			const data: Data = {
 				type: DataTypes.GAME,
 				payload: update
 			};
-			this.onUpdate(docUpdate);
+			comm.sendDataAll(data);
 		});
+
+		// subscribe to game data with filter
+		const _filter = (data: Data) => data.type === DataTypes.GAME;
+		this.sub = comm.dataStream.pipe(filter(_filter)).subscribe({
+			next: (data) => Y.applyUpdate(this.yDoc, data.payload)
+		});
+
 		// this.gameState.observe((event) => {
 		// 	for (const entry of this.gameState.entries()) {
 		// 		console.log('GameState Change', entry);
@@ -52,14 +60,7 @@ export default class GameEngine implements EngineInterface {
 		console.log('GameEngine init');
 	}
 
-	// Functional the handle the doc
-	applyUpdate(update: Uint8Array) {
-		Y.applyUpdate(this.yDoc, update);
-	}
-
-	onUpdate = (update: Data): void => {
-		throw new Error('Please wire the onEmitGameUpdates up');
-	};
+	private sub: Subscription;
 
 	// emitter wrapper
 	on(type: GameEngineEvents, listener: (...args: any[]) => void) {

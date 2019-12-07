@@ -1,10 +1,13 @@
-import { Subject } from 'rxjs';
 import Graph from 'p2p-graph';
-import { ConnectionData, ConnectionEventType } from '../../service/communication/communication.type';
+import {
+	ConnectionData,
+	ConnectionEventType,
+	CommunicationServiceInterface
+} from '../../service/communication/communication.type';
 
 export default class P2PGraphEngine {
-	constructor(connectionStream: Subject<ConnectionData>) {
-		this.sub = connectionStream.subscribe({
+	constructor(comm: CommunicationServiceInterface) {
+		this.sub = comm.connectionStream.subscribe({
 			next: (data: ConnectionData) => this.onNext(data)
 		});
 	}

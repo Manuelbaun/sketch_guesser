@@ -1,23 +1,26 @@
 import * as Y from 'yjs';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import Message from '../models/message';
-import { EngineInterface } from '../interfaces/engine.interface';
-import { Data, DataTypes } from '../service/communication/communication.type';
 
-export default class MessageEngine extends Subject<Message[]> implements EngineInterface {
+import { Data, DataTypes, CommunicationServiceInterface } from '../service/communication/communication.type';
+import StorageEngine from './storage.engine';
+
+export default class MessageEngine extends Subject<Message[]> {
 	yDoc = new Y.Doc();
 	messageState = this.yDoc.getArray<Message>('messages');
 	name: string;
+	sub: Subscription;
 
-	constructor(userName: string) {
+	constructor(userName: string, comm: CommunicationServiceInterface, store: StorageEngine) {
 		super();
 
 		this.yDoc.on('update', (update) => {
-			const docUpdate: Data = {
+			const data: Data = {
 				type: DataTypes.MESSAGE,
 				payload: update
 			};
-			this.onUpdate(docUpdate);
+			comm.sendDataAll(data);
 		});
 
 		this.name = userName;
@@ -27,16 +30,14 @@ export default class MessageEngine extends Subject<Message[]> implements EngineI
 			this.next(this.messageState.toArray().reverse());
 		});
 
+		// subscribe to game data with filter
+		const _filter = (data: Data) => data.type === DataTypes.GAME;
+		this.sub = comm.dataStream.pipe(filter(_filter)).subscribe({
+			next: (data) => Y.applyUpdate(this.yDoc, data.payload)
+		});
+
 		console.log('MessageEngine init');
 	}
-
-	applyUpdate(update: Uint8Array) {
-		Y.applyUpdate(this.yDoc, update);
-	}
-
-	onUpdate = (update: Data): void => {
-		throw new Error('Please wire the onEmitGameUpdates up');
-	};
 
 	sendMessage(msg: string) {
 		// this action already updates the doc and transmits als changes to the peers

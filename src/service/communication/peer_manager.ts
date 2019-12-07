@@ -1,5 +1,4 @@
 import Peer from 'peerjs';
-import { NextObserver, Subject } from 'rxjs';
 
 import { Data, ConnectionData, ConnectionEventType, DataRaw } from './communication.type';
 
@@ -28,17 +27,7 @@ class PeerManager extends Peer {
 	private listOfAllPeers: string[] = new Array();
 	private allConnections: Map<string, Peer.DataConnection> = new Map();
 
-	private _connectionStream: Subject<ConnectionData> = new Subject();
-	public get connectionStream(): Subject<ConnectionData> {
-		return this._connectionStream;
-	}
-
-	private _dataStream: Subject<Data> = new Subject();
-	public get dataStream(): Subject<Data> {
-		return this._dataStream;
-	}
-
-	onPeerOpen(id: string): void {
+	private onPeerOpen(id: string): void {
 		// Workaround for peer.reconnect deleting previous id
 		if (id === null) {
 			console.log('Received null id from peer open');
@@ -58,20 +47,20 @@ class PeerManager extends Peer {
 		});
 	}
 
-	onPeerDisconnected(): void {
+	private onPeerDisconnected(): void {
 		console.log('Connection lost. Please reconnect');
 		this.reconnect();
 	}
 
-	onPeerClosed(): void {
+	private onPeerClosed(): void {
 		console.log('Connection destroyed');
 	}
 
-	onPeerError(err: any): void {
+	private onPeerError(err: any): void {
 		console.error(err);
 	}
 
-	connectTo(peerID) {
+	private connectTo(peerID) {
 		// catch if it is the own peerID
 		if (peerID == this.id) return;
 
@@ -89,7 +78,7 @@ class PeerManager extends Peer {
 		this.setupConnection(conn);
 	}
 
-	setupConnection(conn: Peer.DataConnection): void {
+	private setupConnection(conn: Peer.DataConnection): void {
 		if (this.allConnections[conn.peer] && conn.open) return;
 		console.log('Setup Connection to: ' + conn.peer);
 
@@ -99,49 +88,49 @@ class PeerManager extends Peer {
 		conn.on('open', () => this.onConnectionOpen(conn));
 		conn.on('close', () => this.onConnectionClose(conn));
 
-		// Handle incoming data (messages only since this is the signal sender)
 		// Incoming Data
 		conn.on('data', (data) => this.onConnectionData(conn, data));
 
 		this.allConnections.set(conn.peer, conn);
 	}
 
-	onConnectionOpen(conn: Peer.DataConnection) {
+	private onConnectionOpen(conn: Peer.DataConnection) {
 		const { peer: id } = conn;
 		console.log('Connected to: ', id);
 
 		// emit event of new Connection
-		this.connectionStream.next({ type: ConnectionEventType.OPEN, peerID: id });
+		this.onConnection({ type: ConnectionEventType.OPEN, peerID: id });
 	}
 
-	onConnectionData(conn: Peer.DataConnection, dataRaw: DataRaw) {
+	private onConnectionData(conn: Peer.DataConnection, dataRaw: DataRaw) {
 		console.log('Data from:', conn.peer, dataRaw);
 		// emit event of incoming data
 		const { type } = dataRaw;
 		const payload = new Uint8Array(dataRaw.payload);
-		this.dataStream.next({ type, payload });
+		this.onData({ type, payload });
 	}
 
-	onConnectionClose(conn: Peer.DataConnection) {
+	private onConnectionClose(conn: Peer.DataConnection) {
 		const { peer: id } = conn;
 		console.log('Connection closed');
 		this.allConnections.delete(id);
 		this.allConnections[id] = null;
-		this.connectionStream.next({ type: ConnectionEventType.CLOSE, peerID: id });
+		this.onConnection({ type: ConnectionEventType.CLOSE, peerID: id });
 	}
 
-	subscribeToDataStream(observer: NextObserver<Data>) {
-		return this.dataStream.subscribe(observer);
-	}
-
-	subscribeToConnectionStream(observer: NextObserver<ConnectionData>) {
-		return this.connectionStream.subscribe(observer);
-	}
+	onData = (data: Data): void => {};
+	onConnection = (data: ConnectionData): void => {};
 
 	send(data: Data) {
 		this.allConnections.forEach((connection) => {
 			connection.send(data);
 		});
+	}
+
+	sendDataToID(id: string, data: Data) {
+		const conn = this.allConnections.get(id);
+		if (conn) conn.send(data);
+		else console.log('No connection to peer with id', id);
 	}
 }
 

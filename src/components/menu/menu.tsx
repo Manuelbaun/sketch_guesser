@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import P2PGraph from './p2pGraph';
-import P2PGraphEngine from './p2pGraph.engine';
 import Input from '../../commonComponents/input';
+import { CommunicationServiceInterface } from '../../service/communication/communication.type';
 
 interface MenuInterface {
 	onStartGame: Function;
-	p2pGraphEngine: P2PGraphEngine;
+	comm: CommunicationServiceInterface;
 }
 
 const Menu: React.FC<MenuInterface> = (props) => {
@@ -23,7 +23,7 @@ const Menu: React.FC<MenuInterface> = (props) => {
 				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}
 			/>
 			<Button onClick={() => props.onStartGame()}> START </Button>
-			<P2PGraph engine={props.p2pGraphEngine} />
+			<P2PGraph comm={props.comm} />
 		</div>
 	);
 };

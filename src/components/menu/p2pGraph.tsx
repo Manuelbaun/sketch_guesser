@@ -1,16 +1,21 @@
 import React, { useRef, useEffect } from 'react';
-
-import Graph from 'p2p-graph';
 import P2PGraphEngine from './p2pGraph.engine';
+import { CommunicationServiceInterface } from '../../service/communication/communication.type';
 
 interface P2PGraphInterface {
-	engine: P2PGraphEngine;
+	comm: CommunicationServiceInterface;
 }
 
-const P2PGraph: React.FC<P2PGraphInterface> = ({ engine }) => {
+const P2PGraph: React.FC<P2PGraphInterface> = ({ comm }) => {
 	const el = useRef(null);
 
-	useEffect(() => engine.createGraph(el), [ el ]);
+	useEffect(
+		() => {
+			const engine = new P2PGraphEngine(comm);
+			engine.createGraph(el);
+		},
+		[ el ]
+	);
 
 	return <div ref={el} />;
 };

@@ -1,16 +1,49 @@
-import { Data } from './communication.type';
+import { Subject, NextObserver } from 'rxjs';
+import PeerManager from './peer_manager';
+import {
+	Data,
+	ConnectionData,
+	ConnectionEventType,
+	DataRaw,
+	CommunicationServiceInterface
+} from './communication.type';
 
-// should be facade
-interface CommunicationServiceInterface {
-	sendDataAll(data: Data): void;
-	sendData(id: string, data);
-	onReceiveData(data: Data);
-}
-
-// singleton
+// singleton?
 export default class CommunicationServiceImpl implements CommunicationServiceInterface {
-	constructor() {}
-	sendDataAll(data: Data) {}
-	sendData(id: string, data) {}
-	onReceiveData(data: Data) {}
+	constructor() {
+		this.peerManager = new PeerManager({
+			debug: 2,
+			host: '192.168.178.149',
+			port: 9000
+		});
+
+		this.peerManager.onData = (data) => this._dataStream.next(data);
+		this.peerManager.onConnection = (data) => this._connectionStream.next(data);
+	}
+	private peerManager: PeerManager;
+	private _connectionStream: Subject<ConnectionData> = new Subject();
+	public get connectionStream(): Subject<ConnectionData> {
+		return this._connectionStream;
+	}
+
+	private _dataStream: Subject<Data> = new Subject();
+	public get dataStream(): Subject<Data> {
+		return this._dataStream;
+	}
+
+	sendDataAll(data: Data) {
+		this.peerManager.send(data);
+	}
+
+	sendDataToID(id: string, data: Data) {
+		this.peerManager.sendDataToID(id, data);
+	}
+
+	subscribeToDataStream(observer: NextObserver<Data>) {
+		return this.dataStream.subscribe(observer);
+	}
+
+	subscribeToConnectionStream(observer: NextObserver<ConnectionData>) {
+		return this.connectionStream.subscribe(observer);
+	}
 }

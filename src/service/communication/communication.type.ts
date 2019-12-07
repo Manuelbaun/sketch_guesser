@@ -1,3 +1,5 @@
+import { Subject } from 'rxjs';
+
 export enum DataTypes {
 	DRAW,
 	MESSAGE,
@@ -22,4 +24,11 @@ export enum ConnectionEventType {
 export interface ConnectionData {
 	type: ConnectionEventType;
 	peerID: string;
+}
+
+export interface CommunicationServiceInterface {
+	sendDataAll(data: Data): void;
+	sendDataToID(id: string, data: Data);
+	connectionStream: Subject<ConnectionData>;
+	dataStream: Subject<Data>;
 }
