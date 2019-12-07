@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import MessageRow from './messageRow';
 import Message from '../../models/message';
-import Input from '../../commonComponents/input';
-import MessageEngine from '../../engine/message.engine';
+import Input from '../../common/input';
+import MessageEngine from './message.engine';
 import './message.css';
 
 interface MessageListProps {

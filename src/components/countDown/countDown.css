@@ -1,8 +1,10 @@
-.count-down {
+.count-down,
+.rounds,
+.current-round {
 	color: #ffffff;
 	font-weight: bold;
 	font-size: 2em;
-	position: absolute;
+	/* position: relative; */
 	top: 0;
 	left: 50%;
 
@@ -11,4 +13,9 @@
 	/* height: 2em; */
 
 	border-radius: 50%;
+}
+
+.game-info {
+	display: block;
+	border: 1px solid #ffffff;
 }

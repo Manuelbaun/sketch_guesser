@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import GameEngine, { GameEngineEvents } from '../../engine/game.engine';
+import GameEngine from '../../engine/game.engine';
 
 import './countDown.css';
+import { GameEngineEvents } from '../../engine/game.types';
 
 interface CountDownInterface {
 	gameEngine: GameEngine;
@@ -9,15 +10,28 @@ interface CountDownInterface {
 
 const CountDown: React.FC<CountDownInterface> = ({ gameEngine }) => {
 	const [ time, setTime ] = useState(gameEngine.currentTime);
+	const [ rounds, setRounds ] = useState(gameEngine.rounds);
+	const [ currentRound, setCurrentRound ] = useState(gameEngine.currentRound);
 
 	useEffect(() => {
 		const updateTime = (time) => setTime(time);
-		gameEngine.on(GameEngineEvents.CLOCK, updateTime);
+		const updateRound = (round) => setCurrentRound(round);
+		gameEngine.on(GameEngineEvents.CLOCK_UPDATE, updateTime);
+		gameEngine.on(GameEngineEvents.ROUND_CHANGE, updateRound);
+
 		return () => {
-			gameEngine.off(GameEngineEvents.CLOCK, updateTime);
+			gameEngine.off(GameEngineEvents.CLOCK_UPDATE, updateTime);
+			gameEngine.off(GameEngineEvents.ROUND_CHANGE, updateRound);
 		};
 	}, []);
-	return <div className="count-down"> {time}</div>;
+
+	return (
+		<div className="game-info">
+			<span className="count-down"> "{time}"</span>;
+			<span className="current-round"> "{currentRound}/</span>
+			<span className="rounds">{rounds}" </span>
+		</div>
+	);
 };
 
 export default CountDown;

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-import DrawEngine from '../../engine/draw.engine';
+import DrawEngine from './draw.engine';
 import { Coordinate } from './types';
 
 import './canvas.css';

@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
-import { Coordinate, DrawPath } from '../components/drawing/types';
-import { CacheEngineInterface } from './cache.engine';
+import { Coordinate, DrawPath } from './types';
+import { CacheEngineInterface } from '../../engine/cache.engine';
 
 export default class DrawEngine extends Subject<DrawPath[]> {
 	private _drawPathStore;

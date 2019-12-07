@@ -1,10 +1,11 @@
 import { Subject } from 'rxjs';
 
+// TODO: This can be now changed
 export enum DataTypes {
-	DOC_STATE,
-	DRAW,
-	MESSAGE,
-	GAME,
+	DOC_STATE = 'DOC_STATE',
+	DRAW = 'DRAW',
+	MESSAGE = 'MESSAGE',
+	GAME = 'GAME'
 }
 
 export interface DataRaw {
@@ -28,6 +29,7 @@ export interface ConnectionData {
 }
 
 export interface CommunicationServiceInterface {
+	localID: string;
 	sendDataAll(data: Data): void;
 	sendDataToID(id: string, data: Data);
 	connectionStream: Subject<ConnectionData>;

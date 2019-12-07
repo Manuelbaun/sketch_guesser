@@ -1,6 +1,6 @@
 import { Subject, Subscription } from 'rxjs';
-import Message from '../models/message';
-import { CacheEngineInterface } from './cache.engine';
+import Message from '../../models/message';
+import { CacheEngineInterface } from '../../engine/cache.engine';
 
 export default class MessageEngine extends Subject<Message[]> {
 	/**

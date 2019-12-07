@@ -103,7 +103,7 @@ class PeerManager extends Peer {
 	}
 
 	private onConnectionData(conn: Peer.DataConnection, dataRaw: DataRaw) {
-		console.log('Data from:', conn.peer, dataRaw);
+		// console.log('Data from:', conn.peer, dataRaw);
 		// emit event of incoming data
 		const { type } = dataRaw;
 		const payload = new Uint8Array(dataRaw.payload);

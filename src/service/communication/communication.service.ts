@@ -17,9 +17,12 @@ export default class CommunicationServiceImpl implements CommunicationServiceInt
 			port: 9000
 		});
 
+		this.localID = this.peerManager.id;
+
 		this.peerManager.onData = (data) => this._dataStream.next(data);
 		this.peerManager.onConnection = (data) => this._connectionStream.next(data);
 	}
+	localID: string;
 	private peerManager: PeerManager;
 	private _connectionStream: Subject<ConnectionData> = new Subject();
 	public get connectionStream(): Subject<ConnectionData> {
