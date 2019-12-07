@@ -9,7 +9,7 @@ interface CountDownInterface {
 }
 
 const CountDown: React.FC<CountDownInterface> = ({ gameEngine }) => {
-	const [ time, setTime ] = useState(gameEngine.currentTime);
+	const [ time, setTime ] = useState(gameEngine.time);
 	const [ rounds, setRounds ] = useState(gameEngine.rounds);
 	const [ currentRound, setCurrentRound ] = useState(gameEngine.currentRound);
 
