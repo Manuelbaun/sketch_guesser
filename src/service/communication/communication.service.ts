@@ -1,12 +1,6 @@
 import { Subject, NextObserver } from 'rxjs';
 import PeerManager from './peer_manager';
-import {
-	Data,
-	ConnectionData,
-	ConnectionEventType,
-	DataRaw,
-	CommunicationServiceInterface
-} from './communication.type';
+import { Data, ConnectionData, CommunicationServiceInterface } from './communication.type';
 
 // singleton?
 export default class CommunicationServiceImpl implements CommunicationServiceInterface {
@@ -22,6 +16,7 @@ export default class CommunicationServiceImpl implements CommunicationServiceInt
 		this.peerManager.onData = (data) => this._dataStream.next(data);
 		this.peerManager.onConnection = (data) => this._connectionStream.next(data);
 	}
+
 	localID: string;
 	private peerManager: PeerManager;
 	private _connectionStream: Subject<ConnectionData> = new Subject();

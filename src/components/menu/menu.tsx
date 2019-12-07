@@ -5,13 +5,15 @@ import Input from '../../common/input';
 import { CommunicationServiceInterface } from '../../service/communication/communication.type';
 import GameEngine from '../../engine/game.engine';
 import { GameStates } from '../../engine/game.types';
+import PlayerEngine from '../../engine/player.engine';
 
 interface MenuInterface {
 	comm: CommunicationServiceInterface;
 	gameEngine: GameEngine;
+	playerEngine: PlayerEngine;
 }
 
-const Menu: React.FC<MenuInterface> = ({ comm, gameEngine: engine }) => {
+const Menu: React.FC<MenuInterface> = ({ comm, gameEngine: engine, playerEngine }) => {
 	const [ userName, setUserName ] = useState('');
 
 	const setupGame = () => {
@@ -28,6 +30,7 @@ const Menu: React.FC<MenuInterface> = ({ comm, gameEngine: engine }) => {
 
 	const handleSubmit = (msg: string) => {
 		setUserName(msg);
+		playerEngine.updateLocalName(msg);
 	};
 
 	const startGame = () => {
@@ -49,7 +52,7 @@ const Menu: React.FC<MenuInterface> = ({ comm, gameEngine: engine }) => {
 			<Button onClick={stopGame}> Stop </Button>
 			<Button onClick={setupGame}> Reset </Button>
 			<Button onClick={nextRound}> Next Round </Button>
-			<P2PGraph comm={comm} />
+			<P2PGraph engine={playerEngine} />
 		</div>
 	);
 };

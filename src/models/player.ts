@@ -1,4 +1,4 @@
-export default class Player {
+export default class PlayerClass {
 	constructor(id: string) {
 		this._id = id;
 	}

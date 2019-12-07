@@ -14,27 +14,37 @@ export interface CacheEngineInterface {
 	gameState;
 	clock;
 	messages;
+	players;
 }
 
 export default class CacheEngine implements CacheEngineInterface {
 	private yDoc = new Y.Doc();
+
 	private _drawPathStore = this.yDoc.getArray<DrawPath>('drawState');
 	public get drawPathStore() {
 		return this._drawPathStore;
 	}
+
 	private _gameState = this.yDoc.getMap('gameState');
 	public get gameState() {
 		return this._gameState;
 	}
+
 	private _clock = this.yDoc.getMap('clock');
 	public get clock() {
 		return this._clock;
 	}
-	private _messages = this.yDoc.getArray<Message>('messages');
 
+	private _messages = this.yDoc.getArray<Message>('messages');
 	public get messages() {
 		return this._messages;
 	}
+
+	private _players = this.yDoc.getMap('players');
+	public get players() {
+		return this._players;
+	}
+
 	private subDataStream: Subscription;
 	private subCommStream: Subscription;
 

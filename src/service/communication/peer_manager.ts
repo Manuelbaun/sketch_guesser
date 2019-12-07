@@ -2,6 +2,15 @@ import Peer from 'peerjs';
 
 import { Data, ConnectionData, ConnectionEventType, DataRaw } from './communication.type';
 
+// Dirty workaround
+var chance = require('chance')();
+let id = localStorage.getItem('fakeId') as string;
+
+id = chance.string({ length: 10, alpha: true, numeric: true }) as string;
+if (!id) {
+	localStorage.setItem('fakeId', id);
+}
+
 /**
  * The PeerManager:
  * onConnectionEvent
@@ -12,7 +21,7 @@ import { Data, ConnectionData, ConnectionEventType, DataRaw } from './communicat
 
 class PeerManager extends Peer {
 	constructor(peerJSOptions: Peer.PeerJSOption) {
-		super(peerJSOptions);
+		super(id, peerJSOptions);
 
 		this.on('open', (id) => this.onPeerOpen(id));
 		this.on('close', () => this.onPeerClosed());

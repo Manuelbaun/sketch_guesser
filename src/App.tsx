@@ -13,6 +13,7 @@ import Menu from './components/menu/menu';
 import CommunicationServiceImpl from './service/communication/communication.service';
 import CacheEngine from './engine/cache.engine';
 import { GameEngineEvents } from './engine/game.types';
+import PlayerEngine from './engine/player.engine';
 
 var chance = require('chance')();
 const name = chance.name();
@@ -21,6 +22,7 @@ const name = chance.name();
 const commService = new CommunicationServiceImpl();
 // setup the cache via yjs and creates the doc.
 const cache = new CacheEngine(commService);
+const playerEngine = new PlayerEngine(cache, commService);
 
 // setup the engines
 const gameEngine = new GameEngine(cache);
@@ -45,7 +47,7 @@ const App: React.FC = () => {
 
 	return (
 		<React.Fragment>
-			<Menu gameEngine={gameEngine} comm={commService} />
+			<Menu gameEngine={gameEngine} comm={commService} playerEngine={playerEngine} />
 			<div className="App">
 				{/* Hack around */}
 				{gameStarted && <CountDown gameEngine={gameEngine} />}

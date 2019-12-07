@@ -1,57 +1,84 @@
-import Graph from 'p2p-graph';
-import {
-	ConnectionData,
-	ConnectionEventType,
-	CommunicationServiceInterface
-} from '../../service/communication/communication.type';
+import Graph from './lib/graph';
+import PlayerEngine, { Player } from '../../engine/player.engine';
 
 export default class P2PGraphEngine {
-	constructor(comm: CommunicationServiceInterface) {
-		this.sub = comm.connectionStream.subscribe({
-			next: (data: ConnectionData) => this.onNext(data)
-		});
-	}
 	graph;
-	sub;
-	peers = new Set<string>();
-
-	unsubscribe() {
-		this.sub.unsubscribe();
+	localID: string;
+	constructor(engine: PlayerEngine) {
+		this.localID = engine.localID;
+		// only observe and act accordingly
+		engine.playerDoc.observe((event) => {
+			console.log('P2PGraphEngine Player Event', event);
+			event.keysChanged.forEach((key) => {
+				const player = engine.playerDoc.get(key) as Player;
+				console.log(key, player);
+				if (player) this.updatePeer(key as string, player);
+			});
+		});
 	}
 
 	createGraph(element: React.MutableRefObject<null>) {
 		this.graph = new Graph(element.current);
-		// this.graph.on('select', function(id) {
-		// 	// console.log(id + ' selected!');
-		// });
-		this.graph.add({
-			id: 'local',
-			me: true,
-			name: 'You'
-		});
+		console.log(this.graph);
+
+		this.addLocalPlayer('', 0);
 	}
 
-	onNext(data: ConnectionData) {
-		if (data.type == ConnectionEventType.OPEN) this.addPeer(data.peerID);
-		if (data.type == ConnectionEventType.CLOSE) this.removePeer(data.peerID);
+	addLocalPlayer(name: string, point: number) {
+		try {
+			this.graph.add({
+				id: this.localID,
+				me: true,
+				name: name || 'You',
+				points: point
+			});
+		} catch (err) {
+			console.error(err);
+		}
 	}
 
-	addPeer(peerId: string) {
-		if (this.peers.has(peerId)) return;
+	updatePeer(id: string, player: Player) {
+		// this.removePeer(id);
+		const list = this.graph.list() as Array<any>;
 
-		// Add two peers
-		this.graph.add({
-			id: peerId,
-			name: peerId
-		});
-		this.peers.add(peerId);
-		this.graph.connect('local', peerId);
+		const node = list.find(n => n.id === id);
+
+		if(node) {
+			node.name = "kalsdjflksdjf";
+			this.graph.forceUpdate();
+		}
+
+		// if (id === this.localID) {
+		// 	this.addLocalPlayer(player.name, player.points);
+		// } else {
+		// 	this.addPeer(id, player.name, player.points);
+		// }
+	}
+
+	addPeer(peerId: string, name?: string, points?: number) {
+		try {
+			this.graph.add({
+				id: peerId,
+				name: name || peerId
+			});
+
+			this.graph.connect(this.localID, peerId);
+		} catch (err) {
+			// console.error(err);
+		}
 	}
 
 	removePeer(peerId: string) {
-		if (!this.peers.has(peerId)) return;
-		this.graph.disconnect('local', peerId);
-		this.graph.remove(peerId);
-		this.peers.delete(peerId);
+		try {
+			this.graph.disconnect(this.localID, peerId);
+		} catch (err) {
+			// console.error(err);
+		}
+
+		try {
+			this.graph.remove(peerId);
+		} catch (err) {
+			// console.error(err);
+		}
 	}
 }
