@@ -1,4 +1,3 @@
-import * as Y from 'yjs';
 import sha256 from 'sha256';
 import { EventEmitter } from 'events';
 import { CacheEngineInterface } from './cache.engine';

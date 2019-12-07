@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import P2PGraph from './p2pGraph';
 import Input from '../../common/input';
@@ -14,8 +14,6 @@ interface MenuInterface {
 }
 
 const Menu: React.FC<MenuInterface> = ({ comm, gameEngine: engine, playerEngine }) => {
-	const [ userName, setUserName ] = useState('');
-
 	const setupGame = () => {
 		engine.setupGame({
 			codeWordHash: '',
@@ -29,7 +27,6 @@ const Menu: React.FC<MenuInterface> = ({ comm, gameEngine: engine, playerEngine 
 	useEffect(() => setupGame(), []);
 
 	const handleSubmit = (msg: string) => {
-		setUserName(msg);
 		playerEngine.updateLocalName(msg);
 	};
 

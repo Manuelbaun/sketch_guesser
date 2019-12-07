@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-
-import PlayerEngine from '../../engine/player.engine';
 import { Graph } from 'react-d3-graph';
 
-import './p2pGraph.css';
+import PlayerEngine from '../../engine/player.engine';
 
-var chance = require('chance')('static');
+import './p2pGraph.css';
+// var chance = require('chance')('static');
 
 interface P2PGraphInterface {
 	engine: PlayerEngine;
@@ -95,7 +94,7 @@ const P2PGraph: React.FC<P2PGraphInterface> = ({ engine }) => {
 			window.removeEventListener('resize', updateResize);
 			engine.playerDoc.unobserve(updateNodes);
 		};
-	}, []);
+	});
 
 	// apply filter, since somehow the links artifacts exits...
 	// needed to be removed

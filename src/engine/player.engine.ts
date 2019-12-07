@@ -1,4 +1,4 @@
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CacheEngineInterface } from './cache.engine';
 import {
 	CommunicationServiceInterface,
@@ -13,11 +13,13 @@ export interface Player {
 
 /**
  * Player YMap
+ * @example
+ * interface _YMap {
+ *	 id: string;
+ *	 player: Player;
+ * }
+ * 
  */
-interface _YMap {
-	id: string;
-	player: Player;
-}
 
 export default class PlayerEngine {
 	/**
@@ -48,8 +50,8 @@ export default class PlayerEngine {
 	}
 
 	onNext(data: ConnectionData) {
-		if (data.type == ConnectionEventType.OPEN) this.addPlayer(data.peerID);
-		if (data.type == ConnectionEventType.CLOSE) this.removePlayer(data.peerID);
+		if (data.type === ConnectionEventType.OPEN) this.addPlayer(data.peerID);
+		if (data.type === ConnectionEventType.CLOSE) this.removePlayer(data.peerID);
 	}
 
 	addPlayer(peerId: string) {

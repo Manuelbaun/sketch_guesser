@@ -32,7 +32,6 @@ class PeerManager extends Peer {
 	}
 
 	private localID: string;
-	// manager: ConnectionManager = new ConnectionManager();
 	private listOfAllPeers: string[] = new Array();
 	private allConnections: Map<string, Peer.DataConnection> = new Map();
 
@@ -71,7 +70,7 @@ class PeerManager extends Peer {
 
 	private connectTo(peerID) {
 		// catch if it is the own peerID
-		if (peerID == this.id) return;
+		if (peerID === this.id) return;
 
 		// if the connection already exists
 		if (this.allConnections.has(peerID)) {
