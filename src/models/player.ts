@@ -1,4 +1,10 @@
-export default class PlayerClass {
+export interface IPlayer {
+	id: string;
+	name: string;
+	points: number;
+}
+
+export default class PlayerClass implements IPlayer {
 	constructor(id: string) {
 		this._id = id;
 	}

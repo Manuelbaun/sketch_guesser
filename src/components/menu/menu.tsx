@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
-import P2PGraph from './p2pGraph';
-import Input from '../../common/input';
-import { CommunicationServiceInterface } from '../../service/communication/communication.type';
-import GameEngine from '../../engine/game.engine';
-import { GameStates } from '../../engine/game.types';
-import PlayerEngine from '../../engine/player.engine';
+import P2PGraph from './p2pGraph/p2pGraph';
+import Input from '../common/input';
+import { ICommunicationService } from '../../service/communication/communication.type';
+import GameEngine from '../../gameEngine/game.engine';
+import { GameStates } from '../../gameEngine/game.types';
+import PlayerEngine from '../../gameEngine/player.engine';
 
 interface MenuInterface {
-	comm: CommunicationServiceInterface;
+	comm: ICommunicationService;
 	gameEngine: GameEngine;
 	playerEngine: PlayerEngine;
 }

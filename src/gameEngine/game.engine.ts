@@ -1,13 +1,13 @@
 import sha256 from 'sha256';
 import { EventEmitter } from 'events';
-import { CacheEngineInterface } from './cache.engine';
+import { ICacheEngine } from './cache.engine';
 import { GameEngineEvents, GameState, GameStates } from './game.types';
 
 class GameEngineDocSetterGetter {
 	gameState; //  YMap<GameState>
 	clock;
 
-	constructor(store: CacheEngineInterface) {
+	constructor(store: ICacheEngine) {
 		this.gameState = store.gameState;
 		this.clock = store.clock;
 		this.transact = store.gameState.doc.transact;
@@ -59,7 +59,7 @@ export default class GameEngine extends GameEngineDocSetterGetter {
 	private emitter: EventEmitter = new EventEmitter();
 	timer: NodeJS.Timeout;
 
-	constructor(store: CacheEngineInterface) {
+	constructor(store: ICacheEngine) {
 		super(store);
 
 		this.clock.observe((event) => {

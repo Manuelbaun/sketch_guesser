@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Graph } from 'react-d3-graph';
 
-import PlayerEngine from '../../engine/player.engine';
+import PlayerEngine from '../../../gameEngine/player.engine';
 
 import './p2pGraph.css';
 // var chance = require('chance')('static');

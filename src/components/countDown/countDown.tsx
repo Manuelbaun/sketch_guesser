@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import GameEngine from '../../engine/game.engine';
+import GameEngine from '../../gameEngine/game.engine';
 
 import './countDown.css';
-import { GameEngineEvents } from '../../engine/game.types';
+import { GameEngineEvents } from '../../gameEngine/game.types';
 
-interface CountDownInterface {
+interface ICountDownInterface {
 	gameEngine: GameEngine;
 }
 
-const CountDown: React.FC<CountDownInterface> = ({ gameEngine }) => {
+const CountDown: React.FC<ICountDownInterface> = ({ gameEngine }) => {
 	const [ time, setTime ] = useState(gameEngine.time);
 	const [ rounds, setRounds ] = useState(gameEngine.rounds);
 	const [ currentRound, setCurrentRound ] = useState(gameEngine.currentRound);

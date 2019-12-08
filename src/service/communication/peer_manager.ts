@@ -1,6 +1,6 @@
 import Peer from 'peerjs';
 
-import { Data, ConnectionData, ConnectionEventType, DataRaw } from './communication.type';
+import { Data, IConnectionData, ConnectionEventType, DataRaw } from './communication.type';
 
 // Dirty workaround
 var chance = require('chance')();
@@ -127,7 +127,7 @@ class PeerManager extends Peer {
 	}
 
 	onData = (data: Data): void => {};
-	onConnection = (data: ConnectionData): void => {};
+	onConnection = (data: IConnectionData): void => {};
 
 	send(data: Data) {
 		this.allConnections.forEach((connection) => {

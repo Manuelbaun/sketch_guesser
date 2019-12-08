@@ -1,6 +1,10 @@
 import { Subject, Subscription } from 'rxjs';
 import Message from '../../models/message';
-import { CacheEngineInterface } from '../../engine/cache.engine';
+import { ICacheEngine } from '../../gameEngine/cache.engine';
+
+/**
+ * TODO: Is this just an Manager?
+ */
 
 export default class MessageEngine extends Subject<Message[]> {
 	/**
@@ -10,7 +14,7 @@ export default class MessageEngine extends Subject<Message[]> {
 	name: string;
 	sub: Subscription;
 
-	constructor(userName: string, store: CacheEngineInterface) {
+	constructor(userName: string, store: ICacheEngine) {
 		super();
 
 		this.name = userName;

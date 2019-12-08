@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-import DrawEngine from './draw.engine';
-import { Coordinate } from './types';
+import DrawEngine, { Coordinate } from './draw.engine';
 
 import './canvas.css';
 
@@ -23,13 +22,13 @@ const colorPalette = [
 
 // TODO: Remove all listener, when user is not the current presenter
 
-export interface CanvasProps {
+export interface ICanvasProps {
 	width?: number;
 	height?: number;
 	drawingEngine: DrawEngine;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ width, height, drawingEngine }) => {
+const Canvas: React.FC<ICanvasProps> = ({ width, height, drawingEngine }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const [ isPainting, setIsPainting ] = useState(false);

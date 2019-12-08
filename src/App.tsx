@@ -4,27 +4,26 @@ import MessageBox from './components/messages/messageBox';
 import CountDown from './components/countDown/countDown';
 import MessageEngine from './components/messages/message.engine';
 import DrawEngine from './components/drawing/draw.engine';
-import GameEngine from './engine/game.engine';
-
-import './service/yjs.playground';
-
-import './App.css';
+import GameEngine from './gameEngine/game.engine';
 import Menu from './components/menu/menu';
 import CommunicationServiceImpl from './service/communication/communication.service';
-import CacheEngine from './engine/cache.engine';
-import { GameEngineEvents } from './engine/game.types';
-import PlayerEngine from './engine/player.engine';
+import CacheEngine from './gameEngine/cache.engine';
+import { GameEngineEvents } from './gameEngine/game.types';
+import PlayerEngine from './gameEngine/player.engine';
+
+import './App.css';
 
 var chance = require('chance')();
 const name = chance.name();
 
 // establish connection between peers
 const commService = new CommunicationServiceImpl();
+
 // setup the cache via yjs and creates the doc.
 const cache = new CacheEngine(commService);
-const playerEngine = new PlayerEngine(cache, commService);
 
-// setup the engines
+// setup the "engines" need proper names and refactor
+const playerEngine = new PlayerEngine(cache, commService);
 const gameEngine = new GameEngine(cache);
 const drawingEngine = new DrawEngine(cache);
 const messageEngine = new MessageEngine(name, cache);

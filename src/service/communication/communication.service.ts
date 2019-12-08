@@ -1,9 +1,9 @@
 import { Subject, NextObserver } from 'rxjs';
 import PeerManager from './peer_manager';
-import { Data, ConnectionData, CommunicationServiceInterface } from './communication.type';
+import { Data, IConnectionData, ICommunicationService } from './communication.type';
 
 // singleton?
-export default class CommunicationServiceImpl implements CommunicationServiceInterface {
+export default class CommunicationServiceImpl implements ICommunicationService {
 	constructor() {
 		this.peerManager = new PeerManager({
 			debug: 2,
@@ -19,8 +19,8 @@ export default class CommunicationServiceImpl implements CommunicationServiceInt
 
 	localID: string;
 	private peerManager: PeerManager;
-	private _connectionStream: Subject<ConnectionData> = new Subject();
-	public get connectionStream(): Subject<ConnectionData> {
+	private _connectionStream: Subject<IConnectionData> = new Subject();
+	public get connectionStream(): Subject<IConnectionData> {
 		return this._connectionStream;
 	}
 
@@ -41,7 +41,7 @@ export default class CommunicationServiceImpl implements CommunicationServiceInt
 		return this.dataStream.subscribe(observer);
 	}
 
-	subscribeToConnectionStream(observer: NextObserver<ConnectionData>) {
+	subscribeToConnectionStream(observer: NextObserver<IConnectionData>) {
 		return this.connectionStream.subscribe(observer);
 	}
 }

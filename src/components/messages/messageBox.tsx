@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import MessageRow from './messageRow';
 import Message from '../../models/message';
-import Input from '../../common/input';
+import Input from '../common/input';
 import MessageEngine from './message.engine';
 import './message.css';
 
-interface MessageListProps {
+interface IMessageListProps {
 	messageService: MessageEngine;
 	localUserName: string;
 }
 
 // - get local user to check
-const MessageBox: React.FC<MessageListProps> = ({ messageService, localUserName }) => {
+const MessageBox: React.FC<IMessageListProps> = ({ messageService, localUserName }) => {
 	const [ messageList, setMessageList ] = useState(messageService.getMessages());
 
 	// subscribe to message

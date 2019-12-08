@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
-import { Coordinate } from '../components/drawing/types';
+import { Coordinate } from '../components/drawing/draw.engine';
 
-interface DrawingPathInterface {
+interface IDrawingPath {
 	color: string;
 	origin: Coordinate;
 }
@@ -15,7 +15,7 @@ export default class DrawingPath {
 	element = new Y.Map();
 	currentPath;
 
-	constructor(props: DrawingPathInterface) {
+	constructor(props: IDrawingPath) {
 		this.currentPath = new Y.Array();
 		this.element.set('color', props.color);
 		this.element.set('origin', props.origin);

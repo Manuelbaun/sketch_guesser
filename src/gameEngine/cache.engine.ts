@@ -1,15 +1,15 @@
 import * as Y from 'yjs';
 import { Subscription } from 'rxjs';
-import { DrawPath } from '../components/drawing/types';
 import Message from '../models/message';
 import {
-	CommunicationServiceInterface,
+	ICommunicationService,
 	Data,
 	DataTypes,
 	ConnectionEventType
 } from '../service/communication/communication.type';
+import { IDrawPath } from '../components/drawing/draw.engine';
 
-export interface CacheEngineInterface {
+export interface ICacheEngine {
 	drawPathStore;
 	gameState;
 	clock;
@@ -17,10 +17,10 @@ export interface CacheEngineInterface {
 	players;
 }
 
-export default class CacheEngine implements CacheEngineInterface {
+export default class CacheEngine implements ICacheEngine {
 	private yDoc = new Y.Doc();
 
-	private _drawPathStore = this.yDoc.getArray<DrawPath>('drawState');
+	private _drawPathStore = this.yDoc.getArray<IDrawPath>('drawState');
 	public get drawPathStore() {
 		return this._drawPathStore;
 	}
@@ -48,7 +48,7 @@ export default class CacheEngine implements CacheEngineInterface {
 	private subDataStream: Subscription;
 	private subCommStream: Subscription;
 
-	constructor(comm: CommunicationServiceInterface) {
+	constructor(comm: ICommunicationService) {
 		this.yDoc.on('update', (update) => {
 			const data: Data = {
 				type: DataTypes.MESSAGE,

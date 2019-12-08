@@ -11,12 +11,12 @@ function addZero(t: number | string) {
 	return t;
 }
 
-interface MessageRowProps {
+interface IMessageRowProps {
 	message: Message;
 	incoming: boolean;
 }
 
-const MessageRow: React.FC<MessageRowProps> = (props) => {
+const MessageRow: React.FC<IMessageRowProps> = (props) => {
 	const { message, incoming } = props;
 	const date = new Date(message.ts);
 	var h = date.getHours();

@@ -1,15 +1,11 @@
 import { Subscription } from 'rxjs';
-import { CacheEngineInterface } from './cache.engine';
+import { ICacheEngine } from './cache.engine';
 import {
-	CommunicationServiceInterface,
-	ConnectionData,
+	ICommunicationService,
+	IConnectionData,
 	ConnectionEventType
 } from '../service/communication/communication.type';
-
-export interface Player {
-	name: string;
-	points: number;
-}
+import { IPlayer } from '../models';
 
 /**
  * Player YMap
@@ -31,14 +27,14 @@ export default class PlayerEngine {
 	playerNum: number = 1;
 	localID: string;
 
-	constructor(cache: CacheEngineInterface, comm: CommunicationServiceInterface) {
+	constructor(cache: ICacheEngine, comm: ICommunicationService) {
 		this.playerDoc = cache.players;
 
 		this.localID = comm.localID;
 		console.log('should not be null', this.localID);
 
 		this.sub = comm.connectionStream.subscribe({
-			next: (data: ConnectionData) => this.onNext(data)
+			next: (data: IConnectionData) => this.onNext(data)
 		});
 
 		this.addPlayer(this.localID);
@@ -49,13 +45,13 @@ export default class PlayerEngine {
 		this.sub.unsubscribe();
 	}
 
-	onNext(data: ConnectionData) {
+	onNext(data: IConnectionData) {
 		if (data.type === ConnectionEventType.OPEN) this.addPlayer(data.peerID);
 		if (data.type === ConnectionEventType.CLOSE) this.removePlayer(data.peerID);
 	}
 
 	addPlayer(peerId: string) {
-		const player = this.playerDoc.get(peerId) as Player;
+		const player = this.playerDoc.get(peerId) as IPlayer;
 		if (player) return;
 
 		this.playerDoc.set(peerId, {
@@ -67,7 +63,7 @@ export default class PlayerEngine {
 	}
 
 	updateLocalName(name: string) {
-		const player = this.playerDoc.get(this.localID) as Player;
+		const player = this.playerDoc.get(this.localID) as IPlayer;
 		console.log(name);
 		this.update(this.localID, {
 			...player,
@@ -75,8 +71,8 @@ export default class PlayerEngine {
 		});
 	}
 
-	update(peerId: string, p: Player) {
-		const player = this.playerDoc.get(peerId) as Player;
+	update(peerId: string, p: IPlayer) {
+		const player = this.playerDoc.get(peerId) as IPlayer;
 
 		if (!player) return;
 
@@ -92,7 +88,7 @@ export default class PlayerEngine {
 	}
 
 	addPoints(peerId: string, points: number) {
-		const player = this.playerDoc.get(peerId) as Player;
+		const player = this.playerDoc.get(peerId) as IPlayer;
 		if (!player) return;
 
 		this.playerDoc.set(peerId, {
@@ -102,7 +98,7 @@ export default class PlayerEngine {
 	}
 
 	removePlayer(peerId: string) {
-		const player = this.playerDoc.get(peerId) as Player;
+		const player = this.playerDoc.get(peerId) as IPlayer;
 		if (!player) return;
 
 		this.playerDoc.delete(peerId);
