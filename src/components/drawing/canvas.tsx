@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-import DrawEngine from './drawEngine';
+import DrawEngine from './draw.engine';
 import { Coordinate } from './types';
 
 import './canvas.css';
@@ -28,6 +28,7 @@ export interface CanvasProps {
 	height?: number;
 	drawingEngine: DrawEngine;
 }
+
 const Canvas: React.FC<CanvasProps> = ({ width, height, drawingEngine }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -153,8 +154,13 @@ const Canvas: React.FC<CanvasProps> = ({ width, height, drawingEngine }) => {
 	// Draw Canvas!
 	drawingEngine.subscribe((paths) => {
 		if (paths.length === 0) clearCanvas();
-		const lastPath = paths[paths.length - 1];
-		if (lastPath) drawPath(lastPath);
+
+		// const lastPath = paths[paths.length - 1];
+		// if (lastPath) drawPath(lastPath);
+
+		paths.forEach((path) => {
+			drawPath(path);
+		});
 	});
 
 	/**

@@ -21,9 +21,9 @@
     "noImplicitAny": false,
     // "checkJs": true,
     "allowJs": true,
+    "sourceMap": true,
 
-
-    "maxNodeModuleJsDepth": 2,
+    "maxNodeModuleJsDepth": 5,
   },
   "include": [
     "src"

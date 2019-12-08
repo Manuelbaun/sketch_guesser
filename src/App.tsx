@@ -1,77 +1,60 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Canvas from './components/drawing/canvas';
 import MessageBox from './components/messages/messageBox';
-import Message from './models/message';
-import Fullscreen from 'react-full-screen';
+import CountDown from './components/countDown/countDown';
+import MessageEngine from './components/messages/message.engine';
+import DrawEngine from './components/drawing/draw.engine';
+import GameEngine from './engine/game.engine';
+
+import './service/yjs.playground';
 
 import './App.css';
-import Store from './service/store';
+import Menu from './components/menu/menu';
+import CommunicationServiceImpl from './service/communication/communication.service';
+import CacheEngine from './engine/cache.engine';
+import { GameEngineEvents } from './engine/game.types';
+import PlayerEngine from './engine/player.engine';
 
-import sha256 from 'sha256';
-import GameEngine from './service/gameEngine';
-import MessageService from './service/message.service';
-import CountDown from './components/countDown/countDown';
-import DrawEngine from './components/drawing/drawEngine';
-
-import NetfluxTest from './service/netflux';
 var chance = require('chance')();
+const name = chance.name();
 
-let net: NetfluxTest;
+// establish connection between peers
+const commService = new CommunicationServiceImpl();
+// setup the cache via yjs and creates the doc.
+const cache = new CacheEngine(commService);
+const playerEngine = new PlayerEngine(cache, commService);
+
+// setup the engines
+const gameEngine = new GameEngine(cache);
+const drawingEngine = new DrawEngine(cache);
+const messageEngine = new MessageEngine(name, cache);
 
 const App: React.FC = () => {
-	const store = new Store();
-	const messageService = new MessageService(store.messageState, 'Hans');
-	const gameEngine = new GameEngine(store);
-	const drawingEngine = new DrawEngine({ store: store.drawState });
+	const [ gameStarted, setGameStarted ] = useState(false);
 
-	const [ fullScreen, setFullScreen ] = useState(false);
+	const startGame = () => setGameStarted(true);
+	const stopGame = () => setGameStarted(false);
 
-	gameEngine.createGame({
-		gameID: 'home',
-		codeWord: '',
-		codeWordHash: '',
-		currentRound: 1,
-		rounds: 3,
-		currentMasterID: ''
-	});
+	useEffect(() => {
+		gameEngine.on(GameEngineEvents.GAME_STARTED, startGame);
+		gameEngine.on(GameEngineEvents.GAME_STOPPED, stopGame);
 
-	gameEngine.setGuessWord('test');
-	gameEngine.startRound();
-	const name = chance.name();
-
-	const joinGame = useCallback((gameID: string) => {
-		console.log('GameID', gameID);
-		net = new NetfluxTest({
-			name: name,
-			groupId: gameID,
-			onDataReceived: (data) => {
-				if (typeof data === 'string') {
-					console.log(data);
-				} else {
-					
-					store.onIncomingUpdate(data); // Uint8Array
-				}
-			}
-		});
-		store.onDataSend = (data) => {
-			net.send(data);
-			console.log('send outside');
+		return () => {
+			gameEngine.off(GameEngineEvents.GAME_STARTED, startGame);
+			gameEngine.off(GameEngineEvents.GAME_STOPPED, stopGame);
 		};
 	}, []);
 
-	joinGame('hans');
-
 	return (
-		<div className="App">
-			{/* <button onClick={() => setFullScreen(true)}>Go Fullscreen</button> */}
-
-			<Fullscreen enabled={fullScreen} onChange={(isFull) => setFullScreen(isFull)}>
-				<CountDown gameEngine={gameEngine} />
-
+		<React.Fragment>
+			<Menu gameEngine={gameEngine} comm={commService} playerEngine={playerEngine} />
+			<div className="App">
+				{/* Hack around */}
+				{gameStarted && <CountDown gameEngine={gameEngine} />}
 				<Canvas drawingEngine={drawingEngine} />
-				<MessageBox messageService={messageService} localUserName={'Hans'} />
-			</Fullscreen>
-		</div>
+				<MessageBox messageService={messageEngine} localUserName={name} />
+			</div>
+		</React.Fragment>
 	);
 };
 

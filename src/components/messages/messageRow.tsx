@@ -18,9 +18,10 @@ interface MessageRowProps {
 
 const MessageRow: React.FC<MessageRowProps> = (props) => {
 	const { message, incoming } = props;
-	var h = message.time.getHours();
-	var m = addZero(message.time.getMinutes());
-	var s = addZero(message.time.getSeconds());
+	const date = new Date(message.ts);
+	var h = date.getHours();
+	var m = addZero(date.getMinutes());
+	var s = addZero(date.getSeconds());
 
 	if (h > 12) h -= 12;
 	else if (h === 0) h = 12;

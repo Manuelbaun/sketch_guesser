@@ -1,7 +1,5 @@
-// todo: convert to type?
-
 export default interface Message {
-	time: Date;
+	ts: number;
 	user: string;
 	message: string;
 };
