@@ -38,7 +38,11 @@
 		"build": "react-scripts build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
-		"doc": "tsuml --glob ./src/**/*.ts"
+		"doc.uml": "tsuml --glob ./src/**/*.ts",
+		"doc.type": "typedoc --out docs.types src",
+		"doc.viz": "tsviz src/ docs.viz/diagram.png",
+		"doc.viz.d": "tsviz -d -r src/components docs.viz/diagram_dependencies.png",
+		"doc.viz.r": "tsviz -r src/ docs.viz/diagram_recurs.png"
 	},
 	"eslintConfig": {
 		"extends": "react-app"
@@ -49,6 +53,7 @@
 	},
 	"devDependencies": {
 		"tsuml": "0.0.1-alpha.8",
-		"tsviz": "^1.0.11"
+		"tsviz": "^1.0.11",
+		"typedoc": "^0.15.4"
 	}
 }
