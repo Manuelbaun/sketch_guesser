@@ -28,7 +28,7 @@ export interface ICanvasProps {
 	drawingEngine: DrawEngine;
 }
 
-const Canvas: React.FC<ICanvasProps> = ({ width, height, drawingEngine }) => {
+const DrawingArea: React.FC<ICanvasProps> = ({ width, height, drawingEngine }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const [ isPainting, setIsPainting ] = useState(false);
@@ -259,9 +259,9 @@ const Canvas: React.FC<ICanvasProps> = ({ width, height, drawingEngine }) => {
 	);
 };
 
-Canvas.defaultProps = {
+DrawingArea.defaultProps = {
 	width: 2000,
 	height: 1000
 };
 
-export default Canvas;
+export default DrawingArea;

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Canvas from './components/drawing/canvas';
+import DrawingArea from './components/drawingArea/drawingArea';
 import MessageBox from './components/messages/messageBox';
 import CountDown from './components/countDown/countDown';
 import MessageEngine from './components/messages/message.engine';
-import DrawEngine from './components/drawing/draw.engine';
+import DrawEngine from './components/drawingArea/draw.engine';
 import GameEngine from './gameEngine/game.engine';
 import Menu from './components/menu/menu';
 import CommunicationServiceImpl from './service/communication/communication.service';
@@ -50,7 +50,7 @@ const App: React.FC = () => {
 			<div className="App">
 				{/* Hack around */}
 				{gameStarted && <CountDown gameEngine={gameEngine} />}
-				<Canvas drawingEngine={drawingEngine} />
+				<DrawingArea drawingEngine={drawingEngine} />
 				<MessageBox messageService={messageEngine} localUserName={name} />
 			</div>
 		</React.Fragment>

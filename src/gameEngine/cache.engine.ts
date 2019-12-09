@@ -7,7 +7,7 @@ import {
 	DataTypes,
 	ConnectionEventType
 } from '../service/communication/communication.type';
-import { IDrawPath } from '../components/drawing/draw.engine';
+import { IDrawPath } from '../components/drawingArea/draw.engine';
 
 export interface ICacheEngine {
 	drawPathStore;

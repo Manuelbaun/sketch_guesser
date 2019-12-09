@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import { Coordinate } from '../components/drawing/draw.engine';
+import { Coordinate } from '../components/drawingArea/draw.engine';
 
 interface IDrawingPath {
 	color: string;
