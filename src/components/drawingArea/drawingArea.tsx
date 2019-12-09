@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import DrawEngine, { Coordinate } from './draw.engine';
 
-import './canvas.css';
+import './drawingArea.css';
 
 const colorPalette = [
 	'#e6194B',
