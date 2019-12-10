@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import GameEngine from '../../gameEngine/game.engine';
+import { GameEngine } from '../../gameEngine';
+import { GameEvents } from '../../models';
 
 import './countDown.css';
-import { GameEngineEvents } from '../../gameEngine/game.types';
 
-interface ICountDownInterface {
+interface CountDownProps {
 	gameEngine: GameEngine;
 }
 
-const CountDown: React.FC<ICountDownInterface> = ({ gameEngine }) => {
+const CountDown: React.FC<CountDownProps> = ({ gameEngine }) => {
 	const [ time, setTime ] = useState(gameEngine.time);
 	const [ rounds, setRounds ] = useState(gameEngine.rounds);
 	const [ currentRound, setCurrentRound ] = useState(gameEngine.currentRound);
@@ -16,12 +16,12 @@ const CountDown: React.FC<ICountDownInterface> = ({ gameEngine }) => {
 	useEffect(() => {
 		const updateTime = (time) => setTime(time);
 		const updateRound = (round) => setCurrentRound(round);
-		gameEngine.on(GameEngineEvents.CLOCK_UPDATE, updateTime);
-		gameEngine.on(GameEngineEvents.ROUND_CHANGE, updateRound);
+		gameEngine.on(GameEvents.CLOCK_UPDATE, updateTime);
+		gameEngine.on(GameEvents.ROUND_CHANGE, updateRound);
 
 		return () => {
-			gameEngine.off(GameEngineEvents.CLOCK_UPDATE, updateTime);
-			gameEngine.off(GameEngineEvents.ROUND_CHANGE, updateRound);
+			gameEngine.off(GameEvents.CLOCK_UPDATE, updateTime);
+			gameEngine.off(GameEvents.ROUND_CHANGE, updateRound);
 		};
 	}, []);
 

@@ -1,59 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import { Graph } from 'react-d3-graph';
 
-import PlayerEngine from '../../../gameEngine/player.engine';
-
+import { PlayerEngine } from '../../../gameEngine';
+import { GraphNode, GraphLink } from '../../../models';
 import './p2pGraph.css';
-// var chance = require('chance')('static');
 
-interface P2PGraphInterface {
+interface P2PGraphProps {
 	engine: PlayerEngine;
 }
 
-interface D3Node {
-	id: string;
-	name?: string;
-	color?: string;
-	size?: number;
-	x?: number;
-	y?: number;
-}
+const P2PGraph: React.FC<P2PGraphProps> = ({ engine }) => {
+	const { localID, yMapPlayer: players, playerNum } = engine;
 
-interface D3Link {
-	source: string;
-	target: string;
-}
-
-const P2PGraph: React.FC<P2PGraphInterface> = ({ engine }) => {
 	const selfNode = {
-		id: engine.localID,
+		id: localID,
 		name: 'You',
 		color: '#e6194B',
 		x: window.innerWidth / 2,
 		y: window.innerWidth / 4
 	};
-	const [ nodes, setNodes ] = useState<Array<D3Node>>([ selfNode ]);
-	const [ links, setLinks ] = useState<Array<D3Link>>([]);
+	const [ nodes, setNodes ] = useState<Array<GraphNode>>([ selfNode ]);
+	const [ links, setLinks ] = useState<Array<GraphLink>>([]);
 
 	const [ width, setWidth ] = useState(window.innerWidth - 50);
 	const [ height, setHeight ] = useState(window.innerWidth / 2);
 
 	const updateNodes = () => {
-		const nodesArr: Array<D3Node> = [];
-		const linksArr: Array<D3Link> = [];
+		const nodesArr: Array<GraphNode> = [];
+		const linksArr: Array<GraphLink> = [];
 
-		const arcSec = 2 * Math.PI / engine.playerNum;
-		// console.log('Current Players', engine.playerNum);
+		const arcSec = 2 * Math.PI / playerNum;
 		let counter = 1;
-		engine.playerDoc.forEach((value, key) => console.log(value, key));
-		engine.playerDoc.forEach((value, key) => {
-			const self = engine.localID === key;
+
+		// @ts-ignore
+		players.forEach((value, key) => {
+			const self = localID === key;
 
 			if (self) {
 				nodesArr.push({
-					id: engine.localID,
+					id: localID,
 					color: '#e6194B',
-					name: value.name === engine.localID ? 'You' : value.name + ' (You)',
+					name: value.name === localID ? 'You' : value.name + ' (You)',
 					x: window.innerWidth / 2,
 					y: window.innerWidth / 4
 				});
@@ -72,7 +59,7 @@ const P2PGraph: React.FC<P2PGraphInterface> = ({ engine }) => {
 
 				counter++;
 
-				linksArr.push({ source: engine.localID, target: key });
+				linksArr.push({ source: localID, target: key });
 			}
 		});
 
@@ -87,12 +74,14 @@ const P2PGraph: React.FC<P2PGraphInterface> = ({ engine }) => {
 	};
 
 	useEffect(() => {
-		engine.playerDoc.observe(updateNodes);
+		// @ts-ignore
+		players.observe(updateNodes);
 		window.addEventListener('resize', updateResize);
 
 		return () => {
 			window.removeEventListener('resize', updateResize);
-			engine.playerDoc.unobserve(updateNodes);
+			// @ts-ignore
+			players.unobserve(updateNodes);
 		};
 	});
 
@@ -169,51 +158,6 @@ const P2PGraph: React.FC<P2PGraphInterface> = ({ engine }) => {
 		}
 	};
 
-	// // graph event callbacks
-	// const onClickGraph = function() {
-	// 	window.alert(`Clicked the graph background`);
-	// };
-
-	// const onClickNode = function(nodeId) {
-	// 	window.alert(`Clicked node ${nodeId}`);
-	// };
-
-	// const onDoubleClickNode = function(nodeId) {
-	// 	window.alert(`Double clicked node ${nodeId}`);
-	// };
-
-	// const onRightClickNode = function(event, nodeId) {
-	// 	window.alert(`Right clicked node ${nodeId}`);
-	// };
-
-	// const onMouseOverNode = function(nodeId) {
-	// 	window.alert(`Mouse over node ${nodeId}`);
-	// };
-
-	// const onMouseOutNode = function(nodeId) {
-	// 	window.alert(`Mouse out node ${nodeId}`);
-	// };
-
-	// const onClickLink = function(source, target) {
-	// 	window.alert(`Clicked link between ${source} and ${target}`);
-	// };
-
-	// const onRightClickLink = function(event, source, target) {
-	// 	window.alert(`Right clicked link between ${source} and ${target}`);
-	// };
-
-	// const onMouseOverLink = function(source, target) {
-	// 	window.alert(`Mouse over in link between ${source} and ${target}`);
-	// };
-
-	// const onMouseOutLink = function(source, target) {
-	// 	window.alert(`Mouse out link between ${source} and ${target}`);
-	// };
-
-	// const onNodePositionChange = function(nodeId, x, y) {
-	// 	window.alert(`Node ${nodeId} is moved to new position. New position is x= ${x} y= ${y}`);
-	// };
-
 	return (
 		<div className="graph-view">
 			<Graph
@@ -233,8 +177,6 @@ const P2PGraph: React.FC<P2PGraphInterface> = ({ engine }) => {
 			/>;
 		</div>
 	);
-
-	// <div ref={el} />;
 };
 
 export default P2PGraph;

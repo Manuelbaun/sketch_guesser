@@ -1,22 +1,22 @@
 import React from 'react';
-import Message from '../../models/message';
-
-import './message.css';
+import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import { Message } from '../../models';
+
+import './message.css';
 
 function addZero(t: number | string) {
 	if (t < 10) t = '0' + t;
 	return t;
 }
 
-interface IMessageRowProps {
+interface MessageRowProps {
 	message: Message;
 	incoming: boolean;
 }
 
-const MessageRow: React.FC<IMessageRowProps> = (props) => {
+const MessageRow: React.FC<MessageRowProps> = (props) => {
 	const { message, incoming } = props;
 	const date = new Date(message.ts);
 	var h = date.getHours();

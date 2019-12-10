@@ -1,15 +1,15 @@
 import { Subject, NextObserver } from 'rxjs';
 import PeerManager from './peer_manager';
-import { Data, IConnectionData, ICommunicationService } from './communication.type';
+import { Data, ConnectionData, CommunicationServiceInterface } from './communication.types';
 
-// singleton?
-export default class CommunicationServiceImpl implements ICommunicationService {
+export class CommunicationServiceImpl implements CommunicationServiceInterface {
 	constructor() {
-		this.peerManager = new PeerManager({
+		const options = {
 			debug: 2,
-			host: '192.168.178.149',
-			port: 9000
-		});
+			host: 'sketchguessr.herokuapp.com',
+			port: 27828
+		};
+		this.peerManager = new PeerManager(options);
 
 		this.localID = this.peerManager.id;
 
@@ -17,10 +17,11 @@ export default class CommunicationServiceImpl implements ICommunicationService {
 		this.peerManager.onConnection = (data) => this._connectionStream.next(data);
 	}
 
+	private provider;
 	localID: string;
 	private peerManager: PeerManager;
-	private _connectionStream: Subject<IConnectionData> = new Subject();
-	public get connectionStream(): Subject<IConnectionData> {
+	private _connectionStream: Subject<ConnectionData> = new Subject();
+	public get connectionStream(): Subject<ConnectionData> {
 		return this._connectionStream;
 	}
 
@@ -41,7 +42,7 @@ export default class CommunicationServiceImpl implements ICommunicationService {
 		return this.dataStream.subscribe(observer);
 	}
 
-	subscribeToConnectionStream(observer: NextObserver<IConnectionData>) {
+	subscribeToConnectionStream(observer: NextObserver<ConnectionData>) {
 		return this.connectionStream.subscribe(observer);
 	}
 }

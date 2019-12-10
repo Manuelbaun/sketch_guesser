@@ -1,28 +1,14 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
-import { ICacheEngine } from '../../gameEngine/cache.engine';
+import { CacheEngineInterface } from '../../gameEngine';
+import { DrawingPath, Coordinate } from '../../models';
 
-/**
- * TODO: Is this just an Manager?
- */
-// Relative position between 0..1
-export type Coordinate = {
-	x: number;
-	y: number;
-};
-
-export interface IDrawPath {
-	color: string;
-	origin: Coordinate;
-	path: Array<Coordinate>;
-}
-
-export default class DrawEngine extends Subject<IDrawPath[]> {
+export default class DrawEngine extends Subject<DrawingPath[]> {
 	private _drawPathStore;
 	private currentDrawElement;
 	private currentDrawPath;
 
-	constructor(store: ICacheEngine) {
+	constructor(store: CacheEngineInterface) {
 		super();
 		this._drawPathStore = store.drawPathStore;
 

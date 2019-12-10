@@ -1,15 +1,17 @@
 import * as Y from 'yjs';
+// import { YMap, YArray, Doc } from './yjs.types';
 import { Subscription } from 'rxjs';
-import Message from '../models/message';
+import { Message, DrawingPath } from '../models';
+
 import {
-	ICommunicationService,
+	CommunicationServiceInterface,
 	Data,
 	DataTypes,
 	ConnectionEventType
-} from '../service/communication/communication.type';
-import { IDrawPath } from '../components/drawingArea/draw.engine';
+} from '../service/communication/communication.types';
 
-export interface ICacheEngine {
+export interface CacheEngineInterface {
+	yDoc;
 	drawPathStore;
 	gameState;
 	clock;
@@ -17,10 +19,13 @@ export interface ICacheEngine {
 	players;
 }
 
-export default class CacheEngine implements ICacheEngine {
-	private yDoc = new Y.Doc();
+export class CacheEngine implements CacheEngineInterface {
+	private _yDoc = new Y.Doc();
+	public get yDoc() {
+		return this._yDoc;
+	}
 
-	private _drawPathStore = this.yDoc.getArray<IDrawPath>('drawState');
+	private _drawPathStore = this.yDoc.getArray<DrawingPath>('drawState');
 	public get drawPathStore() {
 		return this._drawPathStore;
 	}
@@ -48,17 +53,17 @@ export default class CacheEngine implements ICacheEngine {
 	private subDataStream: Subscription;
 	private subCommStream: Subscription;
 
-	constructor(comm: ICommunicationService) {
+	constructor(comm: CommunicationServiceInterface) {
 		this.yDoc.on('update', (update) => {
 			const data: Data = {
 				type: DataTypes.MESSAGE,
 				payload: update
 			};
-			comm.sendDataAll(data);
+			// comm.sendDataAll(data);
 		});
 
 		// subscribe to game data with filter
-		// const _filter = (data: Data) => data.type === DataTypes.GAME;
+		const _filter = (data: Data) => data.type === DataTypes.GAME;
 		this.subDataStream = comm.dataStream.subscribe({
 			next: (data) => Y.applyUpdate(this.yDoc, data.payload)
 		});
@@ -78,6 +83,8 @@ export default class CacheEngine implements ICacheEngine {
 			}
 		});
 	}
+
+	// TODO: compute difference to update new connected peer
 
 	destroy() {
 		this.subCommStream.unsubscribe();

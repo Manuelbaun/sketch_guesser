@@ -4,29 +4,24 @@ import MessageBox from './components/messages/messageBox';
 import CountDown from './components/countDown/countDown';
 import MessageEngine from './components/messages/message.engine';
 import DrawEngine from './components/drawingArea/draw.engine';
-import GameEngine from './gameEngine/game.engine';
+import { GameEngine, CacheEngine, PlayerEngine } from './gameEngine';
 import Menu from './components/menu/menu';
-import CommunicationServiceImpl from './service/communication/communication.service';
-import CacheEngine from './gameEngine/cache.engine';
-import { GameEngineEvents } from './gameEngine/game.types';
-import PlayerEngine from './gameEngine/player.engine';
+
+import { GameEvents } from './models';
 
 import './App.css';
+import { CommunicationServiceImpl } from './service/communication';
 
-var chance = require('chance')();
-const name = chance.name();
-
-// establish connection between peers
 const commService = new CommunicationServiceImpl();
-
 // setup the cache via yjs and creates the doc.
 const cache = new CacheEngine(commService);
+// establish connection between peers
 
 // setup the "engines" need proper names and refactor
 const playerEngine = new PlayerEngine(cache, commService);
 const gameEngine = new GameEngine(cache);
 const drawingEngine = new DrawEngine(cache);
-const messageEngine = new MessageEngine(name, cache);
+const messageEngine = new MessageEngine(cache, playerEngine);
 
 const App: React.FC = () => {
 	const [ gameStarted, setGameStarted ] = useState(false);
@@ -35,12 +30,12 @@ const App: React.FC = () => {
 	const stopGame = () => setGameStarted(false);
 
 	useEffect(() => {
-		gameEngine.on(GameEngineEvents.GAME_STARTED, startGame);
-		gameEngine.on(GameEngineEvents.GAME_STOPPED, stopGame);
+		gameEngine.on(GameEvents.GAME_STARTED, startGame);
+		gameEngine.on(GameEvents.GAME_STOPPED, stopGame);
 
 		return () => {
-			gameEngine.off(GameEngineEvents.GAME_STARTED, startGame);
-			gameEngine.off(GameEngineEvents.GAME_STOPPED, stopGame);
+			gameEngine.off(GameEvents.GAME_STARTED, startGame);
+			gameEngine.off(GameEvents.GAME_STOPPED, stopGame);
 		};
 	}, []);
 
@@ -51,7 +46,7 @@ const App: React.FC = () => {
 				{/* Hack around */}
 				{gameStarted && <CountDown gameEngine={gameEngine} />}
 				<DrawingArea drawingEngine={drawingEngine} />
-				<MessageBox messageService={messageEngine} localUserName={name} />
+				<MessageBox messageEngine={messageEngine} />
 			</div>
 		</React.Fragment>
 	);

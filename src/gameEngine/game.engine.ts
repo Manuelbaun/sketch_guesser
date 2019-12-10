@@ -1,13 +1,13 @@
 import sha256 from 'sha256';
 import { EventEmitter } from 'events';
-import { ICacheEngine } from './cache.engine';
-import { GameEngineEvents, GameState, GameStates } from './game.types';
+import { CacheEngineInterface } from './cache.engine';
+import { GameEvents, Game, GameStates } from '../models/game';
 
 class GameEngineDocSetterGetter {
 	gameState; //  YMap<GameState>
 	clock;
 
-	constructor(store: ICacheEngine) {
+	constructor(store: CacheEngineInterface) {
 		this.gameState = store.gameState;
 		this.clock = store.clock;
 		this.transact = store.gameState.doc.transact;
@@ -55,15 +55,15 @@ class GameEngineDocSetterGetter {
 	}
 }
 
-export default class GameEngine extends GameEngineDocSetterGetter {
+export class GameEngine extends GameEngineDocSetterGetter {
 	private emitter: EventEmitter = new EventEmitter();
 	timer: NodeJS.Timeout;
 
-	constructor(store: ICacheEngine) {
+	constructor(store: CacheEngineInterface) {
 		super(store);
 
 		this.clock.observe((event) => {
-			this.emit(GameEngineEvents.CLOCK_UPDATE, this.time);
+			this.emit(GameEvents.CLOCK_UPDATE, this.time);
 		});
 
 		this.gameState.observe((event) => {
@@ -80,39 +80,39 @@ export default class GameEngine extends GameEngineDocSetterGetter {
 		console.log(key, this.gameState.get(key));
 
 		if (key === 'currentRound') {
-			this.emit(GameEngineEvents.ROUND_CHANGE, value);
+			this.emit(GameEvents.ROUND_CHANGE, value);
 		}
 
 		if (key === 'state') {
 			switch (value) {
 				case GameStates.WAITING:
-					this.emit(GameEngineEvents.GAME_PAUSED, true);
+					this.emit(GameEvents.GAME_PAUSED, true);
 					break;
 				case GameStates.CHOOSING_WORD:
-					this.emit(GameEngineEvents.CHOOSING_WORD, true);
+					this.emit(GameEvents.CHOOSING_WORD, true);
 					break;
 				case GameStates.STARTED:
-					this.emit(GameEngineEvents.GAME_STARTED, true);
+					this.emit(GameEvents.GAME_STARTED, true);
 					break;
 				case GameStates.STOPPED:
-					this.emit(GameEngineEvents.GAME_STOPPED, true);
+					this.emit(GameEvents.GAME_STOPPED, true);
 					break;
 			}
 		}
 	}
 
 	// emitter wrapper
-	emit(type: GameEngineEvents, ...args: any[]) {
+	emit(type: GameEvents, ...args: any[]) {
 		this.emitter.emit(type, args);
 	}
 
 	// emitter wrapper
-	on(type: GameEngineEvents, listener: (...args: any[]) => void) {
+	on(type: GameEvents, listener: (...args: any[]) => void) {
 		this.emitter.on(type, listener);
 	}
 
 	// emitter wrapper
-	off(type: GameEngineEvents, listener: (...args: any[]) => void) {
+	off(type: GameEvents, listener: (...args: any[]) => void) {
 		this.emitter.off(type, listener);
 	}
 
@@ -129,7 +129,7 @@ export default class GameEngine extends GameEngineDocSetterGetter {
 		return [ 'Haus', 'Katze', 'Maus' ];
 	}
 
-	setupGame(game: GameState) {
+	setupGame(game: Game) {
 		clearInterval(this.timer);
 
 		this.transact(() => {

@@ -1,19 +1,18 @@
 import React, { useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
-import P2PGraph from './p2pGraph/p2pGraph';
 import Input from '../common/input';
-import { ICommunicationService } from '../../service/communication/communication.type';
-import GameEngine from '../../gameEngine/game.engine';
-import { GameStates } from '../../gameEngine/game.types';
-import PlayerEngine from '../../gameEngine/player.engine';
+import P2PGraph from './p2pGraph/p2pGraph';
+import { CommunicationServiceInterface } from '../../service/communication';
+import { GameStates } from '../../models';
+import { GameEngine, PlayerEngine } from '../../gameEngine';
 
-interface MenuInterface {
-	comm: ICommunicationService;
+interface MenuProps {
+	comm: CommunicationServiceInterface;
 	gameEngine: GameEngine;
 	playerEngine: PlayerEngine;
 }
 
-const Menu: React.FC<MenuInterface> = ({ comm, gameEngine: engine, playerEngine }) => {
+const Menu: React.FC<MenuProps> = ({ comm, gameEngine: engine, playerEngine }) => {
 	const setupGame = () => {
 		engine.setupGame({
 			codeWordHash: '',

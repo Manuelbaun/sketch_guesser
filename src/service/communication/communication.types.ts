@@ -23,15 +23,15 @@ export enum ConnectionEventType {
 	CLOSE = 'CLOSE'
 }
 
-export interface IConnectionData {
+export interface ConnectionData {
 	type: ConnectionEventType;
 	peerID: string;
 }
 
-export interface ICommunicationService {
+export interface CommunicationServiceInterface {
 	localID: string;
 	sendDataAll(data: Data): void;
 	sendDataToID(id: string, data: Data);
-	connectionStream: Subject<IConnectionData>;
+	connectionStream: Subject<ConnectionData>;
 	dataStream: Subject<Data>;
 }

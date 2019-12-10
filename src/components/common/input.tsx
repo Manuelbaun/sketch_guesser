@@ -4,18 +4,18 @@ import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 
-interface InputOptions {
+interface Options {
 	placeholder?: string;
 	label?: string;
 	buttonLabel?: string;
 }
 
-interface InputInterface {
+interface InputProps {
 	onSubmit(msg: string): void;
-	options: InputOptions;
+	options: Options;
 }
 
-const Input: React.FC<InputInterface> = ({ onSubmit, options }) => {
+const Input: React.FC<InputProps> = ({ onSubmit, options }) => {
 	const [ text, setText ] = useState('');
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

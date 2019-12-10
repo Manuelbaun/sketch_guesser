@@ -1,40 +1,33 @@
 import { Subscription } from 'rxjs';
-import { ICacheEngine } from './cache.engine';
+
+import { CacheEngineInterface } from './cache.engine';
 import {
-	ICommunicationService,
-	IConnectionData,
+	CommunicationServiceInterface,
+	ConnectionData,
 	ConnectionEventType
-} from '../service/communication/communication.type';
-import { IPlayer } from '../models';
+} from '../service/communication/communication.types';
+import { Player } from '../models';
 
-/**
- * Player YMap
- * @example
- * interface _YMap {
- *	 id: string;
- *	 player: Player;
- * }
- * 
- */
+export class PlayerEngine {
+	private _sub: Subscription;
+	private _localID: string;
+	yMapPlayer;
 
-export default class PlayerEngine {
-	/**
-	 * @type YArray<Message>
-	 */
-	playerDoc;
-	name: string = 'You';
-	sub: Subscription;
-	playerNum: number = 1;
-	localID: string;
+	public get playerNum(): number {
+		return this.yMapPlayer.values.length;
+		// return 2;
+	}
 
-	constructor(cache: ICacheEngine, comm: ICommunicationService) {
-		this.playerDoc = cache.players;
+	public get localID(): string {
+		return this._localID;
+	}
 
-		this.localID = comm.localID;
-		console.log('should not be null', this.localID);
-
-		this.sub = comm.connectionStream.subscribe({
-			next: (data: IConnectionData) => this.onNext(data)
+	constructor(cache: CacheEngineInterface, comm: CommunicationServiceInterface) {
+		this.yMapPlayer = cache.players;
+		this._localID = comm.localID;
+		this.localName = this.localID;
+		this._sub = comm.connectionStream.subscribe({
+			next: (data: ConnectionData) => this.onNext(data)
 		});
 
 		this.addPlayer(this.localID);
@@ -42,41 +35,40 @@ export default class PlayerEngine {
 	}
 
 	unsubscribe() {
-		this.sub.unsubscribe();
+		this._sub.unsubscribe();
 	}
 
-	onNext(data: IConnectionData) {
+	onNext(data: ConnectionData) {
 		if (data.type === ConnectionEventType.OPEN) this.addPlayer(data.peerID);
 		if (data.type === ConnectionEventType.CLOSE) this.removePlayer(data.peerID);
 	}
 
 	addPlayer(peerId: string) {
-		const player = this.playerDoc.get(peerId) as IPlayer;
+		const player = this.yMapPlayer.get(peerId) as Player;
 		if (player) return;
 
-		this.playerDoc.set(peerId, {
+		this.yMapPlayer.set(peerId, {
 			id: peerId,
 			name: peerId,
 			points: 0
 		});
-		this.playerNum++;
 	}
-
+	localName: string;
 	updateLocalName(name: string) {
-		const player = this.playerDoc.get(this.localID) as IPlayer;
-		console.log(name);
+		this.localName = name;
+		const player = this.yMapPlayer.get(this.localID) as Player;
 		this.update(this.localID, {
 			...player,
 			name: name
 		});
 	}
 
-	update(peerId: string, p: IPlayer) {
-		const player = this.playerDoc.get(peerId) as IPlayer;
+	update(peerId: string, p: Player) {
+		const player = this.yMapPlayer.get(peerId) as Player;
 
 		if (!player) return;
 
-		this.playerDoc.set(peerId, {
+		this.yMapPlayer.set(peerId, {
 			id: peerId,
 			name: p.name || peerId,
 			points: p.points || 0
@@ -88,20 +80,19 @@ export default class PlayerEngine {
 	}
 
 	addPoints(peerId: string, points: number) {
-		const player = this.playerDoc.get(peerId) as IPlayer;
+		const player = this.yMapPlayer.get(peerId) as Player;
 		if (!player) return;
 
-		this.playerDoc.set(peerId, {
+		this.yMapPlayer.set(peerId, {
 			...player,
 			points: player.points + points
 		});
 	}
 
 	removePlayer(peerId: string) {
-		const player = this.playerDoc.get(peerId) as IPlayer;
+		const player = this.yMapPlayer.get(peerId) as Player;
 		if (!player) return;
 
-		this.playerDoc.delete(peerId);
-		this.playerNum--;
+		this.yMapPlayer.delete(peerId);
 	}
 }
