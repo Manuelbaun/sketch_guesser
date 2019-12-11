@@ -57,6 +57,8 @@
 		"development": [ "last 1 chrome version", "last 1 firefox version", "last 1 safari version" ]
 	},
 	"devDependencies": {
+		"eslint-plugin-react": "^7.17.0",
+		"husky": "^3.1.0",
 		"tsuml": "0.0.1-alpha.8",
 		"tsviz": "^1.0.11",
 		"typedoc": "^0.15.4"

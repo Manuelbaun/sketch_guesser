@@ -4,7 +4,7 @@ import { CacheEngineInterface } from './cache.engine';
 import { CommunicationServiceInterface } from '../service/communication/communication.types';
 import { Player } from '../models';
 import { EventBusInterface, EventBusType } from '../service/event.bus';
-const Chance = require('chance');
+import Chance from 'chance';
 
 export class PlayerEngine extends Subject<Array<Player>> {
 	private _localID: string;

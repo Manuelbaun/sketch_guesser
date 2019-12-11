@@ -3,19 +3,18 @@ import { Graph } from 'react-d3-graph';
 
 import { GraphNode, GraphLink, Player } from '../../../models';
 import './p2pGraph.css';
-import memoizeOne from 'memoize-one';
 
 import Avatars from '@dicebear/avatars';
 import sprites from '@dicebear/avatars-bottts-sprites';
-let avatars = new Avatars(sprites());
+const avatars = new Avatars(sprites());
 
 const map = new Map<string, string>();
 
 const createAvatar = (name: string) => {
 	if (map.has(name)) return map.get(name);
 	console.log('create new avatar for ', name);
-	let svgString = avatars.create(name);
-	let blob = new Blob([ svgString ], { type: 'image/svg+xml' });
+	const svgString = avatars.create(name);
+	const blob = new Blob([ svgString ], { type: 'image/svg+xml' });
 	const svgAvatar = URL.createObjectURL(blob);
 
 	map.set(name, svgAvatar);
@@ -37,7 +36,7 @@ interface WindowSize {
 	width: number;
 }
 
-const GRAPH_HEIGHT: number = 400;
+const GRAPH_HEIGHT = 400;
 
 const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 	const selfNode = {
