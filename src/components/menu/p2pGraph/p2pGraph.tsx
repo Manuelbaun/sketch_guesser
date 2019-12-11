@@ -3,16 +3,19 @@ import { Graph } from 'react-d3-graph';
 
 import { GraphNode, GraphLink, Player } from '../../../models';
 import './p2pGraph.css';
+import memoizeOne from 'memoize-one';
 
 import Avatars from '@dicebear/avatars';
 import sprites from '@dicebear/avatars-bottts-sprites';
 let avatars = new Avatars(sprites());
 
-function createNewSvgUrl(name) {
+const createAvatar = (name) => {
 	let svgString = avatars.create(name);
 	let blob = new Blob([ svgString ], { type: 'image/svg+xml' });
 	return URL.createObjectURL(blob);
-}
+};
+
+const memoizeAvatar = memoizeOne(createAvatar);
 
 interface P2PGraphProps {
 	players: Array<Player>;
@@ -72,7 +75,7 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 					x: window.innerWidth / 2,
 					y: GRAPH_HEIGHT / 2,
 					points,
-					svg: createNewSvgUrl(name)
+					svg: memoizeAvatar(name)
 				});
 			} else {
 				const x = size.width / 2 + Math.sin(arcSec * counter) * 100;
@@ -86,7 +89,7 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 					x: x,
 					y: y,
 					points,
-					svg: createNewSvgUrl(name)
+					svg: memoizeAvatar(name)
 				});
 
 				linksArr.push({ source: localID, target: id });
