@@ -77,7 +77,7 @@ export class GameEngine extends GameEngineDocSetterGetter {
 
 	handleGameStateChanged(key: string) {
 		const value = this.gameState.get(key);
-		console.log(key, this.gameState.get(key));
+		// console.log(key, this.gameState.get(key));
 
 		if (key === 'currentRound') {
 			this.emit(GameEvents.ROUND_CHANGE, value);

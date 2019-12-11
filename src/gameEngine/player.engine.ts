@@ -30,7 +30,7 @@ export class PlayerEngine extends Subject<Array<Player>> {
 	}
 
 	private _onPlayerConnection = (event) => {
-		console.log(event);
+		// console.log(event);
 		if (event.connected) this.addPlayer(event.peerId);
 		else this.removePlayer(event.peerId);
 	};
@@ -39,13 +39,12 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		super();
 		this.playersYMap = cache.players;
 		this._localID = comm.localID;
-		this.localName = this.localID;
+		this.localName = chance.name();
 
 		eventBus.on(EventBusType.CONNECTION, this._onPlayerConnection);
 		console.log('PlayerEngine init');
 
 		this.playersYMap.observe(() => {
-			console.log('Send All Players update', this.getAllPlayers());
 			this.next(this.getAllPlayers());
 		});
 
@@ -55,9 +54,10 @@ export class PlayerEngine extends Subject<Array<Player>> {
 	addPlayer(peerId: string) {
 		const player = this.playersYMap.get(peerId) as Player;
 		if (player) return;
+
 		const p = {
 			id: peerId,
-			name: chance.name(),
+			name: this.localName,
 			points: 0
 		};
 		this.playersYMap.set(peerId, p);
@@ -72,14 +72,14 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		});
 	}
 
-	update(peerId: string, p: Player) {
+	private update(peerId: string, p: Player) {
 		const player = this.playersYMap.get(peerId) as Player;
 
 		if (!player) return;
 
 		this.playersYMap.set(peerId, {
 			id: peerId,
-			name: p.name || peerId,
+			name: p.name,
 			points: p.points || 0
 		});
 	}

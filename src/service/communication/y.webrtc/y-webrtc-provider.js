@@ -1,7 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 function _interopDefault(ex) {
 	return ex && typeof ex === 'object' && 'default' in ex ? ex['default'] : ex;
 }
@@ -551,8 +549,4 @@ export class WebrtcProvider extends observable_js.Observable {
 	}
 }
 
-exports.Room = Room;
-exports.SignalingConn = SignalingConn;
-exports.WebrtcConn = WebrtcConn;
-exports.WebrtcProvider = WebrtcProvider;
 //# sourceMappingURL=y-webrtc.js.map

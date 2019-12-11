@@ -8,107 +8,132 @@ import Avatars from '@dicebear/avatars';
 import sprites from '@dicebear/avatars-bottts-sprites';
 let avatars = new Avatars(sprites());
 
+function createNewSvgUrl(name) {
+	let svgString = avatars.create(name);
+	let blob = new Blob([ svgString ], { type: 'image/svg+xml' });
+	return URL.createObjectURL(blob);
+}
+
 interface P2PGraphProps {
 	players: Array<Player>;
 	localID: string;
 }
 
-const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players }) => {
+interface GraphData {
+	nodes: Array<GraphNode>;
+	links: Array<GraphLink>;
+}
+
+interface WindowSize {
+	height: number;
+	width: number;
+}
+
+const GRAPH_HEIGHT: number = 400;
+
+const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 	const selfNode = {
 		id: localID,
 		name: 'You',
 		color: '#e6194B',
 		x: window.innerWidth / 2,
-		y: window.innerWidth / 4,
+		y: GRAPH_HEIGHT / 2,
 		points: 0
 	};
 
-	const [ nodes, setNodes ] = useState<Array<GraphNode>>([ selfNode ]);
-	const [ links, setLinks ] = useState<Array<GraphLink>>([]);
+	const [ graphData, setGraphData ] = useState<GraphData>({
+		nodes: [ selfNode ],
+		links: []
+	});
 
-	const [ width, setWidth ] = useState(window.innerWidth - 50);
-	const [ height, setHeight ] = useState(window.innerWidth / 2);
+	const [ size, setSize ] = useState<WindowSize>({
+		width: window.innerWidth - 50,
+		height: GRAPH_HEIGHT / 2
+	});
 
-	const updateNodes = useCallback(
-		() => {
-			const nodesArr: Array<GraphNode> = [];
-			const linksArr: Array<GraphLink> = [];
+	const updateNodes = useCallback((players) => {
+		const nodesArr: Array<GraphNode> = [];
+		const linksArr: Array<GraphLink> = [];
 
-			const arcSec = 2 * Math.PI / (players.length || 1);
-			let counter = 1;
-			players.forEach((player: Player) => {
-				const { name: _name, id, points } = player;
-				const self = localID === player.id;
+		const arcSec = 2 * Math.PI / (players.length || 1);
+		let counter = 1;
 
-				const name = id === localID ? _name + ' (You)' : _name;
+		players.forEach((player: Player) => {
+			const { name: _name, id, points } = player;
+			const self = localID === player.id;
 
-				let svgString = avatars.create(_name);
-				let blob = new Blob([ svgString ], { type: 'image/svg+xml' });
-				let svg = URL.createObjectURL(blob);
+			const name = id === localID ? _name + ' (You)' : _name;
 
-				if (self) {
-					nodesArr.push({
-						id: localID,
-						color: '#e6194B',
-						name: name,
-						x: window.innerWidth / 2,
-						y: window.innerWidth / 4,
-						points,
-						svg
-					});
-				} else {
-					const x = width / 2 + Math.sin(arcSec * counter) * 100;
-					const y = height / 2 + Math.cos(arcSec * counter) * 100;
+			if (self) {
+				nodesArr.push({
+					id: localID,
+					color: '#e6194B',
+					name: name,
+					x: window.innerWidth / 2,
+					y: GRAPH_HEIGHT / 2,
+					points,
+					svg: createNewSvgUrl(name)
+				});
+			} else {
+				const x = size.width / 2 + Math.sin(arcSec * counter) * 100;
+				const y = GRAPH_HEIGHT / 2 + Math.cos(arcSec * counter) * 100;
 
-					nodesArr.push({
-						id: id,
-						name: name,
-						color: '#911eb4',
-						size: 450,
-						x: x,
-						y: y,
-						points,
-						svg
-					});
+				nodesArr.push({
+					id: id,
+					name: name,
+					color: '#911eb4',
+					size: 450,
+					x: x,
+					y: y,
+					points,
+					svg: createNewSvgUrl(name)
+				});
 
-					counter++;
+				linksArr.push({ source: localID, target: id });
+				counter++;
+			}
+		});
 
-					linksArr.push({ source: localID, target: id });
-				}
-			});
-
-			setNodes(nodesArr);
-			setLinks(linksArr);
-		},
-		[ players ]
-	);
-
-	// triggers only when component is created
-	useEffect(() => {
-		const updateResize = () => {
-			setWidth(window.innerWidth - 50);
-			setHeight(window.innerWidth / 2);
-			updateNodes();
-		};
-		window.addEventListener('resize', updateResize);
-
-		return () => {
-			window.removeEventListener('resize', updateResize);
-		};
+		setGraphData({
+			nodes: nodesArr,
+			links: linksArr
+		});
 	}, []);
 
 	// triggers, when players changed
 	useEffect(
 		() => {
-			console.log('UseEffect has been called');
-			updateNodes();
+			// console.log('UseEffect PLAYER changed has been called');
+			updateNodes(p);
 		},
-		[ players ]
+		[ p ]
+	);
+
+	// triggers only when component is created
+	useEffect(
+		() => {
+			const updateResize = () => {
+				if (window.innerWidth < 900) {
+					setSize({
+						height: GRAPH_HEIGHT / 2,
+						width: window.innerWidth - 50
+					});
+					updateNodes(p);
+				}
+			};
+
+			window.addEventListener('resize', updateResize);
+
+			return () => {
+				window.removeEventListener('resize', updateResize);
+			};
+		},
+		[ p ]
 	);
 
 	const conf = {
-		height: height,
-		width: width,
+		height: GRAPH_HEIGHT,
+		width: size.width,
 		automaticRearrangeAfterDropNode: true,
 		collapsible: false,
 		directed: false,
@@ -167,16 +192,11 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players }) => {
 		}
 	};
 
-	if (nodes.length === 0) return <div className="graph-view" />;
-
 	return (
 		<div className="graph-view">
 			<Graph
 				id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
-				data={{
-					nodes,
-					links
-				}}
+				data={graphData}
 				config={conf}
 				// onClickNode={onClickNode}
 				// onRightClickNode={onRightClickNode}

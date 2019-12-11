@@ -1,8 +1,9 @@
-import { Subject, NextObserver } from 'rxjs';
-import { WebrtcProvider } from './y.webrtc/y-webrtc';
+import { Subject } from 'rxjs';
+
 import { Data, ConnectionData, CommunicationServiceInterface } from './communication.types';
 import { CacheEngineInterface } from '../../gameEngine';
 import { EventBusInterface } from '../event.bus';
+import { WebrtcProvider } from './y.webrtc/y-webrtc-provider';
 
 // localStorage.log = 'y-webrtc'
 localStorage.log = false;
@@ -14,7 +15,7 @@ export class CommunicationServiceImpl implements CommunicationServiceInterface {
 		const roomName = 'sketchguessr-' + window.location.pathname;
 		const password = null;
 
-		console.log(roomName);
+		// console.log(roomName);
 
 		this.provider = new WebrtcProvider(roomName, cache.yDoc, {
 			// signaling: [ 'ws://localhost:4444' ],
@@ -22,7 +23,7 @@ export class CommunicationServiceImpl implements CommunicationServiceInterface {
 		});
 
 		this.provider.on('synced', (synced) => {
-			console.log('synced!', synced);
+			// console.log('synced!', synced);
 		});
 
 		this.provider.on('connected', (remotePeerId) => {
@@ -46,7 +47,7 @@ export class CommunicationServiceImpl implements CommunicationServiceInterface {
 			this.localID = 'local';
 			// TODO: used a hack around in webRTC to esablish an room...
 			// getting this ID, it needs to be different
-			console.log(this.provider.removeMeLaterID);
+			// console.log(this.provider.removeMeLaterID);
 			this.localID = this.provider.removeMeLaterID || 'local';
 		} catch (err) {
 			console.error(err);
