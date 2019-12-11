@@ -9,13 +9,18 @@ import Avatars from '@dicebear/avatars';
 import sprites from '@dicebear/avatars-bottts-sprites';
 let avatars = new Avatars(sprites());
 
-const createAvatar = (name) => {
+const map = new Map<string, string>();
+
+const createAvatar = (name: string) => {
+	if (map.has(name)) return map.get(name);
+	console.log('create new avatar for ', name);
 	let svgString = avatars.create(name);
 	let blob = new Blob([ svgString ], { type: 'image/svg+xml' });
-	return URL.createObjectURL(blob);
-};
+	const svgAvatar = URL.createObjectURL(blob);
 
-const memoizeAvatar = memoizeOne(createAvatar);
+	map.set(name, svgAvatar);
+	return map.get(name);
+};
 
 interface P2PGraphProps {
 	players: Array<Player>;
@@ -61,21 +66,20 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 		const arcSec = 2 * Math.PI / (players.length || 1);
 		let counter = 1;
 
+		console.log(players);
 		players.forEach((player: Player) => {
-			const { name: _name, id, points } = player;
+			const { name, id, points } = player;
 			const self = localID === player.id;
-
-			const name = id === localID ? _name + ' (You)' : _name;
 
 			if (self) {
 				nodesArr.push({
 					id: localID,
 					color: '#e6194B',
-					name: name,
+					name: name + ' (You)',
 					x: window.innerWidth / 2,
 					y: GRAPH_HEIGHT / 2,
 					points,
-					svg: memoizeAvatar(name)
+					svg: createAvatar(name)
 				});
 			} else {
 				const x = size.width / 2 + Math.sin(arcSec * counter) * 100;
@@ -89,7 +93,7 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 					x: x,
 					y: y,
 					points,
-					svg: memoizeAvatar(name)
+					svg: createAvatar(name)
 				});
 
 				linksArr.push({ source: localID, target: id });

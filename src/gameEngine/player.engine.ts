@@ -4,8 +4,7 @@ import { CacheEngineInterface } from './cache.engine';
 import { CommunicationServiceInterface } from '../service/communication/communication.types';
 import { Player } from '../models';
 import { EventBusInterface, EventBusType } from '../service/event.bus';
-import { YMap } from './yjs.types';
-const chance = require('chance').Chance();
+const Chance = require('chance');
 
 export class PlayerEngine extends Subject<Array<Player>> {
 	private _localID: string;
@@ -31,14 +30,16 @@ export class PlayerEngine extends Subject<Array<Player>> {
 
 	private _onPlayerConnection = (event) => {
 		// console.log(event);
-		if (event.connected) this.addPlayer(event.peerId);
-		else this.removePlayer(event.peerId);
+		if (!event.connected) this.removePlayer(event.peerId);
+		//this.addPlayer(event.peerId);
 	};
 
 	constructor(cache: CacheEngineInterface, comm: CommunicationServiceInterface, eventBus: EventBusInterface) {
 		super();
 		this.playersYMap = cache.players;
 		this._localID = comm.localID;
+
+		const chance = Chance(this._localID);
 		this.localName = chance.name();
 
 		eventBus.on(EventBusType.CONNECTION, this._onPlayerConnection);
@@ -48,16 +49,16 @@ export class PlayerEngine extends Subject<Array<Player>> {
 			this.next(this.getAllPlayers());
 		});
 
-		this.addPlayer(this.localID);
+		this.addPlayer(this.localID, this.localName);
 	}
 
-	addPlayer(peerId: string) {
+	addPlayer(peerId: string, name: string) {
 		const player = this.playersYMap.get(peerId) as Player;
 		if (player) return;
 
 		const p = {
 			id: peerId,
-			name: this.localName,
+			name: name,
 			points: 0
 		};
 		this.playersYMap.set(peerId, p);
