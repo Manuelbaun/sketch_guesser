@@ -5,6 +5,8 @@ export interface GraphNode {
 	size?: number;
 	x?: number;
 	y?: number;
+	points: number;
+	svg?: string;
 }
 
 export interface GraphLink {

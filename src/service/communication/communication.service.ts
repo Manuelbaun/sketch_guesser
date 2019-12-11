@@ -1,25 +1,60 @@
 import { Subject, NextObserver } from 'rxjs';
-import PeerManager from './peer_manager';
+import { WebrtcProvider } from './y.webrtc/y-webrtc';
 import { Data, ConnectionData, CommunicationServiceInterface } from './communication.types';
+import { CacheEngineInterface } from '../../gameEngine';
+import { EventBusInterface } from '../event.bus';
+
+// localStorage.log = 'y-webrtc'
+localStorage.log = false;
 
 export class CommunicationServiceImpl implements CommunicationServiceInterface {
-	constructor() {
-		const options = {
-			debug: 2,
-			host: 'sketchguessr.herokuapp.com',
-			port: 27828
-		};
-		this.peerManager = new PeerManager(options);
+	private provider;
 
-		this.localID = this.peerManager.id;
+	constructor(cache: CacheEngineInterface, eventBus: EventBusInterface) {
+		const roomName = 'sketchguessr-' + window.location.pathname;
+		const password = null;
 
-		this.peerManager.onData = (data) => this._dataStream.next(data);
-		this.peerManager.onConnection = (data) => this._connectionStream.next(data);
+		console.log(roomName);
+
+		this.provider = new WebrtcProvider(roomName, cache.yDoc, {
+			// signaling: [ 'ws://localhost:4444' ],
+			password
+		});
+
+		this.provider.on('synced', (synced) => {
+			console.log('synced!', synced);
+		});
+
+		this.provider.on('connected', (remotePeerId) => {
+			eventBus.onPlayerConnected(remotePeerId);
+		});
+
+		// cleanup
+		this.provider.on('closed', (remotePeerId) => {
+			eventBus.onPlayerDisconnected(remotePeerId);
+		});
+
+		// some cleanup
+		window.addEventListener('beforeunload', (e) => {
+			this.provider.destroy();
+
+			e.preventDefault();
+			e.returnValue = '';
+		});
+
+		try {
+			this.localID = 'local';
+			// TODO: used a hack around in webRTC to esablish an room...
+			// getting this ID, it needs to be different
+			console.log(this.provider.removeMeLaterID);
+			this.localID = this.provider.removeMeLaterID || 'local';
+		} catch (err) {
+			console.error(err);
+		}
 	}
 
-	private provider;
 	localID: string;
-	private peerManager: PeerManager;
+	// private peerManager: PeerManager;
 	private _connectionStream: Subject<ConnectionData> = new Subject();
 	public get connectionStream(): Subject<ConnectionData> {
 		return this._connectionStream;
@@ -31,18 +66,10 @@ export class CommunicationServiceImpl implements CommunicationServiceInterface {
 	}
 
 	sendDataAll(data: Data) {
-		this.peerManager.send(data);
+		// this.peerManager.send(data);
 	}
 
 	sendDataToID(id: string, data: Data) {
-		this.peerManager.sendDataToID(id, data);
-	}
-
-	subscribeToDataStream(observer: NextObserver<Data>) {
-		return this.dataStream.subscribe(observer);
-	}
-
-	subscribeToConnectionStream(observer: NextObserver<ConnectionData>) {
-		return this.connectionStream.subscribe(observer);
+		// this.peerManager.sendDataToID(id, data);
 	}
 }

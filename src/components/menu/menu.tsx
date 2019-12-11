@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Input from '../common/input';
 import P2PGraph from './p2pGraph/p2pGraph';
 import { CommunicationServiceInterface } from '../../service/communication';
-import { GameStates } from '../../models';
+import { GameStates, Player } from '../../models';
 import { GameEngine, PlayerEngine } from '../../gameEngine';
 
 interface MenuProps {
@@ -25,6 +25,8 @@ const Menu: React.FC<MenuProps> = ({ comm, gameEngine: engine, playerEngine }) =
 
 	useEffect(() => setupGame(), []);
 
+	const [ players, setPlayers ] = useState<Array<Player>>(playerEngine.getAllPlayers());
+
 	const handleSubmit = (msg: string) => {
 		playerEngine.updateLocalName(msg);
 	};
@@ -38,6 +40,16 @@ const Menu: React.FC<MenuProps> = ({ comm, gameEngine: engine, playerEngine }) =
 	const stopGame = () => engine.stopGame();
 	const nextRound = () => engine.nextRound();
 
+	useEffect(() => {
+		const sub = playerEngine.subscribe((players) => {
+			setPlayers(players);
+		});
+
+		return () => {
+			sub.unsubscribe();
+		};
+	});
+
 	return (
 		<div className="menu">
 			<Input
@@ -48,7 +60,7 @@ const Menu: React.FC<MenuProps> = ({ comm, gameEngine: engine, playerEngine }) =
 			<Button onClick={stopGame}> Stop </Button>
 			<Button onClick={setupGame}> Reset </Button>
 			<Button onClick={nextRound}> Next Round </Button>
-			<P2PGraph engine={playerEngine} />
+			<P2PGraph players={players} localID={playerEngine.localID} />
 		</div>
 	);
 };

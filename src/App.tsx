@@ -11,14 +11,17 @@ import { GameEvents } from './models';
 
 import './App.css';
 import { CommunicationServiceImpl } from './service/communication';
+import { EventBus } from './service/event.bus';
 
-const commService = new CommunicationServiceImpl();
+const eventBus = new EventBus();
+
 // setup the cache via yjs and creates the doc.
-const cache = new CacheEngine(commService);
+const cache = new CacheEngine();
 // establish connection between peers
+const commService = new CommunicationServiceImpl(cache, eventBus);
 
 // setup the "engines" need proper names and refactor
-const playerEngine = new PlayerEngine(cache, commService);
+const playerEngine = new PlayerEngine(cache, commService, eventBus);
 const gameEngine = new GameEngine(cache);
 const drawingEngine = new DrawEngine(cache);
 const messageEngine = new MessageEngine(cache, playerEngine);

@@ -1,7 +1,7 @@
 import sha256 from 'sha256';
 import { EventEmitter } from 'events';
 import { CacheEngineInterface } from './cache.engine';
-import { GameEvents, Game, GameStates } from '../models/game';
+import { Game, GameStates, GameEvents } from '../models';
 
 class GameEngineDocSetterGetter {
 	gameState; //  YMap<GameState>

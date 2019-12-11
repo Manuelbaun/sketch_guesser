@@ -32,6 +32,4 @@ export interface CommunicationServiceInterface {
 	localID: string;
 	sendDataAll(data: Data): void;
 	sendDataToID(id: string, data: Data);
-	connectionStream: Subject<ConnectionData>;
-	dataStream: Subject<Data>;
 }

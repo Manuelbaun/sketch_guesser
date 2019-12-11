@@ -1,62 +1,71 @@
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { CacheEngineInterface } from './cache.engine';
-import {
-	CommunicationServiceInterface,
-	ConnectionData,
-	ConnectionEventType
-} from '../service/communication/communication.types';
+import { CommunicationServiceInterface } from '../service/communication/communication.types';
 import { Player } from '../models';
+import { EventBusInterface, EventBusType } from '../service/event.bus';
+import { YMap } from './yjs.types';
+const chance = require('chance').Chance();
 
-export class PlayerEngine {
-	private _sub: Subscription;
+export class PlayerEngine extends Subject<Array<Player>> {
 	private _localID: string;
-	yMapPlayer;
+	private playersYMap;
+	localName: string;
 
 	public get playerNum(): number {
-		return this.yMapPlayer.values.length;
-		// return 2;
+		return this.playersYMap.values.length;
 	}
 
 	public get localID(): string {
 		return this._localID;
 	}
 
-	constructor(cache: CacheEngineInterface, comm: CommunicationServiceInterface) {
-		this.yMapPlayer = cache.players;
+	getAllPlayers(): Array<Player> {
+		const allPlayers = this.playersYMap.values();
+		return Array.from(allPlayers);
+	}
+
+	playerExists(peerId: string) {
+		return this.playersYMap.has(peerId);
+	}
+
+	private _onPlayerConnection = (event) => {
+		console.log(event);
+		if (event.connected) this.addPlayer(event.peerId);
+		else this.removePlayer(event.peerId);
+	};
+
+	constructor(cache: CacheEngineInterface, comm: CommunicationServiceInterface, eventBus: EventBusInterface) {
+		super();
+		this.playersYMap = cache.players;
 		this._localID = comm.localID;
 		this.localName = this.localID;
-		this._sub = comm.connectionStream.subscribe({
-			next: (data: ConnectionData) => this.onNext(data)
+
+		eventBus.on(EventBusType.CONNECTION, this._onPlayerConnection);
+		console.log('PlayerEngine init');
+
+		this.playersYMap.observe(() => {
+			console.log('Send All Players update', this.getAllPlayers());
+			this.next(this.getAllPlayers());
 		});
 
 		this.addPlayer(this.localID);
-		console.log('PlayerEngine init');
-	}
-
-	unsubscribe() {
-		this._sub.unsubscribe();
-	}
-
-	onNext(data: ConnectionData) {
-		if (data.type === ConnectionEventType.OPEN) this.addPlayer(data.peerID);
-		if (data.type === ConnectionEventType.CLOSE) this.removePlayer(data.peerID);
 	}
 
 	addPlayer(peerId: string) {
-		const player = this.yMapPlayer.get(peerId) as Player;
+		const player = this.playersYMap.get(peerId) as Player;
 		if (player) return;
-
-		this.yMapPlayer.set(peerId, {
+		const p = {
 			id: peerId,
-			name: peerId,
+			name: chance.name(),
 			points: 0
-		});
+		};
+		this.playersYMap.set(peerId, p);
 	}
-	localName: string;
+
 	updateLocalName(name: string) {
 		this.localName = name;
-		const player = this.yMapPlayer.get(this.localID) as Player;
+		const player = this.playersYMap.get(this.localID) as Player;
 		this.update(this.localID, {
 			...player,
 			name: name
@@ -64,11 +73,11 @@ export class PlayerEngine {
 	}
 
 	update(peerId: string, p: Player) {
-		const player = this.yMapPlayer.get(peerId) as Player;
+		const player = this.playersYMap.get(peerId) as Player;
 
 		if (!player) return;
 
-		this.yMapPlayer.set(peerId, {
+		this.playersYMap.set(peerId, {
 			id: peerId,
 			name: p.name || peerId,
 			points: p.points || 0
@@ -80,19 +89,19 @@ export class PlayerEngine {
 	}
 
 	addPoints(peerId: string, points: number) {
-		const player = this.yMapPlayer.get(peerId) as Player;
+		const player = this.playersYMap.get(peerId) as Player;
 		if (!player) return;
 
-		this.yMapPlayer.set(peerId, {
+		this.playersYMap.set(peerId, {
 			...player,
 			points: player.points + points
 		});
 	}
 
 	removePlayer(peerId: string) {
-		const player = this.yMapPlayer.get(peerId) as Player;
+		const player = this.playersYMap.get(peerId) as Player;
 		if (!player) return;
 
-		this.yMapPlayer.delete(peerId);
+		this.playersYMap.delete(peerId);
 	}
 }
