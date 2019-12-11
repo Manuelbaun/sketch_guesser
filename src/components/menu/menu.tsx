@@ -52,14 +52,14 @@ const Menu: React.FC<MenuProps> = ({ comm, gameEngine: engine, playerEngine }) =
 
 	return (
 		<div className="menu">
-			<Input
-				onSubmit={(msg) => handleSubmit(msg)}
-				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}
-			/>
 			<Button onClick={startGame}> START </Button>
 			<Button onClick={stopGame}> Stop </Button>
 			<Button onClick={setupGame}> Reset </Button>
 			<Button onClick={nextRound}> Next Round </Button>
+			<Input
+				onSubmit={(msg) => handleSubmit(msg)}
+				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}
+			/>
 			<P2PGraph players={players} localID={playerEngine.localID} />
 		</div>
 	);

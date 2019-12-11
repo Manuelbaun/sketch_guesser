@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useLayoutEffect, useRef } from 'react';
 import { Graph } from 'react-d3-graph';
 
 import { GraphNode, GraphLink, Player } from '../../../models';
@@ -43,7 +43,7 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 		id: localID,
 		name: 'You',
 		color: '#e6194B',
-		x: window.innerWidth / 2,
+		x: window.innerWidth / 4,
 		y: GRAPH_HEIGHT / 2,
 		points: 0
 	};
@@ -114,6 +114,16 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 		},
 		[ p ]
 	);
+	const targetRef = useRef(null);
+
+	useLayoutEffect(() => {
+		// console.log(targetRef.current.offsetWidth);
+		setSize({
+			height: GRAPH_HEIGHT / 2,
+			// @ts-ignore
+			width: targetRef.current.offsetWidth
+		});
+	}, []);
 
 	// triggers only when component is created
 	useEffect(
@@ -122,7 +132,9 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 				if (window.innerWidth < 900) {
 					setSize({
 						height: GRAPH_HEIGHT / 2,
-						width: window.innerWidth - 50
+						// @ts-ignore
+
+						width: targetRef.current.offsetWidth
 					});
 					updateNodes(p);
 				}
@@ -199,7 +211,7 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 	};
 
 	return (
-		<div className="graph-view">
+		<div className="graph-view" ref={targetRef}>
 			<Graph
 				id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
 				data={graphData}

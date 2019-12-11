@@ -36,8 +36,9 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 	const [ color, setColor ] = useState(colorPalette[0]);
 
 	const startPaint = useCallback(
-		({ clientX, clientY }) => {
-			const origin = calculateCoordinates(clientX, clientY);
+		(event) => {
+			const { offsetX: x, offsetY: y } = event;
+			const origin = calculateCoordinates(x, y);
 			if (origin) {
 				setIsPainting(true);
 				drawingEngine.addNewPath(origin, color);
@@ -48,8 +49,11 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 
 	const startPaintTouch = useCallback(
 		(event) => {
-			const { clientX, clientY } = event.touches[0];
-			const origin = calculateCoordinates(clientX, clientY);
+			// const { clientX, clientY } = event.touches[0];
+			const { clientX: x, clientY: y } = event.touches[0];
+			console.log(event.touches[0], event.touches[0]);
+			const origin = calculateTouchCoordinates(x, y);
+			// console.log(origin);
 			if (origin) {
 				setIsPainting(true);
 				drawingEngine.addNewPath(origin, color);
@@ -60,9 +64,12 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 
 	const paintTouch = useCallback(
 		(event) => {
-			const { clientX, clientY } = event.touches[0];
+			// const { clientX, clientY } = event.touches[0];
+			const { clientX: x, clientY: y } = event.touches[0];
+			console.log(x, y, event.touches[0]);
+
 			if (isPainting) {
-				const newCoordinates = calculateCoordinates(clientX, clientY);
+				const newCoordinates = calculateTouchCoordinates(x, y);
 				if (newCoordinates) {
 					drawingEngine.appendCoordinates(newCoordinates);
 				}
@@ -72,9 +79,11 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 	);
 
 	const paint = useCallback(
-		({ clientX, clientY }) => {
+		(event) => {
+			const { offsetX: x, offsetY: y } = event;
 			if (isPainting) {
-				const newCoordinates = calculateCoordinates(clientX, clientY);
+				const newCoordinates = calculateCoordinates(x, y);
+
 				if (newCoordinates) {
 					drawingEngine.appendCoordinates(newCoordinates);
 				}
@@ -196,7 +205,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 
 			context.beginPath();
 			context.moveTo(xStart, yStart);
-			// console.log(path.toArray());
+
 			path.forEach((c: Coordinate) => {
 				const x = c.x * canvas.width;
 				const y = c.y * canvas.height;
@@ -216,9 +225,23 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 		const canvasRect = canvas.getBoundingClientRect();
 
 		return {
-			x: (x - canvas.offsetLeft) / canvasRect.width,
-			y: (y - canvas.offsetTop) / canvasRect.height
+			x: x / canvasRect.width,
+			y: y / canvasRect.height
 		};
+	};
+
+	const calculateTouchCoordinates = (x: number, y: number): Coordinate | undefined => {
+		if (!canvasRef.current) return;
+
+		const canvas: HTMLCanvasElement = canvasRef.current;
+		const canvasRect = canvas.getBoundingClientRect();
+		const cor = {
+			x: (x - canvasRect.left) / canvasRect.width,
+			y: (y - canvasRect.top) / canvasRect.height
+		};
+		console.log(canvasRect, cor);
+
+		return cor;
 	};
 
 	return (
@@ -261,7 +284,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 };
 
 DrawingArea.defaultProps = {
-	width: 2000,
+	width: 1000,
 	height: 1000
 };
 

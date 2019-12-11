@@ -43,15 +43,23 @@ const App: React.FC = () => {
 	}, []);
 
 	return (
-		<React.Fragment>
-			<Menu gameEngine={gameEngine} comm={commService} playerEngine={playerEngine} />
-			<div className="App">
-				{/* Hack around */}
-				{gameStarted && <CountDown gameEngine={gameEngine} />}
-				<DrawingArea drawingEngine={drawingEngine} />
-				<MessageBox messageEngine={messageEngine} />
+		<div className="App">
+			<div className="App-Container">
+				<div className="App-Header" />
+				<div className="App-Setting">
+					<Menu gameEngine={gameEngine} comm={commService} playerEngine={playerEngine} />
+				</div>
+
+				<div className="App-Message">
+					{gameStarted && <CountDown gameEngine={gameEngine} />}
+					<MessageBox messageEngine={messageEngine} />
+				</div>
+
+				<div className="App-Drawing">
+					<DrawingArea drawingEngine={drawingEngine} />
+				</div>
 			</div>
-		</React.Fragment>
+		</div>
 	);
 };
 
