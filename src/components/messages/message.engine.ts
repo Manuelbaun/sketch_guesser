@@ -1,7 +1,7 @@
 import { Subject, Subscription } from 'rxjs';
 import { CacheStoreInterface } from '../../service/storage/cache';
 import { Message } from '../../models/message';
-import { PlayerEngine } from '../../gameEngine';
+import { PersistentStore } from '../../service/storage';
 
 /**
  * TODO: Is this just an Manager?
@@ -11,31 +11,29 @@ export default class MessageEngine extends Subject<Message[]> {
 	/**
 	 * @type YArray<Message>
 	 */
-	messageState;
+	messageStore;
 	sub: Subscription;
-	private engine: PlayerEngine;
 
 	public get localName(): string {
-		return this.engine.localName;
+		return PersistentStore.localName;
 	}
 
 	public get localID(): string {
-		return this.engine.localID;
+		return PersistentStore.localID;
 	}
-	constructor(store: CacheStoreInterface, engine: PlayerEngine) {
+	constructor(store: CacheStoreInterface) {
 		super();
 
-		this.messageState = store.messages;
-		this.engine = engine;
-		this.messageState.observe((event) => {
-			this.next(this.messageState.toArray().reverse());
+		this.messageStore = store.messages;
+		this.messageStore.observe((event) => {
+			this.next(this.messageStore.toArray().reverse());
 		});
 
 		console.log('MessageEngine init');
 	}
 
 	sendMessage(msg: string) {
-		this.messageState.push([
+		this.messageStore.push([
 			{
 				id: this.localID,
 				message: msg,
@@ -44,10 +42,10 @@ export default class MessageEngine extends Subject<Message[]> {
 			}
 		]);
 
-		this.next(this.messageState.toArray().reverse());
+		this.next(this.messageStore.toArray().reverse());
 	}
 
 	getMessages(): Message[] {
-		return this.messageState.toArray().reverse();
+		return this.messageStore.toArray().reverse();
 	}
 }

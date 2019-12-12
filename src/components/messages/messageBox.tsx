@@ -6,9 +6,9 @@ import MessageEngine from './message.engine';
 import Input from '../common/input';
 import './message.css';
 
-interface MessageBoxProps {
+type MessageBoxProps = {
 	messageEngine: MessageEngine;
-}
+};
 
 // - get local user to check
 const MessageBox: React.FC<MessageBoxProps> = ({ messageEngine }) => {

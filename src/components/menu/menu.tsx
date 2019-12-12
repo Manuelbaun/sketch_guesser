@@ -2,23 +2,23 @@ import React, { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Input from '../common/input';
 import P2PGraph from './p2pGraph/p2pGraph';
-import { CommunicationServiceInterface } from '../../service/communication';
+
 import { GameStates, Player } from '../../models';
 import { GameEngine, PlayerEngine } from '../../gameEngine';
+import { PersistentStore } from '../../service/storage';
 
-interface MenuProps {
-	comm: CommunicationServiceInterface;
+type MenuProps = {
 	gameEngine: GameEngine;
 	playerEngine: PlayerEngine;
-}
+};
 
-const Menu: React.FC<MenuProps> = ({ comm, gameEngine: engine, playerEngine }) => {
+const Menu: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 	const setupGame = () => {
-		engine.setupGame({
+		gameEngine.setupGame({
 			codeWordHash: '',
 			currentRound: 1,
 			rounds: 3,
-			currentMasterID: comm.localID,
+			currentMasterID: PersistentStore.localID,
 			state: GameStates.WAITING
 		});
 	};
@@ -32,13 +32,13 @@ const Menu: React.FC<MenuProps> = ({ comm, gameEngine: engine, playerEngine }) =
 	};
 
 	const startGame = () => {
-		engine.guessWord = 'test';
+		gameEngine.guessWord = 'test';
 
-		engine.startGame();
+		gameEngine.startGame();
 	};
 
-	const stopGame = () => engine.stopGame();
-	const nextRound = () => engine.nextRound();
+	const stopGame = () => gameEngine.stopGame();
+	const nextRound = () => gameEngine.nextRound();
 
 	useEffect(() => {
 		const sub = playerEngine.subscribe((players) => {

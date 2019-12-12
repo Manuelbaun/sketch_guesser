@@ -4,15 +4,15 @@ import MessageBox from './components/messages/messageBox';
 import CountDown from './components/countDown/countDown';
 import MessageEngine from './components/messages/message.engine';
 import DrawingManager from './components/drawingArea/drawManager';
-import { GameEngine, PlayerEngine } from './gameEngine';
 import Menu from './components/menu/menu';
 
+import { GameEngine, PlayerEngine } from './gameEngine';
 import { GameEvents } from './models';
+import { CacheStore, PersistentStore, CommunicationServiceImpl, EventBus } from './service';
 
 import './App.css';
-import { CommunicationServiceImpl } from './service/communication';
-import { EventBus } from './service/event.bus';
-import { CacheStore, PersistentStore } from './service/storage';
+
+// TODO: hen tap updates, no reconnect???
 
 // Typedef
 type FunctionVoidCallback = () => void;
@@ -22,22 +22,35 @@ const eventBus = new EventBus();
 
 // setup the cache via yjs and creates the doc.
 const cache = new CacheStore();
-const persistance = new PersistentStore();
+
 // establish connection between peers
 const commService = new CommunicationServiceImpl(cache, eventBus);
 
 // setup the "engines" need proper names and refactor
-const playerEngine = new PlayerEngine(cache, commService, eventBus);
+const playerEngine = new PlayerEngine(cache, eventBus);
 const gameEngine = new GameEngine(cache);
 const drawingEngine = new DrawingManager(cache);
-const messageEngine = new MessageEngine(cache, playerEngine);
+const messageEngine = new MessageEngine(cache);
+
+const providerValue = {
+	localID: PersistentStore.localID,
+	cache,
+	playerEngine,
+	gameEngine,
+	drawingEngine,
+	messageEngine
+};
+
+// needs to use this => better
+const AppContext = React.createContext(providerValue);
 
 const App: React.FC = () => {
 	const [ gameStarted, setGameStarted ] = useState(false);
-	const startGame: FunctionVoidCallback = () => setGameStarted(true);
-	const stopGame: FunctionVoidCallback = () => setGameStarted(false);
 
 	useEffect(() => {
+		const startGame: FunctionVoidCallback = () => setGameStarted(true);
+		const stopGame: FunctionVoidCallback = () => setGameStarted(false);
+
 		gameEngine.on(GameEvents.GAME_STARTED, startGame);
 		gameEngine.on(GameEvents.GAME_STOPPED, stopGame);
 
@@ -48,23 +61,24 @@ const App: React.FC = () => {
 	}, []);
 
 	return (
-		<div className="App">
-			<div className="App-Container">
-				{/* <div className="App-Header" /> */}
-				<div className="App-Setting">
-					<Menu gameEngine={gameEngine} comm={commService} playerEngine={playerEngine} />
-				</div>
+		<AppContext.Provider value={providerValue}>
+			<div className="App">
+				<div className="App-Container">
+					<div className="App-Setting">
+						<Menu gameEngine={gameEngine} playerEngine={playerEngine} />
+					</div>
 
-				<div className="App-Message">
-					{gameStarted && <CountDown gameEngine={gameEngine} />}
-					<MessageBox messageEngine={messageEngine} />
-				</div>
+					<div className="App-Message">
+						{gameStarted && <CountDown gameEngine={gameEngine} />}
+						<MessageBox messageEngine={messageEngine} />
+					</div>
 
-				<div className="App-Drawing">
-					<DrawingArea drawingManager={drawingEngine} width={1000} height={1000} />
+					<div className="App-Drawing">
+						<DrawingArea drawingManager={drawingEngine} width={1000} height={1000} />
+					</div>
 				</div>
 			</div>
-		</div>
+		</AppContext.Provider>
 	);
 };
 

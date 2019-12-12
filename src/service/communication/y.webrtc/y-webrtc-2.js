@@ -441,35 +441,34 @@ class SignalingConn extends ws.WebsocketClient {
 
 /**
  * @extends Observable<string>
- * 
- * TODO: remove removeMeLaterID!!
  */
 export class WebrtcProvider extends observable_js.Observable {
 	/**
    * @param {string} roomName
    * @param {Y.Doc} doc
    * @param {Object} [opts]
-   * @param {Array<string>} [opts.signaling]
+   * @param {string?} [opts.peerID]
    * @param {string?} [opts.password]
+   * @param {Array<string>} [opts.signaling]
    */
 	constructor(
 		roomName,
 		doc,
 		{
+			peerID = '',
+			password = null,
 			signaling = [
 				'wss://signaling.yjs.dev',
 				'wss://y-webrtc-uchplqjsol.now.sh',
 				'wss://y-webrtc-signaling-eu.herokuapp.com',
 				'wss://y-webrtc-signaling-us.herokuapp.com'
-			],
-			password = null
+			]
 		} = {}
 	) {
 		super();
 		this.roomName = roomName;
 		this.doc = doc;
 		this.signalingConns = [];
-		this.removeMeLaterID = random.uuidv4();
 		/**
      * @type {PromiseLike<CryptoKey | null>}
      */
@@ -479,12 +478,13 @@ export class WebrtcProvider extends observable_js.Observable {
 			this.signalingConns.push(signalingConn);
 			signalingConn.providers.add(this);
 		});
+
 		/**
      * @type {Room|null}
      */
 		this.room = null;
 		this.key.then((key) => {
-			this.room = openRoom(doc, this, roomName, key, this.removeMeLaterID);
+			this.room = openRoom(doc, this, roomName, key, peerID);
 		});
 		/**
      * @type {awarenessProtocol.Awareness}
@@ -504,6 +504,7 @@ export class WebrtcProvider extends observable_js.Observable {
 				broadcastWebrtcConn(this.room, encoder);
 			}
 		};
+
 		/**
      * Listens to Awareness updates and sends them to remote peers
      *
@@ -528,6 +529,15 @@ export class WebrtcProvider extends observable_js.Observable {
 			awarenessProtocol.removeAwarenessStates(this.awareness, [ doc.clientID ], 'window unload');
 		});
 	}
+
+	/**
+	 * @type {string}
+	 * @returns {string}
+	*/
+	getPeerID() {
+		return this.room.peerId;
+	}
+
 	destroy() {
 		super.destroy();
 		this.signalingConns.forEach((conn) => {

@@ -1,22 +1,24 @@
 import { Subject } from 'rxjs';
 
 import { CacheStoreInterface } from '../service/storage/cache';
-import { CommunicationServiceInterface } from '../service/communication/communication.types';
+import { EventBusInterface } from '../service/event.bus';
+
 import { Player } from '../models';
-import { EventBusInterface, EventBusType } from '../service/event.bus';
-import Chance from 'chance';
+import { PersistentStore } from '../service/storage';
 
 export class PlayerEngine extends Subject<Array<Player>> {
-	private _localID: string;
 	private playersYMap;
-	localName: string;
 
 	public get playerNum(): number {
 		return this.playersYMap.values.length;
 	}
 
+	public get playerName(): string {
+		return (this.playersYMap.get(this.localID) as Player).name;
+	}
+
 	public get localID(): string {
-		return this._localID;
+		return PersistentStore.localID;
 	}
 
 	getAllPlayers(): Array<Player> {
@@ -29,27 +31,22 @@ export class PlayerEngine extends Subject<Array<Player>> {
 	}
 
 	private _onPlayerConnection = (event) => {
-		// console.log(event);
 		if (!event.connected) this.removePlayer(event.peerId);
 		//this.addPlayer(event.peerId);
 	};
 
-	constructor(cache: CacheStoreInterface, comm: CommunicationServiceInterface, eventBus: EventBusInterface) {
+	constructor(cache: CacheStoreInterface, eventBus: EventBusInterface) {
 		super();
 		this.playersYMap = cache.players;
-		this._localID = comm.localID;
 
-		const chance = Chance(this._localID);
-		this.localName = chance.name();
-
-		eventBus.on(EventBusType.CONNECTION, this._onPlayerConnection);
-		console.log('PlayerEngine init');
+		eventBus.on('CONNECTION', this._onPlayerConnection);
 
 		this.playersYMap.observe(() => {
 			this.next(this.getAllPlayers());
 		});
 
-		this.addPlayer(this.localID, this.localName);
+		console.log('PlayerEngine init');
+		this.addPlayer(this.localID, PersistentStore.localName);
 	}
 
 	addPlayer(peerId: string, name: string) {
@@ -58,18 +55,20 @@ export class PlayerEngine extends Subject<Array<Player>> {
 
 		const p = {
 			id: peerId,
-			name: name,
+			name,
 			points: 0
 		};
 		this.playersYMap.set(peerId, p);
 	}
 
 	updateLocalName(name: string) {
-		this.localName = name;
+		// update sessionStorage
+		PersistentStore.localName = name;
+
 		const player = this.playersYMap.get(this.localID) as Player;
 		this.update(this.localID, {
 			...player,
-			name: name
+			name
 		});
 	}
 

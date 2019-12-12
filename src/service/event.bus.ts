@@ -7,9 +7,7 @@ export interface EventBusInterface {
 	onPlayerDisconnected(peerID: string);
 }
 
-export enum EventBusType {
-	CONNECTION = 'CONNECTION'
-}
+type EventBusType = 'CONNECTION';
 
 export class EventBus {
 	private emitter: EventEmitter = new EventEmitter();
@@ -25,14 +23,14 @@ export class EventBus {
 	}
 
 	onPlayerConnected(peerID: string) {
-		this.emitter.emit(EventBusType.CONNECTION, {
+		this.emitter.emit('CONNECTION', {
 			connected: true,
 			peerId: peerID
 		});
 	}
 
 	onPlayerDisconnected(peerID: string) {
-		this.emitter.emit(EventBusType.CONNECTION, {
+		this.emitter.emit('CONNECTION', {
 			connected: false,
 			peerId: peerID
 		});

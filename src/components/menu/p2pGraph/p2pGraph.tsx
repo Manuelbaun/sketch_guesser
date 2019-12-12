@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback, useLayoutEffect, useRef } from 'react';
 import { Graph } from 'react-d3-graph';
-
 import { GraphNode, GraphLink, Player } from '../../../models';
 import './p2pGraph.css';
 
@@ -38,6 +37,9 @@ interface WindowSize {
 
 const GRAPH_HEIGHT = 400;
 
+// TODO: link issues still exits..
+// TODO: hen tap updates, no reconnect???
+
 const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 	const selfNode = {
 		id: localID,
@@ -65,7 +67,6 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 		const arcSec = 2 * Math.PI / (players.length || 1);
 		let counter = 1;
 
-		console.log(players);
 		players.forEach((player: Player) => {
 			const { name, id, points } = player;
 			const self = localID === player.id;
@@ -78,6 +79,7 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 					x: window.innerWidth / 2,
 					y: GRAPH_HEIGHT / 2,
 					points,
+					size: 800,
 					svg: createAvatar(name)
 				});
 			} else {
@@ -88,7 +90,7 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 					id: id,
 					name: name,
 					color: '#911eb4',
-					size: 450,
+					size: 600,
 					x: x,
 					y: y,
 					points,

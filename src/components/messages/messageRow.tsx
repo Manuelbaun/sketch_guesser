@@ -11,10 +11,10 @@ function addZero(t: number | string) {
 	return t;
 }
 
-interface MessageRowProps {
+type MessageRowProps = {
 	message: Message;
 	incoming: boolean;
-}
+};
 
 const MessageRow: React.FC<MessageRowProps> = (props) => {
 	const { message, incoming } = props;

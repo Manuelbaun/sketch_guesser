@@ -1,24 +1,23 @@
-import { Subject } from 'rxjs';
-
-import { Data, ConnectionData, CommunicationServiceInterface } from './communication.types';
-
 import { EventBusInterface } from '../event.bus';
-import { WebrtcProvider } from './y.webrtc/y-webrtc-provider';
-import { CacheStoreInterface } from '../storage';
+import { WebrtcProvider } from './y.webrtc/y-webrtc-2';
+import { CacheStoreInterface, PersistentStore } from '../storage';
 
 // localStorage.log = 'y-webrtc'
-localStorage.log = false;
 
-export class CommunicationServiceImpl implements CommunicationServiceInterface {
+export class CommunicationServiceImpl {
 	private provider;
 
 	constructor(cache: CacheStoreInterface, eventBus: EventBusInterface) {
 		const roomName = 'sketchguessr-' + window.location.pathname;
 		const password = null;
 
+		const peerID = PersistentStore.localID;
+
+		// provides an ID, should be unique generated!
+		// now its a workaround...
 		this.provider = new WebrtcProvider(roomName, cache.yDoc, {
-			// signaling: [ 'ws://localhost:4444' ],
-			password
+			password,
+			peerID
 		});
 
 		this.provider.on('synced', (synced) => {
@@ -41,35 +40,5 @@ export class CommunicationServiceImpl implements CommunicationServiceInterface {
 			e.preventDefault();
 			e.returnValue = '';
 		});
-
-		try {
-			this.localID = 'local';
-			// TODO: used a hack around in webRTC to esablish an room...
-			// getting this ID, it needs to be different
-			// console.log(this.provider.removeMeLaterID);
-			this.localID = this.provider.removeMeLaterID || 'local';
-		} catch (err) {
-			console.error(err);
-		}
-	}
-
-	localID: string;
-	// private peerManager: PeerManager;
-	private _connectionStream: Subject<ConnectionData> = new Subject();
-	public get connectionStream(): Subject<ConnectionData> {
-		return this._connectionStream;
-	}
-
-	private _dataStream: Subject<Data> = new Subject();
-	public get dataStream(): Subject<Data> {
-		return this._dataStream;
-	}
-
-	sendDataAll(data: Data) {
-		// this.peerManager.send(data);
-	}
-
-	sendDataToID(id: string, data: Data) {
-		// this.peerManager.sendDataToID(id, data);
 	}
 }

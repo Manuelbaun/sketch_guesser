@@ -125,7 +125,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps) => {
 			event.stopPropagation();
 			// const { clientX, clientY } = event.touches[0];
 			const { clientX: x, clientY: y } = event.touches[0];
-			console.log(event.touches[0], event.touches[0]);
+			// console.log(event.touches[0], event.touches[0]);
 			const origin = calculateTouchCoordinates(x, y);
 			// console.log(origin);
 			if (origin) {
@@ -142,7 +142,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps) => {
 			event.stopPropagation();
 			// const { clientX, clientY } = event.touches[0];
 			const { clientX: x, clientY: y } = event.touches[0];
-			console.log(x, y, event.touches[0]);
+			// console.log(x, y, event.touches[0]);
 
 			if (isPainting) {
 				const newCoordinates = calculateTouchCoordinates(x, y);
