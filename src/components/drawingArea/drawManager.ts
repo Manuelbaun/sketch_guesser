@@ -3,18 +3,19 @@ import { Subject } from 'rxjs';
 import { DrawingPath, Coordinate } from '../../models';
 import { CacheStore } from '../../service/storage';
 
-export default class DrawEngine extends Subject<DrawingPath[]> {
-	private _drawPathStore;
+export default class DrawingManager extends Subject<DrawingPath[]> {
+	private drawPathStore;
 	private currentDrawElement;
 	private currentDrawPath;
 
 	constructor(store: CacheStore) {
 		super();
-		this._drawPathStore = store.drawPathStore;
+		this.drawPathStore = store.drawPaths;
 
+		console.log(this);
 		// TODO: think again
-		this._drawPathStore.observeDeep(() => {
-			this.next(this._drawPathStore.toArray());
+		this.drawPathStore.observeDeep(() => {
+			this.next(this.drawPathStore.toArray());
 		});
 
 		console.log('MessageEngine init');
@@ -23,23 +24,23 @@ export default class DrawEngine extends Subject<DrawingPath[]> {
 	// FIX: Sadly a class cant be pushed to a Y.Array,
 	// it will be just an json object with no methods, when build back
 	// except wrapped with an object => Sync behavior unknown so far?
-	addNewPath(origin: Coordinate, color: string) {
+	addNewPath(origin: Coordinate, color: string): void {
 		this.currentDrawElement = new Y.Map();
 		this.currentDrawElement.set('color', color);
 		this.currentDrawElement.set('origin', origin);
 		this.currentDrawPath = new Y.Array();
 		this.currentDrawElement.set('path', this.currentDrawPath);
-		this._drawPathStore.push([ this.currentDrawElement ]);
+		this.drawPathStore.push([ this.currentDrawElement ]);
 	}
 
-	appendCoordinates(coordinates: Coordinate) {
+	appendCoordinates(coordinates: Coordinate): void {
 		if (!this.currentDrawPath) return;
 		this.currentDrawPath.push([ coordinates ]);
 	}
 
-	getElement(index: number) {
-		const path = this._drawPathStore.get(index) as any;
-		if (!path) return;
+	getElement(index: number): DrawingPath | null {
+		const path = this.drawPathStore.get(index);
+		if (!path) return null;
 
 		return {
 			color: path.get('color'),
@@ -48,7 +49,7 @@ export default class DrawEngine extends Subject<DrawingPath[]> {
 		};
 	}
 
-	clearPaths() {
-		this._drawPathStore.delete(0, this._drawPathStore.length);
+	clearPaths(): void {
+		this.drawPathStore.delete(0, this.drawPathStore.length);
 	}
 }

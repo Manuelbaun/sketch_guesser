@@ -5,7 +5,7 @@ import { Message, DrawingPath } from '../../models';
 
 export interface CacheStoreInterface {
 	yDoc;
-	drawPathStore;
+	drawPaths;
 	gameState;
 	clock;
 	messages;
@@ -19,9 +19,9 @@ export class CacheStore implements CacheStoreInterface {
 		return this._yDoc;
 	}
 
-	private _drawPathStore = this.yDoc.getArray<DrawingPath>('drawState');
-	public get drawPathStore() {
-		return this._drawPathStore;
+	private _drawPaths = this.yDoc.getArray<DrawingPath>('drawState');
+	public get drawPaths() {
+		return this._drawPaths;
 	}
 
 	private _messages = this.yDoc.getArray<Message>('messages');

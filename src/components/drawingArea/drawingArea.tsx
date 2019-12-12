@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-import DrawEngine from './draw.engine';
+import DrawingManager from './drawManager';
 import { Coordinate } from '../../models';
-
 import './drawingArea.css';
 
 const colorPalette = [
@@ -26,14 +25,87 @@ const colorPalette = [
 interface DrawingAreaProps {
 	width: number;
 	height: number;
-	drawingEngine: DrawEngine;
+	drawingManager: DrawingManager;
 }
 
-const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine }) => {
+const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps) => {
+	const { width, height, drawingManager } = props;
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const [ isPainting, setIsPainting ] = useState(false);
 	const [ color, setColor ] = useState(colorPalette[0]);
+
+	/**
+	 * Needs to be an Y.Map! with structure DrawingPath
+	 * @param drawElement 
+	 * 
+	 * @example
+	 * {
+	 * 	color: string
+	 *	origin: Coordinate
+	 *	path : Array<Coordinate>
+	 * }
+	 */
+
+	// TODO: Should only draw the last point
+	// and not the whole draw line... => needs refactor with drawingEngine
+	const drawPath = (drawElement): void => {
+		if (!canvasRef.current) return;
+		const canvas: HTMLCanvasElement = canvasRef.current;
+		const context = canvas.getContext('2d');
+
+		if (context != null) {
+			const color = drawElement.get('color');
+			const origin = drawElement.get('origin');
+			const path = drawElement.get('path');
+
+			context.strokeStyle = color;
+			context.shadowColor = color;
+			context.lineJoin = 'round';
+			context.lineWidth = 5;
+			const xStart = origin.x * canvas.width;
+			const yStart = origin.y * canvas.height;
+
+			context.beginPath();
+			context.moveTo(xStart, yStart);
+
+			path.forEach((c: Coordinate) => {
+				const x = c.x * canvas.width;
+				const y = c.y * canvas.height;
+				context.lineTo(x, y);
+			});
+
+			context.stroke();
+			context.closePath();
+		}
+	};
+
+	// Returns the PointerCoordinates relatively to the canvas
+	const calculateCoordinates = (x: number, y: number): Coordinate | undefined => {
+		if (!canvasRef.current) return;
+
+		const canvas: HTMLCanvasElement = canvasRef.current;
+		const canvasRect = canvas.getBoundingClientRect();
+
+		return {
+			x: x / canvasRect.width,
+			y: y / canvasRect.height
+		};
+	};
+
+	const calculateTouchCoordinates = (x: number, y: number): Coordinate | undefined => {
+		if (!canvasRef.current) return;
+
+		const canvas: HTMLCanvasElement = canvasRef.current;
+		const canvasRect = canvas.getBoundingClientRect();
+		const cor = {
+			x: (x - canvasRect.left) / canvasRect.width,
+			y: (y - canvasRect.top) / canvasRect.height
+		};
+		console.log(canvasRect, cor);
+
+		return cor;
+	};
 
 	const startPaint = useCallback(
 		(event) => {
@@ -41,7 +113,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 			const origin = calculateCoordinates(x, y);
 			if (origin) {
 				setIsPainting(true);
-				drawingEngine.addNewPath(origin, color);
+				drawingManager.addNewPath(origin, color);
 			}
 		},
 		[ color ]
@@ -58,7 +130,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 			// console.log(origin);
 			if (origin) {
 				setIsPainting(true);
-				drawingEngine.addNewPath(origin, color);
+				drawingManager.addNewPath(origin, color);
 			}
 		},
 		[ color ]
@@ -75,7 +147,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 			if (isPainting) {
 				const newCoordinates = calculateTouchCoordinates(x, y);
 				if (newCoordinates) {
-					drawingEngine.appendCoordinates(newCoordinates);
+					drawingManager.appendCoordinates(newCoordinates);
 				}
 			}
 		},
@@ -89,7 +161,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 				const newCoordinates = calculateCoordinates(x, y);
 
 				if (newCoordinates) {
-					drawingEngine.appendCoordinates(newCoordinates);
+					drawingManager.appendCoordinates(newCoordinates);
 				}
 			}
 		},
@@ -106,7 +178,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 		const canvas: HTMLCanvasElement = canvasRef.current;
 		const context = canvas.getContext('2d');
 		if (context) {
-			drawingEngine.clearPaths();
+			drawingManager.clearPaths();
 			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 		}
 	}, []);
@@ -165,7 +237,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 	);
 
 	// Draw Canvas!
-	drawingEngine.subscribe((paths) => {
+	drawingManager.subscribe((paths) => {
 		if (paths.length === 0) clearCanvas();
 
 		// const lastPath = paths[paths.length - 1];
@@ -175,78 +247,6 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 			drawPath(path);
 		});
 	});
-
-	/**
-	 * Needs to be an Y.Map! with structure DrawingPath
-	 * @param drawElement 
-	 * 
-	 * @example
-	 * {
-	 * 	color: string
-	 *	origin: Coordinate
-	 *	path : Array<Coordinate>
-	 * }
-	 */
-
-	// TODO: Should only draw the last point
-	// and not the whole draw line... => needs refactor with drawingEngine
-	const drawPath = (drawElement) => {
-		if (!canvasRef.current) return;
-		const canvas: HTMLCanvasElement = canvasRef.current;
-		const context = canvas.getContext('2d');
-
-		if (context != null) {
-			const color = drawElement.get('color');
-			const origin = drawElement.get('origin');
-			const path = drawElement.get('path');
-
-			context.strokeStyle = color;
-			context.shadowColor = color;
-			context.lineJoin = 'round';
-			context.lineWidth = 5;
-			const xStart = origin.x * canvas.width;
-			const yStart = origin.y * canvas.height;
-
-			context.beginPath();
-			context.moveTo(xStart, yStart);
-
-			path.forEach((c: Coordinate) => {
-				const x = c.x * canvas.width;
-				const y = c.y * canvas.height;
-				context.lineTo(x, y);
-			});
-
-			context.stroke();
-			context.closePath();
-		}
-	};
-
-	// Returns the PointerCoordinates relatively to the canvas
-	const calculateCoordinates = (x: number, y: number): Coordinate | undefined => {
-		if (!canvasRef.current) return;
-
-		const canvas: HTMLCanvasElement = canvasRef.current;
-		const canvasRect = canvas.getBoundingClientRect();
-
-		return {
-			x: x / canvasRect.width,
-			y: y / canvasRect.height
-		};
-	};
-
-	const calculateTouchCoordinates = (x: number, y: number): Coordinate | undefined => {
-		if (!canvasRef.current) return;
-
-		const canvas: HTMLCanvasElement = canvasRef.current;
-		const canvasRect = canvas.getBoundingClientRect();
-		const cor = {
-			x: (x - canvasRect.left) / canvasRect.width,
-			y: (y - canvasRect.top) / canvasRect.height
-		};
-		console.log(canvasRect, cor);
-
-		return cor;
-	};
 
 	return (
 		<div className="drawing-container">
@@ -264,7 +264,7 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 								width: 40,
 								margin: '0.2em'
 							}}
-							onClick={() => setColor(color)}
+							onClick={(): void => setColor(color)}
 						/>
 					))}
 				</ButtonToolbar>
@@ -278,18 +278,13 @@ const DrawingArea: React.FC<DrawingAreaProps> = ({ width, height, drawingEngine 
 						width: 50,
 						margin: '0.2em'
 					}}
-					onClick={() => drawingEngine.clearPaths()}
+					onClick={drawingManager.clearPaths}
 				>
 					X
 				</Button>
 			</div>
 		</div>
 	);
-};
-
-DrawingArea.defaultProps = {
-	width: 1000,
-	height: 1000
 };
 
 export default DrawingArea;

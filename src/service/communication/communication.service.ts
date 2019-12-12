@@ -16,8 +16,6 @@ export class CommunicationServiceImpl implements CommunicationServiceInterface {
 		const roomName = 'sketchguessr-' + window.location.pathname;
 		const password = null;
 
-		// console.log(roomName);
-
 		this.provider = new WebrtcProvider(roomName, cache.yDoc, {
 			// signaling: [ 'ws://localhost:4444' ],
 			password
