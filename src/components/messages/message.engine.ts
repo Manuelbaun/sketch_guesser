@@ -1,5 +1,5 @@
 import { Subject, Subscription } from 'rxjs';
-import { CacheEngineInterface } from '../../gameEngine/cache.engine';
+import { CacheStoreInterface } from '../../service/storage/cache';
 import { Message } from '../../models/message';
 import { PlayerEngine } from '../../gameEngine';
 
@@ -22,7 +22,7 @@ export default class MessageEngine extends Subject<Message[]> {
 	public get localID(): string {
 		return this.engine.localID;
 	}
-	constructor(store: CacheEngineInterface, engine: PlayerEngine) {
+	constructor(store: CacheStoreInterface, engine: PlayerEngine) {
 		super();
 
 		this.messageState = store.messages;

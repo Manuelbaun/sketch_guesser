@@ -1,9 +1,10 @@
 import { Subject } from 'rxjs';
 
 import { Data, ConnectionData, CommunicationServiceInterface } from './communication.types';
-import { CacheEngineInterface } from '../../gameEngine';
+
 import { EventBusInterface } from '../event.bus';
 import { WebrtcProvider } from './y.webrtc/y-webrtc-provider';
+import { CacheStoreInterface } from '../storage';
 
 // localStorage.log = 'y-webrtc'
 localStorage.log = false;
@@ -11,7 +12,7 @@ localStorage.log = false;
 export class CommunicationServiceImpl implements CommunicationServiceInterface {
 	private provider;
 
-	constructor(cache: CacheEngineInterface, eventBus: EventBusInterface) {
+	constructor(cache: CacheStoreInterface, eventBus: EventBusInterface) {
 		const roomName = 'sketchguessr-' + window.location.pathname;
 		const password = null;
 

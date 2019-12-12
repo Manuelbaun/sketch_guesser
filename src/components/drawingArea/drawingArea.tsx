@@ -22,10 +22,10 @@ const colorPalette = [
 ];
 
 // TODO: Remove all listener, when user is not the current presenter
-
+// define some sizes, when acting as presenter or as guesser
 interface DrawingAreaProps {
-	width?: number;
-	height?: number;
+	width: number;
+	height: number;
 	drawingEngine: DrawEngine;
 }
 

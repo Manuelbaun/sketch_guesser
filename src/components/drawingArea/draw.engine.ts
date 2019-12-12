@@ -1,14 +1,14 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
-import { CacheEngineInterface } from '../../gameEngine';
 import { DrawingPath, Coordinate } from '../../models';
+import { CacheStore } from '../../service/storage';
 
 export default class DrawEngine extends Subject<DrawingPath[]> {
 	private _drawPathStore;
 	private currentDrawElement;
 	private currentDrawPath;
 
-	constructor(store: CacheEngineInterface) {
+	constructor(store: CacheStore) {
 		super();
 		this._drawPathStore = store.drawPathStore;
 

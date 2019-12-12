@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 
-import { CacheEngineInterface } from './cache.engine';
+import { CacheStoreInterface } from '../service/storage/cache';
 import { CommunicationServiceInterface } from '../service/communication/communication.types';
 import { Player } from '../models';
 import { EventBusInterface, EventBusType } from '../service/event.bus';
@@ -34,7 +34,7 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		//this.addPlayer(event.peerId);
 	};
 
-	constructor(cache: CacheEngineInterface, comm: CommunicationServiceInterface, eventBus: EventBusInterface) {
+	constructor(cache: CacheStoreInterface, comm: CommunicationServiceInterface, eventBus: EventBusInterface) {
 		super();
 		this.playersYMap = cache.players;
 		this._localID = comm.localID;

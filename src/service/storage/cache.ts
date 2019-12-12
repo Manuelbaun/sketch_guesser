@@ -1,9 +1,9 @@
 import * as Y from 'yjs';
 // import { YMap, YArray, Doc } from './yjs.types';
 
-import { Message, DrawingPath } from '../models';
+import { Message, DrawingPath } from '../../models';
 
-export interface CacheEngineInterface {
+export interface CacheStoreInterface {
 	yDoc;
 	drawPathStore;
 	gameState;
@@ -12,9 +12,9 @@ export interface CacheEngineInterface {
 	players;
 }
 
-export class CacheEngine implements CacheEngineInterface {
-	constructor() {}
+export class CacheStore implements CacheStoreInterface {
 	private _yDoc = new Y.Doc();
+
 	public get yDoc() {
 		return this._yDoc;
 	}
