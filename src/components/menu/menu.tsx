@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
-import Input from '../common/input';
-import P2PGraph from './p2pGraph/p2pGraph';
+import { Input } from '../common';
+import { P2PGraph } from './p2pGraph/p2pGraph';
 
 import { GameStates, Player } from '../../models';
 import { GameEngine, PlayerEngine } from '../../gameEngine';
@@ -12,7 +12,7 @@ type MenuProps = {
 	playerEngine: PlayerEngine;
 };
 
-const Menu: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
+export const Menu: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 	const setupGame = () => {
 		gameEngine.setupGame({
 			codeWordHash: '',
@@ -64,5 +64,3 @@ const Menu: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 		</div>
 	);
 };
-
-export default Menu;

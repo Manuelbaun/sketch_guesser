@@ -16,7 +16,7 @@ type MessageRowProps = {
 	incoming: boolean;
 };
 
-const MessageRow: React.FC<MessageRowProps> = (props) => {
+export const MessageRow: React.FC<MessageRowProps> = (props) => {
 	const { message, incoming } = props;
 	const date = new Date(message.ts);
 	var h = date.getHours();
@@ -55,5 +55,3 @@ const MessageRow: React.FC<MessageRowProps> = (props) => {
 		);
 	}
 };
-
-export default MessageRow;

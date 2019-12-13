@@ -15,7 +15,7 @@ interface InputProps {
 	options: Options;
 }
 
-const Input: React.FC<InputProps> = ({ onSubmit, options }) => {
+export const Input: React.FC<InputProps> = ({ onSubmit, options }) => {
 	const [ text, setText ] = useState('');
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -58,5 +58,3 @@ Input.defaultProps = {
 		label: 'Explain'
 	}
 };
-
-export default Input;

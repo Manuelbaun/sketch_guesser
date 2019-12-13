@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-import DrawingManager from './drawManager';
+import { DrawingManager } from './drawManager';
 import { Coordinate } from '../../models';
 import './drawingArea.css';
 
@@ -28,7 +28,7 @@ interface DrawingAreaProps {
 	drawingManager: DrawingManager;
 }
 
-const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps) => {
+export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps) => {
 	const { width, height, drawingManager } = props;
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -286,5 +286,3 @@ const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps) => {
 		</div>
 	);
 };
-
-export default DrawingArea;

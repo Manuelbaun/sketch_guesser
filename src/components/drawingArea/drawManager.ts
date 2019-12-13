@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { DrawingPath, Coordinate } from '../../models';
 import { CacheStore } from '../../service/storage';
 
-export default class DrawingManager extends Subject<DrawingPath[]> {
+export class DrawingManager extends Subject<DrawingPath[]> {
 	private drawPathStore;
 	private currentDrawElement;
 	private currentDrawPath;

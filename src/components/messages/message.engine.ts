@@ -7,7 +7,7 @@ import { PersistentStore } from '../../service/storage';
  * TODO: Is this just an Manager?
  */
 
-export default class MessageEngine extends Subject<Message[]> {
+export class MessageEngine extends Subject<Message[]> {
 	/**
 	 * @type YArray<Message>
 	 */

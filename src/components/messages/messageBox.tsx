@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import MessageRow from './messageRow';
+import { MessageRow } from './messageRow';
 import { Message } from '../../models';
-
-import MessageEngine from './message.engine';
-import Input from '../common/input';
+import { MessageEngine } from './message.engine';
+import { Input } from '../common';
 import './message.css';
 
 type MessageBoxProps = {
@@ -11,7 +10,7 @@ type MessageBoxProps = {
 };
 
 // - get local user to check
-const MessageBox: React.FC<MessageBoxProps> = ({ messageEngine }) => {
+export const MessageBox: React.FC<MessageBoxProps> = ({ messageEngine }) => {
 	const [ messageList, setMessageList ] = useState(messageEngine.getMessages());
 
 	// subscribe to message
@@ -47,5 +46,3 @@ const MessageBox: React.FC<MessageBoxProps> = ({ messageEngine }) => {
 		</div>
 	);
 };
-
-export default MessageBox;

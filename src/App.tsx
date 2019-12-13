@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import DrawingArea from './components/drawingArea/drawingArea';
-import MessageBox from './components/messages/messageBox';
-import CountDown from './components/countDown/countDown';
-import MessageEngine from './components/messages/message.engine';
-import DrawingManager from './components/drawingArea/drawManager';
-import Menu from './components/menu/menu';
 
 import { GameEngine, PlayerEngine } from './gameEngine';
 import { GameEvents } from './models';
 import { CacheStore, PersistentStore, CommunicationServiceImpl, EventBus } from './service';
 
-import './App.css';
+import { DrawingManager, MessageEngine, Menu, CountDown, MessageBox, DrawingArea } from './components';
 
+import './App.css';
 // TODO: hen tap updates, no reconnect???
 
 // Typedef

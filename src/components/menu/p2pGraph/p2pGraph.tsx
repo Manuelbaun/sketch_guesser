@@ -40,7 +40,7 @@ const GRAPH_HEIGHT = 400;
 // TODO: link issues still exits..
 // TODO: hen tap updates, no reconnect???
 
-const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
+export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 	const selfNode = {
 		id: localID,
 		name: 'You',
@@ -232,5 +232,3 @@ const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 		</div>
 	);
 };
-
-export default P2PGraph;
