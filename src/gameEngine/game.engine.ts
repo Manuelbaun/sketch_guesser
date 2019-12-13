@@ -141,7 +141,7 @@ export class GameEngine extends GameEngineDocSetterGetter {
 	}
 
 	resetTime() {
-		this.time = 5;
+		this.time = 60;
 	}
 
 	startGame() {

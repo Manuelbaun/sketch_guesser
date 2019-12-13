@@ -1,6 +1,5 @@
 import * as random from 'lib0/dist/random.js';
 import Chance from 'chance';
-
 /**
  * Class that stores some data persistent on that Tab session like the id
  * so if the Tab refreshed, the ID stays the same

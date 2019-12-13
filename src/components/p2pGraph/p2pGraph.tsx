@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useLayoutEffect, useRef } from 'react';
 import { Graph } from 'react-d3-graph';
-import { GraphNode, GraphLink, Player } from '../../../models';
+import { GraphNode, GraphLink, Player } from '../../models';
 import './p2pGraph.css';
 
 import Avatars from '@dicebear/avatars';
@@ -111,7 +111,6 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 	// triggers, when players changed
 	useEffect(
 		() => {
-			// console.log('UseEffect PLAYER changed has been called');
 			updateNodes(p);
 		},
 		[ p ]
@@ -119,7 +118,6 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 	const targetRef = useRef(null);
 
 	useLayoutEffect(() => {
-		// console.log(targetRef.current.offsetWidth);
 		setSize({
 			height: GRAPH_HEIGHT / 2,
 			// @ts-ignore

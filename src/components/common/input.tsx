@@ -4,11 +4,11 @@ import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 
-interface Options {
+type Options = {
 	placeholder?: string;
 	label?: string;
 	buttonLabel?: string;
-}
+};
 
 interface InputProps {
 	onSubmit(msg: string): void;
@@ -33,7 +33,7 @@ export const Input: React.FC<InputProps> = ({ onSubmit, options }) => {
 		<Form onSubmit={handleSubmit}>
 			<InputGroup className="mb-3">
 				<InputGroup.Prepend>
-					<InputGroup.Text id="basic-addon1">Guess</InputGroup.Text>
+					<InputGroup.Text id="basic-addon1">{options.label}</InputGroup.Text>
 				</InputGroup.Prepend>
 				<FormControl
 					placeholder={options.placeholder}
@@ -42,7 +42,7 @@ export const Input: React.FC<InputProps> = ({ onSubmit, options }) => {
 					aria-describedby="basic-addon1"
 					onChange={handleChange}
 				/>
-				<Button variant="dark" type="submit" disabled={text.length === 0}>
+				<Button variant="info" type="submit" disabled={text.length === 0}>
 					{options.buttonLabel}
 				</Button>
 			</InputGroup>
