@@ -1,17 +1,18 @@
 import React, { useEffect, useState, useCallback, useLayoutEffect, useRef } from 'react';
-import { Graph } from 'react-d3-graph';
+import { Graph } from './d3graph';
 import { GraphNode, GraphLink, Player } from '../../models';
 import './p2pGraph.css';
 
 import Avatars from '@dicebear/avatars';
 import sprites from '@dicebear/avatars-bottts-sprites';
+import { PlayerEngine } from '../../gameEngine';
 const avatars = new Avatars(sprites());
 
 const map = new Map<string, string>();
 
 const createAvatar = (name: string) => {
 	if (map.has(name)) return map.get(name);
-	console.log('create new avatar for ', name);
+
 	const svgString = avatars.create(name);
 	const blob = new Blob([ svgString ], { type: 'image/svg+xml' });
 	const svgAvatar = URL.createObjectURL(blob);
@@ -23,6 +24,7 @@ const createAvatar = (name: string) => {
 interface P2PGraphProps {
 	players: Array<Player>;
 	localID: string;
+	playerEngine: PlayerEngine;
 }
 
 interface GraphData {
@@ -40,12 +42,12 @@ const GRAPH_HEIGHT = 400;
 // TODO: link issues still exits..
 // TODO: hen tap updates, no reconnect???
 
-export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
+export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngine }) => {
 	const selfNode = {
 		id: localID,
 		name: 'You',
 		color: '#e6194B',
-		x: window.innerWidth / 4,
+		x: window.innerWidth / 2,
 		y: GRAPH_HEIGHT / 2,
 		points: 0
 	};
@@ -55,98 +57,89 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 		links: []
 	});
 
+	const [ nodes, setNodes ] = useState<Array<GraphNode>>([ selfNode ]);
+
 	const [ size, setSize ] = useState<WindowSize>({
-		width: window.innerWidth - 50,
-		height: GRAPH_HEIGHT / 2
+		width: window.innerWidth,
+		height: GRAPH_HEIGHT
 	});
 
-	const updateNodes = useCallback((players) => {
-		const nodesArr: Array<GraphNode> = [];
-		const linksArr: Array<GraphLink> = [];
+	const updateNodes = (players: Player[]) => {
+		const linksArr = new Array<GraphLink>();
 
-		const arcSec = 2 * Math.PI / (players.length || 1);
-		let counter = 1;
+		const pArray = players.map((player: Player) => {
+			const { name, id, points, x, y } = player;
 
-		players.forEach((player: Player) => {
-			const { name, id, points } = player;
-			const self = localID === player.id;
-
-			if (self) {
-				nodesArr.push({
+			if (localID === player.id) {
+				const newNode = {
 					id: localID,
 					color: '#e6194B',
 					name: name + ' (You)',
-					x: window.innerWidth / 2,
-					y: GRAPH_HEIGHT / 2,
+					x: size.width * x,
+					y: size.height * y,
 					points,
 					size: 800,
 					svg: createAvatar(name)
-				});
+				};
+				return newNode;
 			} else {
-				const x = size.width / 2 + Math.sin(arcSec * counter) * 100;
-				const y = GRAPH_HEIGHT / 2 + Math.cos(arcSec * counter) * 100;
-
-				nodesArr.push({
+				const newNode = {
 					id: id,
 					name: name,
 					color: '#911eb4',
 					size: 600,
-					x: x,
-					y: y,
+					x: size.width * x,
+					y: size.height * y,
 					points,
 					svg: createAvatar(name)
-				});
+				};
 
 				linksArr.push({ source: localID, target: id });
-				counter++;
+
+				return newNode;
 			}
 		});
 
+		// setNodes(pArray);
 		setGraphData({
-			nodes: nodesArr,
+			nodes: pArray,
 			links: linksArr
 		});
-	}, []);
+	};
 
 	// triggers, when players changed
 	useEffect(
 		() => {
-			updateNodes(p);
+			updateNodes(players);
 		},
-		[ p ]
+		[ players ]
 	);
-	const targetRef = useRef(null);
 
-	useLayoutEffect(() => {
-		setSize({
-			height: GRAPH_HEIGHT / 2,
-			// @ts-ignore
-			width: targetRef.current.offsetWidth
-		});
-	}, []);
+	const targetRef = useRef(null);
+	const targetRefGraph = useRef(null);
 
 	// triggers only when component is created
 	useEffect(
 		() => {
 			const updateResize = () => {
-				if (window.innerWidth < 900) {
-					setSize({
+				//@ts-ignore
+				if (targetRef.current.offsetWidth < 900) {
+					const size = {
 						height: GRAPH_HEIGHT / 2,
 						// @ts-ignore
-
 						width: targetRef.current.offsetWidth
-					});
-					updateNodes(p);
+					};
+					setSize(size);
+					updateNodes(players);
 				}
 			};
 
 			window.addEventListener('resize', updateResize);
-
 			return () => {
 				window.removeEventListener('resize', updateResize);
 			};
 		},
-		[ p ]
+		[ players ]
 	);
 
 	const conf = {
@@ -163,7 +156,7 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 		maxZoom: 8,
 		minZoom: 0.1,
 		nodeHighlightBehavior: true,
-		panAndZoom: true,
+		panAndZoom: false,
 		staticGraph: false,
 		staticGraphWithDragAndDrop: false,
 		d3: {
@@ -210,10 +203,19 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 		}
 	};
 
+	const nodePosChange = (node) => {
+		const { id, x, y } = node;
+		const xx = x / size.width;
+		const yy = y / size.height;
+		playerEngine.changeLocalPosition(id, xx, yy);
+	};
+
+	// console.log(graphData.nodes[1]?.name,graphData.nodes[1]?.x)
 	return (
 		<div className="graph-view" ref={targetRef}>
 			<Graph
 				id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
+				ref={targetRefGraph}
 				data={graphData}
 				config={conf}
 				// onClickNode={onClickNode}
@@ -225,7 +227,7 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players: p }) => {
 				// onMouseOutNode={onMouseOutNode}
 				// onMouseOverLink={onMouseOverLink}
 				// onMouseOutLink={onMouseOutLink}
-				// onNodePositionChange={onNodePositionChange}
+				onNodeDragMove={nodePosChange}
 			/>;
 		</div>
 	);

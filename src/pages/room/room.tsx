@@ -33,7 +33,9 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 				onSubmit={(msg) => handleSubmit(msg)}
 				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}
 			/>
-			<P2PGraph players={players} localID={playerEngine.localID} />
+			{players.length > 0 && (
+				<P2PGraph players={players} localID={playerEngine.localID} playerEngine={playerEngine} />
+			)}
 		</div>
 	);
 };

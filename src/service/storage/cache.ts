@@ -15,6 +15,11 @@ export interface CacheStoreInterface {
 export class CacheStore implements CacheStoreInterface {
 	private _yDoc = new Y.Doc();
 
+	constructor() {
+		// this._yDoc.on('update', (data) => {
+		// 	console.log(data)
+		// })
+	}
 	public get yDoc() {
 		return this._yDoc;
 	}

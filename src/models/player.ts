@@ -1,38 +1,63 @@
-export interface Player {
+import * as Y from 'yjs';
+
+export type Player = {
 	id: string;
 	name: string;
 	points: number;
-}
+	x: number; // between 0 and 1 => normalized
+	y: number; // between 0 and 1
+};
 
-export default class PlayerClass implements Player {
-	constructor(id: string) {
-		this._id = id;
+type PlayerProps = {
+	id: string;
+	name?: string;
+	points?: number;
+	x?: number; // between 0 and 1 => normalized
+	y?: number; // between 0 and 1
+};
+
+export class PlayerClass extends Y.Map<any> {
+	_id: string = '';
+
+	constructor(props: PlayerProps) {
+		super();
+
+		this._id = props.id;
+		this.set('id', props.id);
+		this.name = props.name || props.id;
+		this.x = props.x || 0.5;
+		this.y = props.y || 0.5;
+		this.points = props.points || 0;
 	}
 
-	private _name: string;
 	public get name(): string {
-		return this._name;
+		return this.get('name') as string;
 	}
-	public set name(value: string) {
-		this._name = value;
+	public set name(name: string) {
+		this.set('name', name);
 	}
 
-	private _id: string;
+	public get x() {
+		return this.get('x');
+	}
+	public set x(value: number) {
+		this.set('x', value);
+	}
+
 	public get id(): string {
 		return this._id;
 	}
-	public set id(value: string) {
-		this._id = value;
+	public get y(): number {
+		return this.get('y') as number;
+	}
+	public set y(value: number) {
+		this.set('y', value);
 	}
 
-	private _points: number;
 	public get points(): number {
-		return this._points;
+		return this.get('points') as number;
 	}
 	public set points(value: number) {
-		this._points = value;
-	}
-	public addPoints(value: number) {
-		this._points += value;
+		this.set('points', value);
 	}
 }
