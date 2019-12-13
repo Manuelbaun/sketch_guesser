@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import { DrawingManager } from './drawManager';
-import { Coordinate } from '../../models';
+import { Coordinate, DrawingPath } from '../../models';
 import './drawingArea.css';
 
 const colorPalette = [
@@ -49,30 +49,22 @@ export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps)
 
 	// TODO: Should only draw the last point
 	// and not the whole draw line... => needs refactor with drawingEngine
-	const drawPath = (drawElement): void => {
+	const drawPath = ({ color, origin, line }: DrawingPath): void => {
 		if (!canvasRef.current) return;
 		const canvas: HTMLCanvasElement = canvasRef.current;
 		const context = canvas.getContext('2d');
 
 		if (context != null) {
-			const color = drawElement.get('color');
-			const origin = drawElement.get('origin');
-			const path = drawElement.get('path');
-
 			context.strokeStyle = color;
 			context.shadowColor = color;
 			context.lineJoin = 'round';
 			context.lineWidth = 5;
-			const xStart = origin.x * canvas.width;
-			const yStart = origin.y * canvas.height;
 
 			context.beginPath();
-			context.moveTo(xStart, yStart);
+			context.moveTo(origin.x * canvas.width, origin.y * canvas.height);
 
-			path.forEach((c: Coordinate) => {
-				const x = c.x * canvas.width;
-				const y = c.y * canvas.height;
-				context.lineTo(x, y);
+			line.forEach(({ x, y }: Coordinate) => {
+				context.lineTo(x * canvas.width, y * canvas.height);
 			});
 
 			context.stroke();
@@ -102,7 +94,6 @@ export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps)
 			x: (x - canvasRect.left) / canvasRect.width,
 			y: (y - canvasRect.top) / canvasRect.height
 		};
-		console.log(canvasRect, cor);
 
 		return cor;
 	};
@@ -172,18 +163,40 @@ export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps)
 		setIsPainting(false);
 	}, []);
 
-	const clearCanvas = useCallback(() => {
+	const clearCanvas = () => {
 		if (!canvasRef.current) return;
 
 		const canvas: HTMLCanvasElement = canvasRef.current;
 		const context = canvas.getContext('2d');
+
 		if (context) {
 			drawingManager.clearPaths();
 			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 		}
-	}, []);
+	};
 
 	// setup useEffect
+	useEffect(() => {
+		let currentPaths: number = 0;
+		drawingManager.subscribe((paths) => {
+			// Clear the canvas
+			if (paths.length === 0) {
+				clearCanvas();
+				currentPaths = 0;
+			} else if (paths.length != currentPaths) {
+				// check how many paths already drawn
+				for (let i = currentPaths; i < paths.length; i++) {
+					drawPath(paths[i]);
+				}
+				currentPaths = paths.length;
+			} else {
+				// redraw the last path.
+				// TODO Optimize this one
+				const p = paths[paths.length - 1];
+				drawPath(p);
+			}
+		});
+	}, []);
 
 	useEffect(
 		() => {
@@ -236,18 +249,6 @@ export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps)
 		[ exitPaint ]
 	);
 
-	// Draw Canvas!
-	drawingManager.subscribe((paths) => {
-		if (paths.length === 0) clearCanvas();
-
-		// const lastPath = paths[paths.length - 1];
-		// if (lastPath) drawPath(lastPath);
-
-		paths.forEach((path) => {
-			drawPath(path);
-		});
-	});
-
 	return (
 		<div className="drawing-container">
 			<canvas ref={canvasRef} height={height} width={width} />
@@ -278,7 +279,7 @@ export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps)
 						width: 50,
 						margin: '0.2em'
 					}}
-					onClick={drawingManager.clearPaths}
+					onClick={clearCanvas}
 				>
 					X
 				</Button>

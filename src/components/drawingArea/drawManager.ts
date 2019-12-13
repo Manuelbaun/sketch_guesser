@@ -3,6 +3,15 @@ import { Subject } from 'rxjs';
 import { DrawingPath, Coordinate } from '../../models';
 import { CacheStore } from '../../service/storage';
 
+/**
+ * 
+ * TODO: This manager should track which paths are already drawn to the canvas 
+ * and which paths should be drawn/updated....
+ * not the DrawingArea Component.
+ * 
+ * DrawingPath should have an ID, for better tracking
+ */
+
 export class DrawingManager extends Subject<DrawingPath[]> {
 	private drawPathStore;
 	private currentDrawElement;
@@ -13,9 +22,20 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 		this.drawPathStore = store.drawPaths;
 
 		console.log(this);
-		// TODO: think again
+		// TODO: think again!!!!!!!!!
+
 		this.drawPathStore.observeDeep(() => {
-			this.next(this.drawPathStore.toArray());
+			const arr = new Array<DrawingPath>();
+
+			this.drawPathStore.forEach((path) => {
+				arr.push({
+					color: path.get('color'),
+					origin: path.get('origin'),
+					line: path.get('path').toArray()
+				});
+			});
+
+			this.next(arr);
 		});
 
 		console.log('MessageEngine init');
@@ -45,7 +65,7 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 		return {
 			color: path.get('color'),
 			origin: path.get('origin'),
-			path: path.get('path').toArray()
+			line: path.get('path').toArray()
 		};
 	}
 

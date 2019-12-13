@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-
 import { GameEngine, PlayerEngine } from './gameEngine';
 import { GameEvents } from './models';
 import { CacheStore, PersistentStore, CommunicationServiceImpl, EventBus } from './service';
-
 import { DrawingManager, MessageEngine, Menu, CountDown, MessageBox, DrawingArea } from './components';
 
 import './App.css';
