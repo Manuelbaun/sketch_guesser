@@ -27,7 +27,13 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		const arr = new Array<Player>();
 
 		this.playersYMap.forEach((player: any) => {
-			arr.push(player.toJSON() as Player);
+			let j;
+			try {
+				j = player.toJSON();
+				arr.push(player.toJSON() as Player);
+			} catch (err) {
+				console.error(player,err);
+			}
 		});
 
 		return arr;
@@ -66,7 +72,6 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		const xx = this.chance.floating({ min: 0.25, max: 0.75 });
 		const yy = this.chance.floating({ min: 0.25, max: 0.75 });
 
-
 		this.localPlayer.set('id', peerId);
 		this.localPlayer.set('name', name);
 		this.localPlayer.set('points', 0);
@@ -90,12 +95,12 @@ export class PlayerEngine extends Subject<Array<Player>> {
 
 	changeLocalPosition(peerId: string, x, y) {
 		if (this.localID === peerId) {
-			this.localPlayer.doc && this.localPlayer.doc.transact(() => {
-				this.localPlayer.set('x', x);
-				this.localPlayer.set('y', y);
-			})
+			this.localPlayer.doc &&
+				this.localPlayer.doc.transact(() => {
+					this.localPlayer.set('x', x);
+					this.localPlayer.set('y', y);
+				});
 		}
-
 	}
 
 	removePlayer(peerId: string) {
