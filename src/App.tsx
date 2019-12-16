@@ -7,6 +7,7 @@ import { LandingPage, RoomPage, GamePage } from './pages';
 
 import './App.css';
 
+
 // Typedef
 type FunctionVoidCallback = () => void;
 

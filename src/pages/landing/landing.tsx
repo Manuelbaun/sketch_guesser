@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import './landing.css';
 import { Input } from '../../components/common/input';
+import mySvg from '../../logo.svg';
 
 type Props = {
 	onJoinGame(roomID: string): void;
@@ -19,6 +20,9 @@ export const LandingPage = (props: Props) => {
 
 	return (
 		<div className="landing-page">
+			<div className="header" >
+				<img src={mySvg} />
+			</div>
 			<h1>Welcome to SketchGuessr</h1>
 
 			<Button className={'join-button'} variant="success" onClick={createGame}>

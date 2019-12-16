@@ -20,3 +20,9 @@
 .landing-page from {
 	height: 5rem;
 }
+
+.landing-page .header {
+	/* height: 50vh; */
+
+	display: block;
+}
