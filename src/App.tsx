@@ -7,7 +7,6 @@ import { LandingPage, RoomPage, GamePage } from './pages';
 
 import './App.css';
 
-
 // Typedef
 type FunctionVoidCallback = () => void;
 
@@ -15,7 +14,6 @@ type FunctionVoidCallback = () => void;
 const eventBus = new EventBus();
 // setup the cache via yjs and creates the doc.
 const cacheStore = new CacheStore();
-
 // setup the "engines" need proper names and refactor
 const playerEngine = new PlayerEngine(cacheStore, eventBus);
 const gameEngine = new GameEngine(cacheStore);
@@ -30,22 +28,20 @@ const providerValue = {
 // needs to use this => better
 const AppContext = React.createContext(providerValue);
 
-type AppState = 'LANDING' | 'ROOM' | 'GAME';
+enum AppState {
+	LANDING,
+	ROOM,
+	GAME
+}
 
 // needs to be refactored
 let commService: CommunicationServiceImpl;
 
 const App: React.FC = () => {
-	const [ appState, setAppState ] = useState<AppState>('LANDING');
+	const [ appState, setAppState ] = useState<AppState>(AppState.LANDING);
 
-	const startGame: FunctionVoidCallback = () => {
-		console.log('Start the game');
-		setAppState('GAME');
-	};
-	const stopGame: FunctionVoidCallback = () => {
-		console.log('STOP the game');
-		setAppState('ROOM');
-	};
+	const startGame: FunctionVoidCallback = () => setAppState(AppState.GAME);
+	const stopGame: FunctionVoidCallback = () => setAppState(AppState.ROOM);
 
 	useEffect(() => {
 		const roomID = window.location.pathname.slice(1);
@@ -66,10 +62,9 @@ const App: React.FC = () => {
 	const joinGame = (id?: string) => {
 		// establish connection between peers
 		commService = new CommunicationServiceImpl(cacheStore, eventBus, id);
-
 		const url = window.location.origin + '/' + commService.roomID;
 		window.history.replaceState('', 'Room', url);
-		setAppState('ROOM');
+		setAppState(AppState.ROOM);
 	};
 
 	const createGame = () => {
@@ -79,11 +74,11 @@ const App: React.FC = () => {
 	return (
 		<AppContext.Provider value={providerValue}>
 			<div className="App">
-				{appState == 'LANDING' && <LandingPage onJoinGame={joinGame} onCreateGame={createGame} />}
+				{appState == AppState.LANDING && <LandingPage onJoinGame={joinGame} onCreateGame={createGame} />}
 
-				{appState == 'ROOM' && <RoomPage gameEngine={gameEngine} playerEngine={playerEngine} />}
+				{appState == AppState.ROOM && <RoomPage gameEngine={gameEngine} playerEngine={playerEngine} />}
 
-				{appState == 'GAME' && <GamePage gameEngine={gameEngine} cache={cacheStore} />}
+				{appState == AppState.GAME && <GamePage gameEngine={gameEngine} cache={cacheStore} />}
 			</div>
 		</AppContext.Provider>
 	);
