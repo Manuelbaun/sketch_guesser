@@ -5,11 +5,6 @@ export type Coordinate = {
 	y: number;
 };
 
-/**
- * x, y coordinate
- */
-export type Coordinate2 = [number, number];
-
 // refactor the origin out!
 export type DrawingPath = {
 	color: string;

@@ -14,15 +14,15 @@ type FunctionVoidCallback = () => void;
 // Setups
 const eventBus = new EventBus();
 // setup the cache via yjs and creates the doc.
-const cache = new CacheStore();
+const cacheStore = new CacheStore();
 
 // setup the "engines" need proper names and refactor
-const playerEngine = new PlayerEngine(cache, eventBus);
-const gameEngine = new GameEngine(cache);
+const playerEngine = new PlayerEngine(cacheStore, eventBus);
+const gameEngine = new GameEngine(cacheStore);
 
 const providerValue = {
 	localID: PersistentStore.localID,
-	cache,
+	cache: cacheStore,
 	playerEngine,
 	gameEngine
 };
@@ -65,7 +65,7 @@ const App: React.FC = () => {
 	// the same as open a room by id
 	const joinGame = (id?: string) => {
 		// establish connection between peers
-		commService = new CommunicationServiceImpl(cache, eventBus, id);
+		commService = new CommunicationServiceImpl(cacheStore, eventBus, id);
 
 		const url = window.location.origin + '/' + commService.roomID;
 		window.history.replaceState('', 'Room', url);
@@ -83,7 +83,7 @@ const App: React.FC = () => {
 
 				{appState == 'ROOM' && <RoomPage gameEngine={gameEngine} playerEngine={playerEngine} />}
 
-				{appState == 'GAME' && <GamePage gameEngine={gameEngine} cache={cache} />}
+				{appState == 'GAME' && <GamePage gameEngine={gameEngine} cache={cacheStore} />}
 			</div>
 		</AppContext.Provider>
 	);

@@ -25,12 +25,9 @@ export class PersistentStore {
 	}
 
 	/**
-	 * Stores the user Local name
-	 * 
-	 * if there is no user name defined, generate a random one
-	 * else use the local name 
+	 * Stores the user Local name. If there is no user name defined, 
+	 * generate a random one else use the local name 
 	 * */
-
 	private static _localName: string;
 	public static get localName(): string {
 		const key: SessionKeys = 'local_name';

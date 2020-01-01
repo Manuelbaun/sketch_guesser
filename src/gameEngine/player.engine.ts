@@ -32,7 +32,7 @@ export class PlayerEngine extends Subject<Array<Player>> {
 				j = player.toJSON();
 				arr.push(player.toJSON() as Player);
 			} catch (err) {
-				console.error(player,err);
+				console.error(player, err);
 			}
 		});
 
@@ -48,9 +48,9 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		//this.addPlayer(event.peerId);
 	};
 
-	constructor(cache: CacheStoreInterface, eventBus: EventBusInterface) {
+	constructor(cacheStore: CacheStoreInterface, eventBus: EventBusInterface) {
 		super();
-		this.playersYMap = cache.players;
+		this.playersYMap = cacheStore.players;
 
 		eventBus.on('CONNECTION', this._onPlayerConnection);
 

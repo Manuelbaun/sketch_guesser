@@ -1,6 +1,4 @@
 import * as Y from 'yjs';
-// import { YMap, YArray, Doc } from './yjs.types';
-
 import { Message, DrawingPath } from '../../models';
 
 export interface CacheStoreInterface {

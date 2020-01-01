@@ -66,7 +66,7 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 			color: path.get('color'),
 			origin: path.get('origin'),
 			line: path.get('path').toArray()
-		};
+		} as DrawingPath;
 	}
 
 	clearPaths(): void {
