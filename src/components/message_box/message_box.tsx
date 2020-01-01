@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageRow } from './messageRow';
+import { MessageRow } from './message_row';
 import { Message } from '../../models';
 import { MessageEngine } from './message.engine';
 import { Input } from '../common';

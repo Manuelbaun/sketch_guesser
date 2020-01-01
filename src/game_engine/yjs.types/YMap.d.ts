@@ -1,6 +1,6 @@
-import { YEvent } from '../utils/YEvent.js';
-import { Transaction } from '../utils/Transaction.js';
-import { AbstractType } from './AbstractType.js';
+import { YEvent } from '../utils/YEvent.js.js';
+import { Transaction } from '../utils/Transaction.js.js';
+import { AbstractType } from './AbstractType.js.js';
 
 /**
  * @template T

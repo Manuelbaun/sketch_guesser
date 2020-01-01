@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Player } from '../../models';
-import { GameEngine, PlayerEngine } from '../../gameEngine';
+import { GameEngine, PlayerEngine } from '../../game_engine';
 import { GameControl, Input, P2PGraph } from '../../components';
 
 type MenuProps = {

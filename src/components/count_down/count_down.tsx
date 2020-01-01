@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { GameEngine } from '../../gameEngine';
+import { GameEngine } from '../../game_engine';
 import { GameEvents } from '../../models';
 
-import './countDown.css';
+import './count_down.css';
 
 interface CountDownProps {
 	gameEngine: GameEngine;

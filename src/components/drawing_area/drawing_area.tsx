@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-import { DrawingManager } from './drawManager';
+import { DrawingManager } from './draw_manager';
 import { Coordinate, DrawingPath } from '../../models';
-import './drawingArea.css';
+import './drawing_area.css';
 
 const colorPalette = [
 	'#e6194B',

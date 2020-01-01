@@ -129,9 +129,9 @@ export function typeMapGetSnapshot(parent: AbstractType<any>, key: string, snaps
     [x: string]: any;
 };
 export function createMapIterator(map: Map<string, Item>): IterableIterator<any[]>;
-import { Transaction } from "../utils/Transaction.js";
-import { Item } from "../structs/Item.js";
-import { Doc } from "../utils/Doc.js";
-import { EventHandler } from "../utils/EventHandler.js";
-import { YEvent } from "../utils/YEvent.js";
-import { Snapshot } from "../utils/Snapshot.js";
+import { Transaction } from "../utils/Transaction.js.js";
+import { Item } from "../structs/Item.js.js";
+import { Doc } from "../utils/Doc.js.js";
+import { EventHandler } from "../utils/EventHandler.js.js";
+import { YEvent } from "../utils/YEvent.js.js";
+import { Snapshot } from "../utils/Snapshot.js.js";

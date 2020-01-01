@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GameEngine, PlayerEngine } from './gameEngine';
+import { GameEngine, PlayerEngine } from './game_engine';
 import { GameEvents } from './models';
 import { CacheStore, PersistentStore, CommunicationServiceImpl, EventBus } from './service';
 

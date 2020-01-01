@@ -2,10 +2,10 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 
 import { GameStates } from '../../models';
-import { GameEngine } from '../../gameEngine';
+import { GameEngine } from '../../game_engine';
 import { PersistentStore } from '../../service/storage';
 
-import './game-control.css';
+import './game_control.css';
 
 type Props = {
 	gameEngine: GameEngine;

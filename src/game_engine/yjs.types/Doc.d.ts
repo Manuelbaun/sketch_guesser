@@ -109,11 +109,11 @@ export class Doc {
      */
     off(eventName: string, f: Function): void;
 }
-import { AbstractType } from "../types/AbstractType.js";
-import { YEvent } from "./YEvent.js";
-import { StructStore } from "./StructStore.js";
-import { Transaction } from "./Transaction.js";
-import { YArray } from "../types/YArray.js";
-import { YText } from "../types/YText.js";
-import { YMap } from "../types/YMap.js";
-import { YXmlFragment } from "../types/YXmlFragment.js";
+import { AbstractType } from "../types/AbstractType.js.js";
+import { YEvent } from "./YEvent.js.js";
+import { StructStore } from "./StructStore.js.js";
+import { Transaction } from "./Transaction.js.js";
+import { YArray } from "../types/YArray.js.js";
+import { YText } from "../types/YText.js.js";
+import { YMap } from "../types/YMap.js.js";
+import { YXmlFragment } from "../types/YXmlFragment.js.js";

@@ -5,9 +5,9 @@ import './p2pGraph.css';
 
 import Avatars from '@dicebear/avatars';
 import sprites from '@dicebear/avatars-bottts-sprites';
-import { PlayerEngine } from '../../gameEngine';
-const avatars = new Avatars(sprites());
+import { PlayerEngine } from '../../game_engine';
 
+const avatars = new Avatars(sprites());
 const map = new Map<string, string>();
 
 const createAvatar = (name: string) => {
