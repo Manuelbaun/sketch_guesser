@@ -2,22 +2,36 @@ import * as Y from 'yjs';
 import { Message, DrawingPath } from '../../models';
 
 export interface CacheStoreInterface {
+	/**
+	 * @type {YDoc<any>}
+	 */
 	yDoc;
+	/**
+	 * @type {YArray<DrawingPath>}
+	 */
 	drawPaths;
+	/**
+	* @type {YMap<GameState>}
+	**/
 	gameState;
+	/**
+	 * @type {YMap<any>}
+	 */
 	clock;
+	/**
+	 * @type {YArray<Message>}
+	 */
 	messages;
+	/**
+	 * @type {YMap<Player>}
+	 */
 	players;
 }
 
 export class CacheStore implements CacheStoreInterface {
 	private _yDoc = new Y.Doc();
 
-	constructor() {
-		// this._yDoc.on('update', (data) => {
-		// 	console.log(data)
-		// })
-	}
+	constructor() {}
 	public get yDoc() {
 		return this._yDoc;
 	}

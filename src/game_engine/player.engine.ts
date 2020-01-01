@@ -1,14 +1,17 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
+import Chance from 'chance';
 
 import { CacheStoreInterface } from '../service/storage/cache';
 import { EventBusInterface } from '../service/event.bus';
 
 import { Player } from '../models';
 import { PersistentStore } from '../service/storage';
-import Chance from 'chance';
 
 export class PlayerEngine extends Subject<Array<Player>> {
+	/**
+	 * @type {YMap<Player>}
+	 */
 	private playersYMap = new Y.Map();
 
 	public get playerNum(): number {
@@ -45,7 +48,6 @@ export class PlayerEngine extends Subject<Array<Player>> {
 
 	private _onPlayerConnection = (event) => {
 		if (!event.connected) this.removePlayer(event.peerId);
-		//this.addPlayer(event.peerId);
 	};
 
 	constructor(cacheStore: CacheStoreInterface, eventBus: EventBusInterface) {

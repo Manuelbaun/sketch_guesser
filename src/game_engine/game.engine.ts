@@ -4,7 +4,13 @@ import { CacheStoreInterface } from '../service/storage/cache';
 import { Game, GameStates, GameEvents } from '../models';
 
 class GameEngineDocSetterGetter {
-	gameState; //  YMap<GameState>
+	/**
+	 * @type {YMap<GameState>}
+	 */
+	gameState;
+	/**
+	 * @type {YMap<any>}
+	 */
 	clock;
 
 	constructor(store: CacheStoreInterface) {
@@ -13,6 +19,10 @@ class GameEngineDocSetterGetter {
 		this.transact = store.gameState.doc.transact;
 	}
 
+	/**
+	 * Function to execute multiple transaction on document
+	 * @type {Function(() => {})} 
+	 */
 	transact;
 	// Mechanics
 	get time(): number {
@@ -40,7 +50,7 @@ class GameEngineDocSetterGetter {
 	set guessWord(word: string) {
 		if (!this.gameState) return;
 
-		this.gameState.doc.transact(() => {
+		this.transact(() => {
 			this.gameState.set('codeWordHash', sha256(word));
 		});
 	}
@@ -77,7 +87,6 @@ export class GameEngine extends GameEngineDocSetterGetter {
 
 	handleGameStateChanged(key: string) {
 		const value = this.gameState.get(key);
-		// console.log(key, this.gameState.get(key));
 
 		if (key === 'currentRound') {
 			this.emit(GameEvents.ROUND_CHANGE, value);

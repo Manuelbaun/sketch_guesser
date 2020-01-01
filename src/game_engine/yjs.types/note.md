@@ -1,1 +1,0 @@
-this folder should be removed, once the yjs has its declared d.ts files
