@@ -28,6 +28,13 @@ export interface CacheStoreInterface {
 	players;
 }
 
+/**
+ * *CacheStore* creates the yDoc and all other sub documents
+ * which needs to be synced between all peers.
+ * Further, this class will be used in the communication.service class
+ * which 
+ */
+
 export class CacheStore implements CacheStoreInterface {
 	private _yDoc = new Y.Doc();
 
