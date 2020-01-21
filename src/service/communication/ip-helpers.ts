@@ -1,29 +1,25 @@
 // Temp function to help getting Ip address...
 // to see if clients are actually on different public ips
+var xhr = new XMLHttpRequest();
 
 export function getPublicIpAddress() {
 	return new Promise((resolve, reject) => {
-		fetch('https://api.ipify.org')
-			.then(function(response) {
-				if (response.status !== 200) {
-					reject({ code: response.status, msg: 'some error with statuscode' });
-					return;
-				}
+		// Setup our listener to process compeleted requests
+		xhr.onreadystatechange = function() {
+			// Only run if the request is complete
+			if (xhr.readyState !== 4) return;
 
-				// Examine the text in the response
-				response
-					.text()
-					.then(function(data) {
-						console.log(data);
-						resolve({ code: 200, msg: data });
-					})
-					.catch((err) => {
-						console.error(err);
-					});
-			})
-			.catch(function(err) {
-				console.error('Fetch Error :-S', err);
-				reject({ code: '0', msg: err });
-			});
+			// Process our return data
+			if (xhr.status >= 200 && xhr.status < 300) {
+				// What do when the request is successful
+				const data = JSON.parse(xhr.response);
+				resolve({ code: xhr.status, msg: data.ip });
+			} else {
+				// What to do when the request has failed
+				reject({ code: '0', msg: xhr });
+			}
+		};
+		xhr.open('GET', 'https://api.ipify.org?format=json');
+		xhr.send();
 	});
 }
