@@ -34,7 +34,7 @@
 		"simple-peer": "^9.6.2",
 		"typescript": "3.7.3",
 		"y-protocols": "^0.1.0",
-		"y-webrtc": "^10.0.1",
+		"y-webrtc": "^10.1.0",
 		"yjs": "^13.0.0-103"
 	},
 	"scripts": {

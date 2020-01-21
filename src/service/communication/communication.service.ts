@@ -2,6 +2,7 @@ import Chance from 'chance';
 
 import { EventBusInterface } from '../event.bus';
 import { WebrtcProvider } from './y-webrtc';
+
 import { CacheStoreInterface, PersistentStore } from '../storage';
 
 /**

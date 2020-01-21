@@ -1,5 +1,6 @@
 import * as Y from 'yjs';
 import { Message, DrawingPath } from '../../models';
+import { PersistentStore } from './persistance';
 
 export interface CacheStoreInterface {
 	/**
@@ -38,7 +39,9 @@ export interface CacheStoreInterface {
 export class CacheStore implements CacheStoreInterface {
 	private _yDoc = new Y.Doc();
 
-	constructor() {}
+	constructor() {
+		// this._yDoc.clientID = PersistentStore.localID;
+	}
 	public get yDoc() {
 		return this._yDoc;
 	}
