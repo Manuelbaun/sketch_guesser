@@ -6,9 +6,25 @@ import { GameControl, Input, P2PGraph } from '../../components';
 import { getPublicIpAddress } from '../../service/communication';
 import './room.css';
 
+import Avatars from '@dicebear/avatars';
+import sprites from '@dicebear/avatars-bottts-sprites';
+
 type MenuProps = {
 	gameEngine: GameEngine;
 	playerEngine: PlayerEngine;
+};
+
+const avatars = new Avatars(sprites());
+const map = new Map<string, string>();
+const createAvatar = (name: string) => {
+	if (map.has(name)) return map.get(name);
+
+	const svgString = avatars.create(name);
+	const blob = new Blob([ svgString ], { type: 'image/svg+xml' });
+	const svgAvatar = URL.createObjectURL(blob);
+
+	map.set(name, svgAvatar);
+	return map.get(name);
 };
 
 export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
@@ -42,11 +58,17 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 				onSubmit={(msg) => handleSubmit(msg)}
 				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}
 			/>
-			{players.length > 0 && (
-				<P2PGraph players={players} localID={playerEngine.localID} playerEngine={playerEngine} />
-			)}
+			{players.length > 0 &&
+				players.map((player) => (
+					<div className="player-disp">
+						<img src={createAvatar(player.name)} height="100" width="100" />
+						 {player.name}
+					</div>
+				))
+			// <P2PGraph players={players} localID={playerEngine.localID} playerEngine={playerEngine} />
+			}
 		</div>
 	);
 };
 
-// players.map((player) => <div className="player-disp">{player.name}</div>)
+//
