@@ -3,7 +3,7 @@
 
 export function getPublicIpAddress() {
 	return new Promise((resolve, reject) => {
-		fetch('https://api.ipify.org?format=json')
+		fetch('https://api.ipify.org')
 			.then(function(response) {
 				if (response.status !== 200) {
 					reject({ code: response.status, msg: 'some error with statuscode' });
@@ -11,9 +11,15 @@ export function getPublicIpAddress() {
 				}
 
 				// Examine the text in the response
-				response.json().then(function(data) {
-					resolve({ code: 200, msg: data });
-				});
+				response
+					.text()
+					.then(function(data) {
+						console.log(data);
+						resolve({ code: 200, msg: data });
+					})
+					.catch((err) => {
+						console.error(err);
+					});
 			})
 			.catch(function(err) {
 				console.error('Fetch Error :-S', err);

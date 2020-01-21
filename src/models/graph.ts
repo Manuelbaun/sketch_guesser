@@ -1,5 +1,5 @@
 export interface GraphNode {
-	id: string;
+	id: string | number;
 	name?: string;
 	color?: string;
 	size?: number;
@@ -10,6 +10,6 @@ export interface GraphNode {
 }
 
 export interface GraphLink {
-	source: string;
-	target: string;
+	source: string | number;
+	target: string | number;
 }

@@ -25,9 +25,7 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 
 		getPublicIpAddress()
 			.then((data: any) => {
-				console.log(data.msg);
-
-				setIpAddress(data.msg.ip);
+				setIpAddress(data.msg);
 			})
 			.catch((err) => console.error(err));
 
@@ -44,9 +42,9 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 				onSubmit={(msg) => handleSubmit(msg)}
 				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}
 			/>
-			{players.length > 0 &&
-			<P2PGraph players={players} localID={playerEngine.localID} playerEngine={playerEngine} />
-			}
+			{players.length > 0 && (
+				<P2PGraph players={players} localID={playerEngine.localID} playerEngine={playerEngine} />
+			)}
 		</div>
 	);
 };

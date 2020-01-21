@@ -654,12 +654,17 @@ export class WebrtcProvider extends Observable {
 			this.room.disconnect();
 		}
 	}
-	destroy() {
+
+	/**
+	 * @async function
+	 */
+	async destroy() {
 		// need to wait for key before deleting room
-		this.key.then(() => {
-			/** @type {Room} */ this.room.destroy();
-			rooms.delete(this.roomName);
-		});
+		await this.key;
+		// .then(() => {});
+
+		/** @type {Room} */ this.room.destroy();
+		rooms.delete(this.roomName);
 		super.destroy();
 	}
 }

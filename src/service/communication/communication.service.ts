@@ -4,6 +4,7 @@ import { EventBusInterface } from '../event.bus';
 import { WebrtcProvider } from './y-webrtc';
 
 import { CacheStoreInterface, PersistentStore } from '../storage';
+import { Awareness } from './custom-awareness';
 
 /**
  * This is the CommunicationService.
@@ -44,30 +45,59 @@ export class CommunicationServiceImpl {
 		 * provides an ID, should be unique generated!
 		 * This is a workaround.
 		 */
+		const aw = new Awareness(cache.yDoc, 5000);
+
+		aw.on('change', ({ added, updated, removed }, origin) => {
+			const state = aw.getStates();
+			// console.log(state, origin);
+
+			if (added.length > 0) {
+				// console.log('Player added', added, origin);
+				// eventBus.onPlayerConnected(remotePeerId);
+			}
+
+			if (updated.length > 0) {
+				// console.log('Player updated', updated, origin);
+			}
+			if (removed.length > 0) {
+				// console.log('Player removed', removed, origin);
+				removed.forEach((element) => {
+					eventBus.onPlayerDisconnected(element);
+				});
+			}
+		});
+
 		this.provider = new WebrtcProvider(room, cache.yDoc, {
 			password,
-			peerID
+			peerID,
+			awareness: aw
 		});
 
 		this.provider.on('synced', (synced) => {
-			// console.log('synced!', synced);
-		});
-
-		this.provider.on('connected', (remotePeerId) => {
-			eventBus.onPlayerConnected(remotePeerId);
+			console.log('synced!', synced);
 		});
 
 		// cleanup
 		this.provider.on('closed', (remotePeerId) => {
-			eventBus.onPlayerDisconnected(remotePeerId);
+			console.log('closed', remotePeerId);
 		});
 
-		// some cleanup
-		window.addEventListener('beforeunload', (e) => {
-			this.provider.destroy();
+		// Clean up Provider
+		window.onbeforeunload = async (event) => {
+			var message = '';
+			await this.provider.destroy();
+			if (window.event) {
+				// console.log(window.event);
+				// console.log(event.currentTarget.performance);
+				// console.log(event.currentTarget.performance.navigation);
+				// console.log(event.currentTarget.performance.navigation.type);
+			}
+			console.log('destroyed provider');
 
-			e.preventDefault();
-			e.returnValue = '';
-		});
+			event = event || window.event;
+			event.preventDefault = true;
+			event.cancelBubble = true;
+			event.returnValue = message;
+		};
 	}
 }

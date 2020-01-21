@@ -4,6 +4,7 @@ export type Player = {
 	id: string;
 	name: string;
 	points: number;
+	online: boolean;
 	x: number; // between 0 and 1 => normalized
 	y: number; // between 0 and 1
 };

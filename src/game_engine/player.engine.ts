@@ -32,8 +32,15 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		this.playersYMap.forEach((player: any) => {
 			let j;
 			try {
-				j = player.toJSON();
-				arr.push(player.toJSON() as Player);
+				const p = {
+					id: player.get('id'),
+					online: player.get('online'),
+					name: player.get('name'),
+					points: player.get('points'),
+					x: player.get('x'),
+					y: player.get('y')
+				};
+				arr.push(p as Player);
 			} catch (err) {
 				console.error(player, err);
 			}
@@ -71,15 +78,18 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		if (player) return;
 		this.chance = Chance();
 
-		const xx = this.chance.floating({ min: 0.25, max: 0.75 });
+		const xx = this.chance.floating({ min: 0.2, max: 0.85 });
 		const yy = this.chance.floating({ min: 0.25, max: 0.75 });
 
 		this.localPlayer.set('id', peerId);
+		this.localPlayer.set('online', true);
+		//@ts-ignore
+		this.localPlayer.set('doc_id', this.playersYMap.doc.clientID);
+
 		this.localPlayer.set('name', name);
 		this.localPlayer.set('points', 0);
 		this.localPlayer.set('x', xx);
 		this.localPlayer.set('y', yy);
-
 		this.playersYMap.set(peerId, this.localPlayer);
 	}
 
@@ -105,10 +115,17 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		}
 	}
 
+	// For now, the player does not get removed, we could, be
+	// we set the player just offline
 	removePlayer(peerId: string) {
-		const player = this.playersYMap.get(peerId) as Player;
-		if (!player) return;
+		// const player = this.playersYMap.get(peerId) as Player;
+		// if (!player) return;
+		// this.playersYMap.delete(peerId);
 
-		this.playersYMap.delete(peerId);
+		this.playersYMap.forEach((p: any) => {
+			if (p.get('doc_id') == peerId) {
+				p.set('online', false);
+			}
+		});
 	}
 }

@@ -44,7 +44,7 @@ const GRAPH_HEIGHT = 400;
 
 export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngine }) => {
 	const selfNode = {
-		id: localID,
+		id: 0,
 		name: 'You',
 		color: '#e6194B',
 		x: window.innerWidth / 2,
@@ -67,12 +67,12 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngi
 	const updateNodes = (players: Player[]) => {
 		const linksArr = new Array<GraphLink>();
 
-		const pArray = players.map((player: Player) => {
+		const pArray = players.filter((player) => player.online).map((player: Player, index) => {
 			const { name, id, points, x, y } = player;
 
 			if (localID === player.id) {
 				const newNode = {
-					id: localID,
+					id: index,
 					color: '#e6194B',
 					name: name + ' (You)',
 					x: size.width * x,
@@ -84,7 +84,7 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngi
 				return newNode;
 			} else {
 				const newNode = {
-					id: id,
+					id: index,
 					name: name,
 					color: '#911eb4',
 					size: 600,
@@ -94,7 +94,7 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngi
 					svg: createAvatar(name)
 				};
 
-				linksArr.push({ source: localID, target: id });
+				linksArr.push({ source: 0, target: index });
 
 				return newNode;
 			}
@@ -103,7 +103,7 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngi
 		// setNodes(pArray);
 		setGraphData({
 			nodes: pArray,
-			links: []
+			links: linksArr
 		});
 	};
 
@@ -160,10 +160,10 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngi
 		staticGraph: false,
 		staticGraphWithDragAndDrop: false,
 		d3: {
-			alphaTarget: 0.05,
+			alphaTarget: 0.15,
 			gravity: -400,
 			linkLength: 200,
-			linkStrength: 2
+			linkStrength: 10
 		},
 		node: {
 			color: '#d3d3d3',
