@@ -252,6 +252,13 @@ const broadcastWebrtcConn = (room, encoder) => {
 	}
 };
 
+const ICEServers = [
+	{ urls: 'stun:stun.l.google.com:19302' },
+	{ urls: 'stun:global.stun.twilio.com:3478?transport=tpc' },
+	{ urls: 'stun.ekiga.net' },
+	{ urls: 'stun.sipgate.net:3478' }
+];
+
 class WebrtcConn {
 	/**
    * @param {SignalingConn} signalingConn
@@ -269,8 +276,14 @@ class WebrtcConn {
 		/**
      * @type {any}
      */
-		this.peer = new Peer({ initiator });
+		this.peer = new Peer({
+			initiator,
+			config    : {
+				ICEServers
+			}
+		});
 		this.peer.on('signal', (signal) => {
+			console.log(signal);
 			publishSignalingMessage(signalingConn, room, {
 				to     : remotePeerId,
 				from   : room.peerId,
@@ -399,6 +412,7 @@ class SignalingConn extends ws.WebsocketClient {
 		this.providers = new Set();
 		this.on('connect', () => {
 			const topics = Array.from(rooms.keys());
+
 			this.send({ type: 'subscribe', topics });
 			rooms.forEach((room) => publishSignalingMessage(this, room, { type: 'announce', from: room.peerId }));
 		});
@@ -416,6 +430,7 @@ class SignalingConn extends ws.WebsocketClient {
 						if (data == null || data.from === peerId || (data.to !== undefined && data.to !== peerId)) {
 							return;
 						}
+
 						switch (data.type) {
 							case 'announce':
 								map.setIfUndefined(

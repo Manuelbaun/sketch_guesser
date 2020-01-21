@@ -203,14 +203,13 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngi
 		}
 	};
 
-	const nodePosChange = (node) => {
-		const { id, x, y } = node;
-		const xx = x / size.width;
-		const yy = y / size.height;
-		playerEngine.changeLocalPosition(id, xx, yy);
-	};
+	// const nodePosChange = (node) => {
+	// 	const { id, x, y } = node;
+	// 	const xx = x / size.width;
+	// 	const yy = y / size.height;
+	// 	playerEngine.changeLocalPosition(id, xx, yy);
+	// };
 
-	// console.log(graphData.nodes[1]?.name,graphData.nodes[1]?.x)
 	return (
 		<div className="graph-view" ref={targetRef}>
 			<Graph
@@ -218,16 +217,8 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngi
 				ref={targetRefGraph}
 				data={graphData}
 				config={conf}
-				// onClickNode={onClickNode}
-				// onRightClickNode={onRightClickNode}
-				// onClickGraph={onClickGraph}
-				// onClickLink={onClickLink}
-				// onRightClickLink={onRightClickLink}
-				// onMouseOverNode={onMouseOverNode}
-				// onMouseOutNode={onMouseOutNode}
-				// onMouseOverLink={onMouseOverLink}
-				// onMouseOutLink={onMouseOutLink}
-				onNodeDragMove={nodePosChange}
+
+				// onNodeDragMove={nodePosChange}
 			/>;
 		</div>
 	);
