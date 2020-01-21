@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Player } from '../../models';
 import { GameEngine, PlayerEngine } from '../../game_engine';
 import { GameControl, Input, P2PGraph } from '../../components';
+import './room.css';
 
 type MenuProps = {
 	gameEngine: GameEngine;
@@ -33,9 +34,9 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 				onSubmit={(msg) => handleSubmit(msg)}
 				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}
 			/>
-			{players.length > 0 && (
-				<P2PGraph players={players} localID={playerEngine.localID} playerEngine={playerEngine} />
-			)}
+			{players.length > 0 && players.map((player) => <div className="player-disp">{player.name}</div>)
+			// <P2PGraph players={players} localID={playerEngine.localID} playerEngine={playerEngine} />
+			}
 		</div>
 	);
 };
