@@ -233,7 +233,11 @@ const sendWebrtcConn = (webrtcConn, encoder) => {
 		')',
 		logging.UNCOLOR
 	);
-	webrtcConn.peer.send(encoding.toUint8Array(encoder));
+	if (webrtcConn.peer != null) {
+		webrtcConn.peer.send(encoding.toUint8Array(encoder));
+	} else {
+		log('webRTC connection is null?');
+	}
 };
 
 /**
@@ -245,7 +249,11 @@ const broadcastWebrtcConn = (room, encoder) => {
 	const m = encoding.toUint8Array(encoder);
 	try {
 		room.webrtcConns.forEach((conn) => {
-			conn.peer.send(m);
+			if (conn.peer != null) {
+				conn.peer.send(m);
+			} else {
+				log('webRTC connection is null?');
+			}
 		});
 	} catch (err) {
 		console.error(err);
