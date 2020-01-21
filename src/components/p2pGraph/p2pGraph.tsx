@@ -103,7 +103,7 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngi
 		// setNodes(pArray);
 		setGraphData({
 			nodes: pArray,
-			links: linksArr
+			links: []
 		});
 	};
 
