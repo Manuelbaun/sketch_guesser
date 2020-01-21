@@ -217,7 +217,6 @@ export const P2PGraph: React.FC<P2PGraphProps> = ({ localID, players, playerEngi
 				ref={targetRefGraph}
 				data={graphData}
 				config={conf}
-
 				// onNodeDragMove={nodePosChange}
 			/>;
 		</div>
