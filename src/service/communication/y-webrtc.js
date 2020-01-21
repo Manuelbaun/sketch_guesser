@@ -27,7 +27,8 @@ var promise = require('lib0/dist/promise.js');
 
 require('yjs');
 
-var Peer = _interopDefault(require('simple-peer/simplepeer.min.js'));
+// var Peer = _interopDefault(require('simple-peer/simplepeer.min.js'));
+var Peer = require('simple-peer');
 var syncProtocol = require('y-protocols/dist/sync.js');
 var awarenessProtocol = require('y-protocols/dist/awareness.js');
 var buffer = require('lib0/dist/buffer.js');
