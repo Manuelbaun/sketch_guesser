@@ -3,9 +3,10 @@ import * as Y from 'yjs';
 export type Player = {
 	id: string;
 	name: string;
-	clientId: number;
+	clientID: number;
 	points: number;
 	online: boolean;
+	gone: boolean;
 	x: number; // between 0 and 1 => normalized
 	y: number; // between 0 and 1
 };
@@ -24,7 +25,6 @@ export class PlayerClass extends Y.Map<any> {
 	constructor(props: PlayerProps) {
 		super();
 
-		
 		this._id = props.id;
 		this.set('id', props.id);
 		this.name = props.name || props.id;

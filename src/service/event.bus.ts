@@ -3,8 +3,7 @@ import { EventEmitter } from 'events';
 export interface EventBusInterface {
 	on(type: EventBusType, listener: (...args: any[]) => void);
 	off(type: EventBusType, listener: (...args: any[]) => void);
-	onPlayerConnected(id: string);
-	onPlayerDisconnected(id: string);
+	onPlayerConnection(id: string, connected: boolean);
 }
 
 type EventBusType = 'CONNECTION';
@@ -22,16 +21,9 @@ export class EventBus {
 		this.emitter.off(type, listener);
 	}
 
-	onPlayerConnected(id: string) {
+	onPlayerConnection(id: string, connected: boolean) {
 		this.emitter.emit('CONNECTION', {
-			connected: true,
-			id
-		});
-	}
-
-	onPlayerDisconnected(id: string) {
-		this.emitter.emit('CONNECTION', {
-			connected: false,
+			connected,
 			id
 		});
 	}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GameEngine, PlayerEngine } from './engines';
 import { GameEvents } from './models';
-import { CacheStore, CommunicationServiceImpl, EventBus } from './service';
+import { CacheStore, CommunicationService, EventBus } from './service';
 
 import { LandingPage, RoomPage, GamePage } from './pages';
 
@@ -25,7 +25,7 @@ enum AppState {
 }
 
 // needs to be refactored
-let commService: CommunicationServiceImpl;
+let commService: CommunicationService;
 
 const App: React.FC = () => {
 	const [ appState, setAppState ] = useState<AppState>(AppState.LANDING);
@@ -49,9 +49,16 @@ const App: React.FC = () => {
 	}, []);
 
 	// the same as open a room by id
-	const joinGame = (roomName?: string) => {
+	const joinGame = async (roomName?: string) => {
 		// establish connection between peers
-		commService = new CommunicationServiceImpl(cacheStore, eventBus, roomName);
+		if (commService) {
+			// needs to clear the webrtc connections to all previous ones.
+			// then reconnect, so the sync algorithm works properly
+			// Update: still a bug
+			await commService.dispose();
+		}
+
+		commService = new CommunicationService(cacheStore, eventBus, roomName);
 		const url = window.location.origin + '/' + commService.roomID;
 		window.history.replaceState('', 'Room', url);
 		setAppState(AppState.ROOM);

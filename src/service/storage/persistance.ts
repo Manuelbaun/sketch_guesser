@@ -6,7 +6,7 @@ import Chance from 'chance';
  * 
  * Quick hack to get the session storage up and going
  */
-type SessionKeys = 'local_id' | 'local_name' | 'client_id';
+type SessionKeys = 'local_peer_id' | 'local_name' | 'local_doc_id';
 
 export class PersistentStore {
 	private static _localID: string;
@@ -16,7 +16,7 @@ export class PersistentStore {
 	// loads the id from the sessionStorage
 	// when no ID exist, create on
 	public static get localID(): string {
-		const key: SessionKeys = 'local_id';
+		const key: SessionKeys = 'local_peer_id';
 		if (!(this._localID = sessionStorage.getItem(key) || '')) {
 			this._localID = random.uuidv4();
 			sessionStorage.setItem(key, this._localID);
@@ -26,7 +26,7 @@ export class PersistentStore {
 	}
 
 	public static get clientID(): number {
-		const key: SessionKeys = 'client_id';
+		const key: SessionKeys = 'local_doc_id';
 		let clientID = '';
 		if (!(clientID = sessionStorage.getItem(key) || '')) {
 			this._clientID = random.uint32();

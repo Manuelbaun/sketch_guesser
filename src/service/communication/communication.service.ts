@@ -4,7 +4,6 @@ import { EventBusInterface } from '../event.bus';
 import { WebrtcProvider } from './y-webrtc';
 
 import { CacheStoreInterface, PersistentStore } from '../storage';
-import { Awareness } from './custom-awareness';
 
 /**
  * This is the CommunicationService.
@@ -27,8 +26,8 @@ import { Awareness } from './custom-awareness';
  * that this is sufficient enough.
  */
 
-export class CommunicationServiceImpl {
-	private provider;
+export class CommunicationService {
+	private _provider;
 	roomID: string;
 
 	constructor(store: CacheStoreInterface, eventBus: EventBusInterface, roomName: string = '') {
@@ -40,58 +39,34 @@ export class CommunicationServiceImpl {
 
 		const room = 'sketchguessr-' + this.roomID;
 
-		/**
-		 * provides an ID, should be unique generated!
-		 * This is a workaround.
-		 */
-		const aw = new Awareness(store.yDoc);
-
-		aw.on('change', ({ added, updated, removed }, origin) => {
-			const state = aw.getStates();
-
-			console.log(added, updated, removed);
-
-			if (added.length > 0) {
-				added.forEach((element) => {
-					eventBus.onPlayerConnected(element.toString());
-				});
-			}
-
-			if (updated.length > 0) {
-				// console.log('Player updated', updated, origin);
-			}
-
-			if (removed.length > 0) {
-				removed.forEach((element) => {
-					eventBus.onPlayerDisconnected(element.toString());
-				});
-			}
-		});
-
-		this.provider = new WebrtcProvider(room, store.yDoc, {
+		this._provider = new WebrtcProvider(room, store.yDoc, {
 			password: null,
-			awareness: aw
+			peerID: PersistentStore.localID
 		});
 
-		this.provider.on('synced', (synced) => {
+		this._provider.on('synced', (synced) => {
 			console.log('synced!', synced);
 		});
 
-		// cleanup
-		this.provider.on('closed', (remotePeerId) => {
-			console.log('closed', remotePeerId);
+		this._provider.on('peers', (peers) => {
+			console.log(peers);
+			peers.added.forEach((peerID) => eventBus.onPlayerConnection(peerID, true));
+			peers.removed.forEach((peerID) => eventBus.onPlayerConnection(peerID, false));
 		});
 
 		// Clean up Provider
-		window.onbeforeunload = async (event) => {
-			var message = '';
-			await this.provider.destroy();
-			console.log('destroyed provider');
+		window.onbeforeunload = (event) => this.dispose(event);
+	}
 
-			event = event || window.event;
-			event.preventDefault = true;
-			event.cancelBubble = true;
-			event.returnValue = '';
-		};
+	// cleanup
+	async dispose(event?) {
+		console.log('destroyed provider');
+		await this._provider.destroy();
+
+		let ev = event || window.event;
+		ev.preventDefault = true;
+		ev.cancelBubble = true;
+		ev.returnValue = '';
+		ev.message = '';
 	}
 }

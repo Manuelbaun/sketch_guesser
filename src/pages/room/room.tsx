@@ -20,7 +20,8 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 
 	useEffect(() => {
 		const sub = playerEngine.subscribe((players) => {
-			setPlayers(players);
+			const online = players.filter((player) => !player.gone);
+			setPlayers(online);
 		});
 
 		getPublicIpAddress()
@@ -59,9 +60,9 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 								<td>
 									<Avatar name={player.name} />
 								</td>
-								<td>{playerEngine.localID == player.id ? player.name + ' (You)' : player.name}</td>
+								<td>{playerEngine.isLocalPlayer(player.id) ? player.name + ' (You)' : player.name}</td>
 								<td>{player.points}</td>
-								<td>{player.id}</td>
+								<td>{player.clientID}</td>
 								<td>{player.online ? 'online' : 'offline'}</td>
 							</tr>
 						))}

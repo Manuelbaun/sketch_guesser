@@ -12,30 +12,25 @@ import EngineInterface from './engine.interface';
 // A Little hack to get the Subject Methods onto the PlayerEngineInterface
 export interface PlayerEngineInterface extends Subject<Array<Player>> {
 	playerNum: number;
-
 	playerName: string;
-
 	localID: string;
 
 	getAllPlayers(): Player[];
-
+	isLocalPlayer(id: string): boolean;
 	playerExists(peerId: string): boolean;
-
 	addLocalPlayer();
-
 	updateLocalName(name: string);
-
 	addLocalPoints(points: number);
-
 	changeLocalPosition(peerId: string, x, y);
-
 	setPlayerOnline(id);
-
 	// For now, the player does not get removed, we could, be
 	// we set the player just offline
 	setPlayerOffline(id: string);
 }
 
+type PlayerEngineProps = {
+	playerTimeout: number;
+};
 // Now the Subject class implements the Subject interface
 export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngineInterface, EngineInterface {
 	/**
@@ -51,8 +46,11 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 		return this._localPlayer.get('name') as string;
 	}
 
+	public isLocalPlayer(id: string) {
+		return PersistentStore.localID == id;
+	}
 	public get localID(): string {
-		return PersistentStore.clientID.toString();
+		return PersistentStore.localID;
 	}
 
 	getAllPlayers(): Array<Player> {
@@ -63,7 +61,9 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 			try {
 				const p = {
 					id: player.get('id'),
+					clientID: player.get('doc_id'),
 					online: player.get('online'),
+					gone: player.get('gone'),
 					name: player.get('name'),
 					points: player.get('points'),
 					x: player.get('x'),
@@ -78,8 +78,7 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 		return arr;
 	}
 
-	private _onPlayerConnection = (event) => {
-		console.log(event);
+	private _onPlayerConnectionHandler = (event) => {
 		if (!event.connected) this.setPlayerOffline(event.id);
 		if (event.connected) this.setPlayerOnline(event.id);
 	};
@@ -87,14 +86,17 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	private _observerDeep;
 	private _localPlayer = new Y.Map();
 	private _chance;
-	constructor(cacheStore: CacheStoreInterface, eventBus: EventBusInterface) {
+	private _playerTimeout;
+
+	constructor(cacheStore: CacheStoreInterface, eventBus: EventBusInterface, { playerTimeout = 5000 } = {}) {
 		super();
+
+		this._playerTimeout = playerTimeout;
 		this.store = cacheStore.players;
 
-		eventBus.on('CONNECTION', this._onPlayerConnection);
-		this._observerDeep = () => {
-			this.next(this.getAllPlayers());
-		};
+		eventBus.on('CONNECTION', this._onPlayerConnectionHandler);
+
+		this._observerDeep = () => this.next(this.getAllPlayers());
 		this.store.observeDeep(this._observerDeep);
 
 		console.log('PlayerEngine init');
@@ -110,7 +112,8 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	}
 
 	public addLocalPlayer() {
-		const id = PersistentStore.clientID.toString();
+		const id = PersistentStore.localID;
+		const docId = PersistentStore.clientID;
 		const name = PersistentStore.localName;
 
 		this._localPlayer = new Y.Map();
@@ -120,7 +123,11 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 		const yy = this._chance.floating({ min: 0.25, max: 0.75 });
 
 		this._localPlayer.set('id', id);
+		this._localPlayer.set('doc_id', docId);
 		this._localPlayer.set('online', true);
+		// workaround for delete
+		this._localPlayer.set('gone', false);
+
 		this._localPlayer.set('name', name);
 		this._localPlayer.set('points', 0);
 		this._localPlayer.set('x', xx);
@@ -153,13 +160,48 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 
 	setPlayerOnline(id) {
 		console.log('Player online ', id);
-		// this.playersYMap.forEach((p: any) => {});
+		let p = new Y.Map();
+		//@ts-ignore
+		p = this.store.get(id);
+		if (p) {
+			const timer = this.offlineTimer.get(id);
+			p.set('online', true);
+			// delete workround
+			p.set('gone', false);
+			console.log('Player is back online');
+
+			if (timer) {
+				clearTimeout(timer);
+			}
+		}
 	}
 
 	// For now, the player does not get removed, we could, be
 	// we set the player just offline
+	offlineTimer = new Map<string, NodeJS.Timeout>();
 	setPlayerOffline(id: string) {
 		console.log('Remove Player', id);
-		this.store.delete(id);
+		let p = new Y.Map();
+		//@ts-ignore
+		p = this.store.get(id);
+
+		if (p) {
+			p.set('online', false);
+
+			// let timer run, to delete player, when longer offline
+			// then the player should
+			const timer = setTimeout(() => {
+				// TODO: Delete and readd does not work
+				// some sync issue, because of a missing update package
+				// via yjs. For now, just set offline is fine!
+				// this.store.delete(id);
+				// workaround for the delete
+				p.set('gone', true);
+				this.offlineTimer.delete(id);
+			}, this._playerTimeout);
+
+			// store timer
+			this.offlineTimer.set(id, timer);
+		}
 	}
 }
