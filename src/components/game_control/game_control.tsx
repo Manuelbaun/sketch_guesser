@@ -37,6 +37,11 @@ export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 		gameEngine.startGame();
 	};
 
+	const resetGame = () => {
+		setupGame();
+		startGame();
+	};
+
 	const stopGame = () => {
 		setGameStarted(false);
 		gameEngine.stopGame();
@@ -54,7 +59,7 @@ export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 				START
 			</Button>
 			<Button onClick={stopGame}> Stop </Button>
-			<Button onClick={setupGame}> Reset </Button>
+			<Button onClick={resetGame}> Reset </Button>
 			<Button onClick={nextRound}> Next Round </Button>
 			<Button onClick={cancelGame}> Go Back to Menu </Button>
 		</div>
