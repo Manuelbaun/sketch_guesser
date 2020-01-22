@@ -1,6 +1,6 @@
 import React from 'react';
 import { GameControl, CountDown, MessageBox, DrawingArea, MessageEngine, DrawingManager } from '../../components';
-import { GameEngine } from '../../game_engine';
+import { GameEngine } from '../../engines';
 import { CacheStore } from '../../service';
 
 type Props = {

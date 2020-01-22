@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GameEngine, PlayerEngine } from './game_engine';
+import { GameEngine, PlayerEngine } from './engines';
 import { GameEvents } from './models';
 import { CacheStore, CommunicationServiceImpl, EventBus } from './service';
 
@@ -49,9 +49,9 @@ const App: React.FC = () => {
 	}, []);
 
 	// the same as open a room by id
-	const joinGame = (id?: string) => {
+	const joinGame = (roomName?: string) => {
 		// establish connection between peers
-		commService = new CommunicationServiceImpl(cacheStore, eventBus, id);
+		commService = new CommunicationServiceImpl(cacheStore, eventBus, roomName);
 		const url = window.location.origin + '/' + commService.roomID;
 		window.history.replaceState('', 'Room', url);
 		setAppState(AppState.ROOM);

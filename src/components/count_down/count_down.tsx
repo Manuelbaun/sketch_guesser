@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GameEngine } from '../../game_engine';
+import { GameEngine } from '../../engines';
 import { GameEvents } from '../../models';
 
 import './count_down.css';

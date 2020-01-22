@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import Button from 'react-bootstrap/Button';
-import './landing.css';
 import { Input } from '../../components/common/input';
 import mySvg from '../../logo.svg';
+import './landing.css';
 
 type Props = {
 	onJoinGame(roomID: string): void;

@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
 import { DrawingPath, Coordinate } from '../../models';
-import { CacheStore } from '../../service/storage';
+import { CacheStoreInterface } from '../../service/storage';
 
 /**
  * 
@@ -17,7 +17,7 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 	private currentDrawElement;
 	private currentDrawPath;
 
-	constructor(cache: CacheStore) {
+	constructor(cache: CacheStoreInterface) {
 		super();
 		this.drawPathStore = cache.drawPaths;
 

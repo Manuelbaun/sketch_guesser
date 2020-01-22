@@ -1,4 +1,4 @@
-import * as Y from 'yjs';
+import * as Y from 'yjs'
 import { Message, DrawingPath } from '../../models';
 import { PersistentStore } from './persistance';
 

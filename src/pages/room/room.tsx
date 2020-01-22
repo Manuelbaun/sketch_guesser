@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Player } from '../../models';
-import { GameEngine, PlayerEngine } from '../../game_engine';
+import { GameEngine, PlayerEngine } from '../../engines';
 import { GameControl, Input, Avatar } from '../../components';
 import { getPublicIpAddress } from '../../service/communication';
 import './room.css';
