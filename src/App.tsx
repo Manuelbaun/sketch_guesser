@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GameEngine, PlayerEngine } from './game_engine';
 import { GameEvents } from './models';
-import { CacheStore, PersistentStore, CommunicationServiceImpl, EventBus } from './service';
+import { CacheStore, CommunicationServiceImpl, EventBus } from './service';
 
 import { LandingPage, RoomPage, GamePage } from './pages';
 

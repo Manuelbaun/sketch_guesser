@@ -2,6 +2,9 @@
 // to see if clients are actually on different public ips
 var xhr = new XMLHttpRequest();
 
+
+// For some reason, getting the actual IP-Address
+// does not work in the brave browser
 export function getPublicIpAddress() {
 	return new Promise((resolve, reject) => {
 		// Setup our listener to process compeleted requests

@@ -1,8 +1,6 @@
 .player-disp {
 	color: rgb(140, 255, 140);
-	border-color: grey;
-	font-size: 2em;
-	border-style: solid 1px;
+	font-size: 1.52em;
 }
 
 .player-table {
