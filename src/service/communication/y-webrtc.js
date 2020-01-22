@@ -462,7 +462,6 @@ export class Room {
  */
 const openRoom = (doc, provider, name, key, peerID) => {
 	// there must only be one room
-	console.log(rooms);
 	if (rooms.has(name)) {
 		throw error.create(`A Yjs Doc connected to room "${name}" already exists!`);
 	}
