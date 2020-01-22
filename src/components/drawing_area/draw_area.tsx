@@ -1,6 +1,6 @@
 import React from 'react';
 import { DrawingPath } from '../../models';
-import { DrawLine } from './drawing_line';
+import { DrawLine } from './draw_line';
 
 type Props = {
 	paths: Array<DrawingPath>;
