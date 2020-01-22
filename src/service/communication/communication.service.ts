@@ -32,7 +32,7 @@ export class CommunicationServiceImpl {
 	roomID: string;
 
 	constructor(cache: CacheStoreInterface, eventBus: EventBusInterface, roomName: string = '') {
-		const peerID = PersistentStore.localID;
+		const peerID = PersistentStore.clientID;
 		// create random room name based on the peerID as seed.
 		this.roomID = roomName === '' ? Chance(peerID).string({ length: 20, alpha: true, numeric: true }) : roomName;
 
@@ -44,25 +44,26 @@ export class CommunicationServiceImpl {
 		 * provides an ID, should be unique generated!
 		 * This is a workaround.
 		 */
-		const aw = new Awareness(cache.yDoc, 5000);
+		const aw = new Awareness(cache.yDoc);
 
 		aw.on('change', ({ added, updated, removed }, origin) => {
 			const state = aw.getStates();
+
 			console.log(added, updated, removed);
 
 			if (added.length > 0) {
 				added.forEach((element) => {
-					eventBus.onPlayerConnected(element);
+					eventBus.onPlayerConnected(element.toString());
 				});
 			}
 
 			if (updated.length > 0) {
 				// console.log('Player updated', updated, origin);
 			}
+
 			if (removed.length > 0) {
-				// console.log('Player removed', removed, origin);
 				removed.forEach((element) => {
-					eventBus.onPlayerDisconnected(element);
+					eventBus.onPlayerDisconnected(element.toString());
 				});
 			}
 		});

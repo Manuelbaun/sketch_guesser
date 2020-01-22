@@ -23,7 +23,7 @@ export const GameControl = ({ gameEngine }: Props) => {
 			codeWordHash: '',
 			currentRound: 1,
 			rounds: 3,
-			currentMasterID: PersistentStore.localID,
+			currentMasterID: PersistentStore.clientID.toString(),
 			state: GameStates.WAITING
 		});
 	};

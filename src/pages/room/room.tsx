@@ -77,7 +77,7 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 								</td>
 								<td>{playerEngine.localID == player.id ? player.name + ' (You)' : player.name}</td>
 								<td>{player.points}</td>
-								<td>{player.clientId}</td>
+								<td>{player.id}</td>
 								<td>{player.online ? 'online' : 'offline'}</td>
 							</tr>
 						))

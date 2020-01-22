@@ -19,7 +19,7 @@ export class MessageEngine extends Subject<Message[]> {
 	}
 
 	public get localID(): string {
-		return PersistentStore.localID;
+		return PersistentStore.clientID.toString();
 	}
 	constructor(store: CacheStoreInterface) {
 		super();

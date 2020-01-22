@@ -24,6 +24,7 @@ export class PlayerClass extends Y.Map<any> {
 	constructor(props: PlayerProps) {
 		super();
 
+		
 		this._id = props.id;
 		this.set('id', props.id);
 		this.name = props.name || props.id;
