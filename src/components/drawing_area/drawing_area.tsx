@@ -22,53 +22,39 @@ const colorPalette = [
 
 // TODO: Remove all listener, when user is not the current presenter
 // define some sizes, when acting as presenter or as guesser
-interface DrawingAreaProps {
+interface Props {
 	width: number;
 	height: number;
 	drawingManager: DrawingManager;
 }
 
-export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps) => {
+export const DrawingArea: React.FC<Props> = (props: Props) => {
 	const { width, height, drawingManager } = props;
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const [ isPainting, setIsPainting ] = useState(false);
 	const [ color, setColor ] = useState(colorPalette[0]);
 
-	/**
-	 * Needs to be an Y.Map! with structure DrawingPath
-	 * @param drawElement 
-	 * 
-	 * @example
-	 * {
-	 * 	color: string
-	 *	origin: Coordinate
-	 *	path : Array<Coordinate>
-	 * }
-	 */
-
-	// TODO: Should only draw the last point
-	// and not the whole draw line... => needs refactor with drawingEngine
 	const drawPath = ({ color, origin, line }: DrawingPath): void => {
 		if (!canvasRef.current) return;
 		const canvas: HTMLCanvasElement = canvasRef.current;
-		const context = canvas.getContext('2d');
+		const ctx = canvas.getContext('2d');
 
-		if (context != null) {
-			context.strokeStyle = color;
-			context.shadowColor = color;
-			context.lineJoin = 'round';
-			context.lineWidth = 5;
+		if (ctx != null) {
+			ctx.strokeStyle = color;
+			ctx.shadowColor = color;
+			ctx.lineJoin = 'round';
+			ctx.lineWidth = 5;
 
-			context.beginPath();
-			context.moveTo(origin.x * canvas.width, origin.y * canvas.height);
+			ctx.beginPath();
+			ctx.moveTo(origin.x * canvas.width, origin.y * canvas.height);
 
 			line.forEach(({ x, y }: Coordinate) => {
-				context.lineTo(x * canvas.width, y * canvas.height);
+				ctx.lineTo(x * canvas.width, y * canvas.height);
 			});
 
-			context.stroke();
-			context.closePath();
+			ctx.stroke();
+			ctx.closePath();
 		}
 	};
 
@@ -114,11 +100,8 @@ export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps)
 		(event) => {
 			event.preventDefault();
 			event.stopPropagation();
-			// const { clientX, clientY } = event.touches[0];
 			const { clientX: x, clientY: y } = event.touches[0];
-			// console.log(event.touches[0], event.touches[0]);
 			const origin = calculateTouchCoordinates(x, y);
-			// console.log(origin);
 			if (origin) {
 				setIsPainting(true);
 				drawingManager.addNewPath(origin, color);
@@ -131,9 +114,7 @@ export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps)
 		(event) => {
 			event.preventDefault();
 			event.stopPropagation();
-			// const { clientX, clientY } = event.touches[0];
 			const { clientX: x, clientY: y } = event.touches[0];
-			// console.log(x, y, event.touches[0]);
 
 			if (isPainting) {
 				const newCoordinates = calculateTouchCoordinates(x, y);
@@ -159,19 +140,17 @@ export const DrawingArea: React.FC<DrawingAreaProps> = (props: DrawingAreaProps)
 		[ isPainting ]
 	);
 
-	const exitPaint = useCallback(() => {
-		setIsPainting(false);
-	}, []);
+	const exitPaint = useCallback(() => setIsPainting(false), []);
 
 	const clearCanvas = () => {
 		if (!canvasRef.current) return;
 
 		const canvas: HTMLCanvasElement = canvasRef.current;
-		const context = canvas.getContext('2d');
+		const ctx = canvas.getContext('2d');
 
-		if (context) {
+		if (ctx) {
 			drawingManager.clearPaths();
-			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+			ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		}
 	};
 

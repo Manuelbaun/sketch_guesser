@@ -17,39 +17,28 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 	private currentDrawElement;
 	private currentDrawPath;
 
-	constructor(store: CacheStore) {
+	constructor(cache: CacheStore) {
 		super();
-		this.drawPathStore = store.drawPaths;
-
-		console.log(this);
-		// TODO: think again!!!!!!!!!
+		this.drawPathStore = cache.drawPaths;
 
 		this.drawPathStore.observeDeep(() => {
-			const arr = new Array<DrawingPath>();
+			const arr3 = this.drawPathStore.map((path) => path.toJSON()) as Array<DrawingPath>;
 
-			this.drawPathStore.forEach((path) => {
-				arr.push({
-					color: path.get('color'),
-					origin: path.get('origin'),
-					line: path.get('path').toArray()
-				});
-			});
-
-			this.next(arr);
+			// emit to listener (Drawing Area)
+			this.next(arr3);
 		});
 
 		console.log('MessageEngine init');
 	}
 
-	// FIX: Sadly a class cant be pushed to a Y.Array,
-	// it will be just an json object with no methods, when build back
-	// except wrapped with an object => Sync behavior unknown so far?
+	// Classes cant be pushed into an array, it will just be an json object
 	addNewPath(origin: Coordinate, color: string): void {
 		this.currentDrawElement = new Y.Map();
 		this.currentDrawElement.set('color', color);
 		this.currentDrawElement.set('origin', origin);
 		this.currentDrawPath = new Y.Array();
-		this.currentDrawElement.set('path', this.currentDrawPath);
+		this.currentDrawElement.set('line', this.currentDrawPath);
+
 		this.drawPathStore.push([ this.currentDrawElement ]);
 	}
 
@@ -65,7 +54,7 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 		return {
 			color: path.get('color'),
 			origin: path.get('origin'),
-			line: path.get('path').toArray()
+			line: path.get('line').toArray()
 		} as DrawingPath;
 	}
 
