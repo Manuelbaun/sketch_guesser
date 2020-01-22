@@ -58,15 +58,33 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 				onSubmit={(msg) => handleSubmit(msg)}
 				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}
 			/>
-			{players.length > 0 &&
-				players.map((player) => (
-					<div className="player-disp">
-						<img src={createAvatar(player.name)} height="100" width="100" />
-						 {player.name}
-					</div>
-				))
-			// <P2PGraph players={players} localID={playerEngine.localID} playerEngine={playerEngine} />
-			}
+			<table className="player-table">
+				<thead>
+					<tr className="player-disp">
+						<th />
+						<th>Name</th>
+						<th>Points</th>
+						<th>ID</th>
+						<th>State</th>
+					</tr>
+				</thead>
+				<tbody>
+					{players.length > 0 &&
+						players.map((player) => (
+							<tr key={player.id} className="player-disp">
+								<td>
+									<img src={createAvatar(player.name)} height="100" width="100" />
+								</td>
+								<td>{playerEngine.localID == player.id ? player.name + ' (You)' : player.name}</td>
+								<td>{player.points}</td>
+								<td>{player.clientId}</td>
+								<td>{player.online ? 'online' : 'offline'}</td>
+							</tr>
+						))
+					// <P2PGraph players={players} localID={playerEngine.localID} playerEngine={playerEngine} />
+					}
+				</tbody>
+			</table>
 		</div>
 	);
 };

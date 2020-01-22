@@ -18,16 +18,6 @@ const cacheStore = new CacheStore();
 const playerEngine = new PlayerEngine(cacheStore, eventBus);
 const gameEngine = new GameEngine(cacheStore);
 
-const providerValue = {
-	localID: PersistentStore.localID,
-	cache: cacheStore,
-	playerEngine,
-	gameEngine
-};
-
-// needs to use this => better
-const AppContext = React.createContext(providerValue);
-
 enum AppState {
 	LANDING,
 	ROOM,
@@ -40,14 +30,14 @@ let commService: CommunicationServiceImpl;
 const App: React.FC = () => {
 	const [ appState, setAppState ] = useState<AppState>(AppState.LANDING);
 
-	const startGame: FunctionVoidCallback = () => setAppState(AppState.GAME);
-	const stopGame: FunctionVoidCallback = () => setAppState(AppState.ROOM);
-
 	useEffect(() => {
 		const roomID = window.location.pathname.slice(1);
 		if (roomID != '') {
 			joinGame(roomID);
 		}
+
+		const startGame: FunctionVoidCallback = () => setAppState(AppState.GAME);
+		const stopGame: FunctionVoidCallback = () => setAppState(AppState.ROOM);
 
 		gameEngine.on(GameEvents.GAME_STARTED, startGame);
 		gameEngine.on(GameEvents.GAME_STOPPED, stopGame);
@@ -72,15 +62,13 @@ const App: React.FC = () => {
 	};
 
 	return (
-		<AppContext.Provider value={providerValue}>
-			<div className="App">
-				{appState == AppState.LANDING && <LandingPage onJoinGame={joinGame} onCreateGame={createGame} />}
+		<div className="App">
+			{appState == AppState.LANDING && <LandingPage onJoinGame={joinGame} onCreateGame={createGame} />}
 
-				{appState == AppState.ROOM && <RoomPage gameEngine={gameEngine} playerEngine={playerEngine} />}
+			{appState == AppState.ROOM && <RoomPage gameEngine={gameEngine} playerEngine={playerEngine} />}
 
-				{appState == AppState.GAME && <GamePage gameEngine={gameEngine} cache={cacheStore} />}
-			</div>
-		</AppContext.Provider>
+			{appState == AppState.GAME && <GamePage gameEngine={gameEngine} cache={cacheStore} />}
+		</div>
 	);
 };
 

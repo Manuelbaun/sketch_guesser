@@ -39,7 +39,6 @@ export class CommunicationServiceImpl {
 		this.roomID = this.roomID.toLowerCase();
 
 		const room = 'sketchguessr-' + this.roomID;
-		const password = null;
 
 		/**
 		 * provides an ID, should be unique generated!
@@ -49,11 +48,12 @@ export class CommunicationServiceImpl {
 
 		aw.on('change', ({ added, updated, removed }, origin) => {
 			const state = aw.getStates();
-			// console.log(state, origin);
+			console.log(added, updated, removed);
 
 			if (added.length > 0) {
-				// console.log('Player added', added, origin);
-				// eventBus.onPlayerConnected(remotePeerId);
+				added.forEach((element) => {
+					eventBus.onPlayerConnected(element);
+				});
 			}
 
 			if (updated.length > 0) {
@@ -68,8 +68,7 @@ export class CommunicationServiceImpl {
 		});
 
 		this.provider = new WebrtcProvider(room, cache.yDoc, {
-			password,
-			peerID,
+			password: null,
 			awareness: aw
 		});
 
@@ -86,18 +85,12 @@ export class CommunicationServiceImpl {
 		window.onbeforeunload = async (event) => {
 			var message = '';
 			await this.provider.destroy();
-			if (window.event) {
-				// console.log(window.event);
-				// console.log(event.currentTarget.performance);
-				// console.log(event.currentTarget.performance.navigation);
-				// console.log(event.currentTarget.performance.navigation.type);
-			}
 			console.log('destroyed provider');
 
 			event = event || window.event;
 			event.preventDefault = true;
 			event.cancelBubble = true;
-			event.returnValue = message;
+			event.returnValue = '';
 		};
 	}
 }

@@ -40,7 +40,7 @@ export class CacheStore implements CacheStoreInterface {
 	private _yDoc = new Y.Doc();
 
 	constructor() {
-		// this._yDoc.clientID = PersistentStore.localID;
+		this._yDoc.clientID = PersistentStore.clientID;
 	}
 	public get yDoc() {
 		return this._yDoc;

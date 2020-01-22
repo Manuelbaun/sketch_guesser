@@ -6,10 +6,11 @@ import Chance from 'chance';
  * 
  * Quick hack to get the session storage up and going
  */
-type SessionKeys = 'local_id' | 'local_name';
+type SessionKeys = 'local_id' | 'local_name' | 'client_id';
 
 export class PersistentStore {
 	private static _localID: string;
+	private static _clientID: number;
 	static chanceName;
 
 	// loads the id from the sessionStorage
@@ -24,6 +25,18 @@ export class PersistentStore {
 		return this._localID;
 	}
 
+	public static get clientID(): number {
+		const key: SessionKeys = 'client_id';
+		let clientID = '';
+		if (!(clientID = sessionStorage.getItem(key) || '')) {
+			this._clientID = random.uint32();
+			sessionStorage.setItem(key, this._clientID.toString());
+		} else {
+			this._clientID = parseInt(clientID);
+		}
+
+		return this._clientID;
+	}
 	/**
 	 * Stores the user Local name. If there is no user name defined, 
 	 * generate a random one else use the local name 

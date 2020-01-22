@@ -34,6 +34,7 @@ export class PlayerEngine extends Subject<Array<Player>> {
 			try {
 				const p = {
 					id: player.get('id'),
+					clientId: player.get('doc_id'),
 					online: player.get('online'),
 					name: player.get('name'),
 					points: player.get('points'),
@@ -54,7 +55,8 @@ export class PlayerEngine extends Subject<Array<Player>> {
 	}
 
 	private _onPlayerConnection = (event) => {
-		if (!event.connected) this.removePlayer(event.peerId);
+		if (!event.connected) this.setPlayerOffline(event.peerId);
+		if (event.connected) this.setPlayerOnline(event.peerId);
 	};
 
 	constructor(cacheStore: CacheStoreInterface, eventBus: EventBusInterface) {
@@ -68,20 +70,24 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		});
 
 		console.log('PlayerEngine init');
-		this.addPlayer(this.localID, PersistentStore.localName, 0.5, 0.5);
+		this.addLocalPlayer();
 	}
 
 	localPlayer = new Y.Map();
 	chance;
-	addPlayer(peerId: string, name: string, x?: number, y?: number) {
-		const player = this.playersYMap.get(peerId) as Player;
+	addLocalPlayer() {
+		const id = PersistentStore.localID;
+		const name = PersistentStore.localName;
+		const player = this.playersYMap.get(id);
+
 		if (player) return;
+		this.localPlayer = new Y.Map();
 		this.chance = Chance();
 
 		const xx = this.chance.floating({ min: 0.2, max: 0.85 });
 		const yy = this.chance.floating({ min: 0.25, max: 0.75 });
 
-		this.localPlayer.set('id', peerId);
+		this.localPlayer.set('id', id);
 		this.localPlayer.set('online', true);
 		//@ts-ignore
 		this.localPlayer.set('doc_id', this.playersYMap.doc.clientID);
@@ -90,7 +96,8 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		this.localPlayer.set('points', 0);
 		this.localPlayer.set('x', xx);
 		this.localPlayer.set('y', yy);
-		this.playersYMap.set(peerId, this.localPlayer);
+
+		this.playersYMap.set(id, this.localPlayer);
 	}
 
 	updateLocalName(name: string) {
@@ -115,17 +122,30 @@ export class PlayerEngine extends Subject<Array<Player>> {
 		}
 	}
 
-	// For now, the player does not get removed, we could, be
-	// we set the player just offline
-	removePlayer(peerId: string) {
-		// const player = this.playersYMap.get(peerId) as Player;
-		// if (!player) return;
-		// this.playersYMap.delete(peerId);
-
+	setPlayerOnline(id) {
+		console.log('Player online ', id);
 		this.playersYMap.forEach((p: any) => {
-			if (p.get('doc_id') == peerId) {
-				p.set('online', false);
+			console.log(p.get('doc_id'));
+			if (p.get('doc_id') == id) {
+				p.set('online', true);
 			}
 		});
+	}
+
+	// For now, the player does not get removed, we could, be
+	// we set the player just offline
+	setPlayerOffline(id: string) {
+		// if (!player) return;
+		let idLong = '';
+		this.playersYMap.forEach((p: any) => {
+			console.log();
+			if (p.get('doc_id') == id) {
+				idLong = p.get('id');
+
+				console.log('Player offline ', id, idLong);
+			}
+		});
+
+		this.playersYMap.delete(idLong);
 	}
 }

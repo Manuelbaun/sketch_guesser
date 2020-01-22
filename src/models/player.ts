@@ -3,6 +3,7 @@ import * as Y from 'yjs';
 export type Player = {
 	id: string;
 	name: string;
+	clientId: number;
 	points: number;
 	online: boolean;
 	x: number; // between 0 and 1 => normalized
