@@ -2,91 +2,80 @@ import sha256 from 'sha256';
 import { EventEmitter } from 'events';
 import { CacheStoreInterface } from '../service/storage/cache';
 import { Game, GameStates, GameEvents } from '../models';
+import EngineInterface from './engine.interface';
 
-class GameEngineDocSetterGetter {
+export interface GameEngineInterface {
+	// emitter wrapper
+	emit(type: GameEvents, ...args: any[]);
+	handleGameStateChanged(key: string);
+	nextRound();
+	// emitter wrapper
+	off(type: GameEvents, listener: (...args: any[]) => void);
+	// emitter wrapper
+	on(type: GameEvents, listener: (...args: any[]) => void);
+	resetTime();
+	setupGame(game: Game);
+	startGame();
+	stopGame();
+
+	// getters and setters
+	codeWordHash: number;
+	currentMasterID: number;
+	currentRound: number;
+	guessWord: string;
+	name: string;
+	randomWords: string[];
+	rounds: number;
+	state: GameStates;
+	time: number;
+}
+
+export class GameEngine implements GameEngineInterface, EngineInterface {
+	private _emitter: EventEmitter = new EventEmitter();
+	private _observerClock;
+	private _observerGameState;
+	private _timer: NodeJS.Timeout;
+
 	/**
 	 * @type {YMap<GameState>}
 	 */
-	gameState;
+	private _gameState;
 	/**
 	 * @type {YMap<any>}
 	 */
-	clock;
-
-	constructor(store: CacheStoreInterface) {
-		this.gameState = store.gameState;
-		this.clock = store.clock;
-		this.transact = store.gameState.doc.transact;
-	}
-
+	private _clock;
 	/**
 	 * Function to execute multiple transaction on document
 	 * @type {Function(() => {})} 
 	 */
-	transact;
-	// Mechanics
-	get time(): number {
-		return this.clock.get('time');
-	}
-	set time(value: number) {
-		this.clock.set('time', value);
-	}
-
-	get currentRound(): number {
-		return this.gameState.get('currentRound');
-	}
-	get rounds(): number {
-		return this.gameState.get('rounds');
-	}
-
-	get codeWordHash(): number {
-		return this.gameState.get('codeWordHash');
-	}
-
-	get currentMasterID(): number {
-		return this.gameState.get('currentMasterID');
-	}
-
-	set guessWord(word: string) {
-		if (!this.gameState) return;
-
-		this.transact(() => {
-			this.gameState.set('codeWordHash', sha256(word));
-		});
-	}
-
-	// normally should be private!!
-	get state() {
-		return this.gameState.get('state') as GameStates;
-	}
-
-	set state(value: GameStates) {
-		this.gameState.set('state', GameStates.STARTED);
-	}
-}
-
-export class GameEngine extends GameEngineDocSetterGetter {
-	private emitter: EventEmitter = new EventEmitter();
-	timer: NodeJS.Timeout;
-
+	private _transact;
 	constructor(store: CacheStoreInterface) {
-		super(store);
+		this._gameState = store.gameState;
+		this._clock = store.clock;
+		this._transact = store.gameState.doc.transact;
 
-		this.clock.observe((event) => {
+		this._observerClock = (event) => {
 			this.emit(GameEvents.CLOCK_UPDATE, this.time);
-		});
+		};
 
-		this.gameState.observe((event) => {
+		this._observerGameState = (event) => {
 			event.keysChanged.forEach((key) => {
 				this.handleGameStateChanged(key as string);
 			});
-		});
+		};
 
+		this._clock.observe(this._observerClock);
+		this._gameState.observe(this._observerGameState);
 		console.log('GameEngine init');
 	}
 
+	dispose() {
+		this._clock.unobserve(this._observerClock);
+		this._gameState.unobserve(this._observerGameState);
+	}
+
 	handleGameStateChanged(key: string) {
-		const value = this.gameState.get(key);
+		const value = this._gameState.get(key);
 
 		if (key === 'currentRound') {
 			this.emit(GameEvents.ROUND_CHANGE, value);
@@ -112,17 +101,66 @@ export class GameEngine extends GameEngineDocSetterGetter {
 
 	// emitter wrapper
 	emit(type: GameEvents, ...args: any[]) {
-		this.emitter.emit(type, args);
+		this._emitter.emit(type, args);
 	}
 
 	// emitter wrapper
 	on(type: GameEvents, listener: (...args: any[]) => void) {
-		this.emitter.on(type, listener);
+		this._emitter.on(type, listener);
 	}
 
 	// emitter wrapper
 	off(type: GameEvents, listener: (...args: any[]) => void) {
-		this.emitter.off(type, listener);
+		this._emitter.off(type, listener);
+	}
+
+	setupGame(game: Game) {
+		clearInterval(this._timer);
+
+		this._transact(() => {
+			for (const key in game) {
+				this._gameState.set(key, game[key]);
+			}
+			this.resetTime();
+		});
+	}
+
+	resetTime() {
+		this.time = 60;
+	}
+
+	startGame() {
+		const state = this.state;
+		if (state === GameStates.STARTED || state === GameStates.CHOOSING_WORD) return;
+
+		this._transact(() => {
+			this.resetTime();
+			this._gameState.set('state', GameStates.STARTED);
+		});
+
+		// setup the game time
+		this._timer = setInterval(() => {
+			const time = this.time - 1;
+			this.time = time;
+
+			if (time < 1) {
+				if (this.currentRound <= this.rounds) this.nextRound();
+				else this.stopGame();
+			}
+		}, 1000);
+	}
+
+	stopGame() {
+		clearInterval(this._timer);
+		this._gameState.set('state', GameStates.STOPPED);
+	}
+
+	nextRound() {
+		const round = this.currentRound + 1;
+		this._gameState.doc.transact(() => {
+			this._gameState.set('currentRound', round);
+			this.resetTime();
+		});
 	}
 
 	private _name: string;
@@ -137,53 +175,44 @@ export class GameEngine extends GameEngineDocSetterGetter {
 	get randomWords(): string[] {
 		return [ 'Haus', 'Katze', 'Maus' ];
 	}
+	// Mechanics
+	get time(): number {
+		return this._clock.get('time');
+	}
 
-	setupGame(game: Game) {
-		clearInterval(this.timer);
+	set time(value: number) {
+		this._clock.set('time', value);
+	}
 
-		this.transact(() => {
-			for (const key in game) {
-				this.gameState.set(key, game[key]);
-			}
-			this.resetTime();
+	get currentRound(): number {
+		return this._gameState.get('currentRound');
+	}
+
+	get rounds(): number {
+		return this._gameState.get('rounds');
+	}
+
+	get codeWordHash(): number {
+		return this._gameState.get('codeWordHash');
+	}
+
+	get currentMasterID(): number {
+		return this._gameState.get('currentMasterID');
+	}
+
+	set guessWord(word: string) {
+		if (!this._gameState) return;
+
+		this._transact(() => {
+			this._gameState.set('codeWordHash', sha256(word));
 		});
 	}
 
-	resetTime() {
-		this.time = 60;
+	get state() {
+		return this._gameState.get('state') as GameStates;
 	}
 
-	startGame() {
-		const state = this.state;
-		if (state === GameStates.STARTED || state === GameStates.CHOOSING_WORD) return;
-
-		this.transact(() => {
-			this.resetTime();
-			this.gameState.set('state', GameStates.STARTED);
-		});
-
-		// setup the game time
-		this.timer = setInterval(() => {
-			const time = this.time - 1;
-			this.time = time;
-
-			if (time < 1) {
-				if (this.currentRound <= this.rounds) this.nextRound();
-				else this.stopGame();
-			}
-		}, 1000);
-	}
-
-	stopGame() {
-		clearInterval(this.timer);
-		this.gameState.set('state', GameStates.STOPPED);
-	}
-
-	nextRound() {
-		const round = this.currentRound + 1;
-		this.gameState.doc.transact(() => {
-			this.gameState.set('currentRound', round);
-			this.resetTime();
-		});
+	set state(value: GameStates) {
+		this._gameState.set('state', value);
 	}
 }

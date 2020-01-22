@@ -1,19 +1,14 @@
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { CacheStoreInterface } from '../../service/storage/cache';
 import { Message } from '../../models/message';
 import { PersistentStore } from '../../service/storage';
 
-/**
- * TODO: Is this just an Manager?
- */
-
-export class MessageEngine extends Subject<Message[]> {
+export class MessageManager extends Subject<Message[]> {
 	/**
 	 * @type YArray<Message>
 	 */
-	messageStore;
-	sub: Subscription;
-
+	store;
+	observer;
 	public get localName(): string {
 		return PersistentStore.localName;
 	}
@@ -21,19 +16,26 @@ export class MessageEngine extends Subject<Message[]> {
 	public get localID(): string {
 		return PersistentStore.clientID.toString();
 	}
+
 	constructor(store: CacheStoreInterface) {
 		super();
+		console.log('MessageManager init');
+		this.store = store.messages;
+		this.observer = () => {
+			this.next(this.store.toArray().reverse());
+		};
 
-		this.messageStore = store.messages;
-		this.messageStore.observe((event) => {
-			this.next(this.messageStore.toArray().reverse());
-		});
+		this.store.observe(this.observer);
+	}
 
-		console.log('MessageEngine init');
+	dispose() {
+		console.log('Dispose DrawingManager');
+		this.clearAllMessages();
+		this.store.unobserve(this.observer);
 	}
 
 	sendMessage(msg: string) {
-		this.messageStore.push([
+		this.store.push([
 			{
 				id: this.localID,
 				message: msg,
@@ -42,10 +44,16 @@ export class MessageEngine extends Subject<Message[]> {
 			}
 		]);
 
-		this.next(this.messageStore.toArray().reverse());
+		const m = this.store.toArray().reverse();
+
+		this.next(m);
+	}
+
+	clearAllMessages() {
+		this.store.delete(0, this.store.length);
 	}
 
 	getMessages(): Message[] {
-		return this.messageStore.toArray().reverse();
+		return this.store.toArray().reverse();
 	}
 }

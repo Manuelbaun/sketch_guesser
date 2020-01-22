@@ -13,22 +13,32 @@ import { CacheStoreInterface } from '../../service/storage';
  */
 
 export class DrawingManager extends Subject<DrawingPath[]> {
-	private drawPathStore;
+	/**
+	 * @type YArray<DrawingPath>
+	 */
+	private store;
 	private currentDrawElement;
 	private currentDrawPath;
 
-	constructor(cache: CacheStoreInterface) {
+	private observer;
+	constructor(store: CacheStoreInterface) {
 		super();
-		this.drawPathStore = cache.drawPaths;
-
-		this.drawPathStore.observeDeep(() => {
-			const arr3 = this.drawPathStore.map((path) => path.toJSON()) as Array<DrawingPath>;
+		this.store = store.drawPaths;
+		this.observer = () => {
+			const arr3 = this.store.map((path) => path.toJSON()) as Array<DrawingPath>;
 
 			// emit to listener (Drawing Area)
 			this.next(arr3);
-		});
+		};
+		this.store.observeDeep(this.observer);
 
 		console.log('MessageEngine init');
+	}
+
+	dispose() {
+		console.log('Dispose DrawingManager');
+		this.clearPaths();
+		this.store.unobserve(this.observer);
 	}
 
 	// Classes cant be pushed into an array, it will just be an json object
@@ -39,7 +49,7 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 		this.currentDrawPath = new Y.Array();
 		this.currentDrawElement.set('line', this.currentDrawPath);
 
-		this.drawPathStore.push([ this.currentDrawElement ]);
+		this.store.push([ this.currentDrawElement ]);
 	}
 
 	appendCoordinates(coordinates: Coordinate): void {
@@ -48,7 +58,7 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 	}
 
 	getElement(index: number): DrawingPath | null {
-		const path = this.drawPathStore.get(index);
+		const path = this.store.get(index);
 		if (!path) return null;
 
 		return {
@@ -59,6 +69,6 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 	}
 
 	clearPaths(): void {
-		this.drawPathStore.delete(0, this.drawPathStore.length);
+		this.store.delete(0, this.store.length);
 	}
 }

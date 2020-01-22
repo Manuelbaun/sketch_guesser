@@ -1,22 +1,32 @@
-import React from 'react';
-import { GameControl, CountDown, MessageBox, DrawingArea, MessageEngine, DrawingManager } from '../../components';
-import { GameEngine } from '../../engines';
-import { CacheStore } from '../../service';
+import React, { useEffect } from 'react';
+import { GameControl, CountDown, MessageBox, DrawingArea, MessageManager, DrawingManager } from '../../components';
+import { GameEngineInterface } from '../../engines';
+import { CacheStoreInterface } from '../../service';
 
 type Props = {
-	gameEngine: GameEngine;
-	cache: CacheStore
+	gameEngine: GameEngineInterface;
+	store: CacheStoreInterface;
 };
 
-export const GamePage = ({ gameEngine, cache }: Props) => {
-	const drawingManager = new DrawingManager(cache);
-	const messageEngine = new MessageEngine(cache);
+export const GamePage = ({ gameEngine, store }: Props) => {
+	let drawingManager: DrawingManager = new DrawingManager(store);
+	let messageManager: MessageManager = new MessageManager(store);
+
+	useEffect(() => {
+		console.log('Create Game');
+		// clean up!!
+		return () => {
+			drawingManager.dispose();
+			messageManager.dispose();
+		};
+	}, []);
+
 	return (
 		<div>
 			<div className="App-Message">
 				<GameControl gameEngine={gameEngine} />
 				<CountDown gameEngine={gameEngine} />
-				<MessageBox messageEngine={messageEngine} />
+				<MessageBox messageEngine={messageManager} />
 			</div>
 
 			<div className="App-Drawing">

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { MessageRow } from './message_row';
 import { Message } from '../../models';
-import { MessageEngine } from './message.engine';
+import { MessageManager } from './message.engine';
 import { Input } from '../common';
 import './message.css';
 
 type MessageBoxProps = {
-	messageEngine: MessageEngine;
+	messageEngine: MessageManager;
 };
 
 // - get local user to check

@@ -31,7 +31,7 @@ export class CommunicationServiceImpl {
 	private provider;
 	roomID: string;
 
-	constructor(cache: CacheStoreInterface, eventBus: EventBusInterface, roomName: string = '') {
+	constructor(store: CacheStoreInterface, eventBus: EventBusInterface, roomName: string = '') {
 		const peerID = PersistentStore.clientID;
 		// create random room name based on the peerID as seed.
 		this.roomID = roomName === '' ? Chance(peerID).string({ length: 20, alpha: true, numeric: true }) : roomName;
@@ -44,7 +44,7 @@ export class CommunicationServiceImpl {
 		 * provides an ID, should be unique generated!
 		 * This is a workaround.
 		 */
-		const aw = new Awareness(cache.yDoc);
+		const aw = new Awareness(store.yDoc);
 
 		aw.on('change', ({ added, updated, removed }, origin) => {
 			const state = aw.getStates();
@@ -68,7 +68,7 @@ export class CommunicationServiceImpl {
 			}
 		});
 
-		this.provider = new WebrtcProvider(room, cache.yDoc, {
+		this.provider = new WebrtcProvider(room, store.yDoc, {
 			password: null,
 			awareness: aw
 		});

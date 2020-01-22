@@ -2,13 +2,13 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 
 import { GameStates } from '../../models';
-import { GameEngine } from '../../engines';
+import { GameEngineInterface } from '../../engines';
 import { PersistentStore } from '../../service/storage';
 
 import './game_control.css';
 
 type Props = {
-	gameEngine: GameEngine;
+	gameEngine: GameEngineInterface;
 };
 
 /**

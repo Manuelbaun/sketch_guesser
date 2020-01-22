@@ -67,7 +67,7 @@ const App: React.FC = () => {
 
 			{appState == AppState.ROOM && <RoomPage gameEngine={gameEngine} playerEngine={playerEngine} />}
 
-			{appState == AppState.GAME && <GamePage gameEngine={gameEngine} cache={cacheStore} />}
+			{appState == AppState.GAME && <GamePage gameEngine={gameEngine} store={cacheStore} />}
 		</div>
 	);
 };
