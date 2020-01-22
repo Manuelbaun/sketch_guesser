@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 
 import { GameStates } from '../../models';
@@ -18,6 +18,7 @@ type Props = {
  * prototype purpose. It also provides a button to go to the next round.
  */
 export const GameControl = ({ gameEngine }: Props) => {
+	const [ gameStarted, setGameStarted ] = useState(false);
 	const setupGame = () => {
 		gameEngine.setupGame({
 			codeWordHash: '',
@@ -30,15 +31,22 @@ export const GameControl = ({ gameEngine }: Props) => {
 
 	const startGame = () => {
 		gameEngine.guessWord = 'test';
+		setupGame();
+		setGameStarted(true);
 		gameEngine.startGame();
 	};
 
-	const stopGame = () => gameEngine.stopGame();
+	const stopGame = () => {
+		setGameStarted(false);
+		gameEngine.stopGame();
+	};
 	const nextRound = () => gameEngine.nextRound();
-
+	console.log('game stated', gameStarted);
 	return (
 		<div className="game-controller">
-			<Button onClick={startGame}> START </Button>
+			<Button onClick={startGame} disabled={gameStarted}>
+				START
+			</Button>
 			<Button onClick={stopGame}> Stop </Button>
 			<Button onClick={setupGame}> Reset </Button>
 			<Button onClick={nextRound}> Next Round </Button>

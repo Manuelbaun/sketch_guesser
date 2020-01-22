@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Player } from '../../models';
 import { GameEngineInterface, PlayerEngineInterface } from '../../engines';
-import { GameControl, Input, Avatar } from '../../components';
+import { Input, Avatar } from '../../components';
 import { getPublicIpAddress } from '../../service/communication';
 import './room.css';
 
@@ -38,7 +38,6 @@ export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
 	return (
 		<div className="menu">
 			<div className="player-disp"> Your IP address: {ipAddress} </div>
-			<GameControl gameEngine={gameEngine} />
 			<Input
 				onSubmit={handleSubmit}
 				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}

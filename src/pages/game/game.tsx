@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { GameControl, CountDown, MessageBox, DrawingArea, MessageManager, DrawingManager } from '../../components';
+import { CountDown, MessageBox, DrawingArea, MessageManager, DrawingManager } from '../../components';
 import { GameEngineInterface } from '../../engines';
 import { CacheStoreInterface } from '../../service';
 
@@ -24,7 +24,6 @@ export const GamePage = ({ gameEngine, store }: Props) => {
 	return (
 		<div>
 			<div className="App-Message">
-				<GameControl gameEngine={gameEngine} />
 				<CountDown gameEngine={gameEngine} />
 				<MessageBox messageEngine={messageManager} />
 			</div>

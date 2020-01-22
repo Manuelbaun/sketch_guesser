@@ -6,6 +6,7 @@ import { CacheStore, CommunicationService, EventBus } from './service';
 import { LandingPage, RoomPage, GamePage } from './pages';
 
 import './App.css';
+import { GameControl } from './components';
 
 // Typedef
 type FunctionVoidCallback = () => void;
@@ -71,10 +72,14 @@ const App: React.FC = () => {
 	return (
 		<div className="App">
 			{appState == AppState.LANDING && <LandingPage onJoinGame={joinGame} onCreateGame={createGame} />}
+			{appState != AppState.LANDING && (
+				<div>
+					<GameControl gameEngine={gameEngine} />
+					{appState == AppState.ROOM && <RoomPage gameEngine={gameEngine} playerEngine={playerEngine} />}
 
-			{appState == AppState.ROOM && <RoomPage gameEngine={gameEngine} playerEngine={playerEngine} />}
-
-			{appState == AppState.GAME && <GamePage gameEngine={gameEngine} store={cacheStore} />}
+					{appState == AppState.GAME && <GamePage gameEngine={gameEngine} store={cacheStore} />}
+				</div>
+			)}
 		</div>
 	);
 };
