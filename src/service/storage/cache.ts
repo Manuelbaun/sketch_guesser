@@ -1,4 +1,4 @@
-import * as Y from 'yjs'
+import * as Y from 'yjs';
 import { Message, DrawingPath } from '../../models';
 import { PersistentStore } from './persistance';
 
@@ -27,6 +27,8 @@ export interface CacheStoreInterface {
 	 * @type {YMap<Player>}
 	 */
 	players;
+
+	dispose();
 }
 
 /**
@@ -69,5 +71,10 @@ export class CacheStore implements CacheStoreInterface {
 	private _players = this.yDoc.getMap('players');
 	public get players() {
 		return this._players;
+	}
+
+	dispose() {
+		this._yDoc.destroy();
+		console.log('CacheStorage dispose');
 	}
 }

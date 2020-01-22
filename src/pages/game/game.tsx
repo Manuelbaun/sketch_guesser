@@ -8,7 +8,7 @@ type Props = {
 	store: CacheStoreInterface;
 };
 
-export const GamePage = ({ gameEngine, store }: Props) => {
+export const Game = ({ gameEngine, store }: Props) => {
 	let drawingManager: DrawingManager = new DrawingManager(store);
 	let messageManager: MessageManager = new MessageManager(store);
 

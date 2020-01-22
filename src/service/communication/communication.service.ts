@@ -60,7 +60,7 @@ export class CommunicationService {
 
 	// cleanup
 	async dispose(event?) {
-		console.log('destroyed provider');
+		console.log('Communication service dispose');
 		await this._provider.destroy();
 
 		let ev = event || window.event;

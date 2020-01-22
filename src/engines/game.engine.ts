@@ -4,7 +4,7 @@ import { CacheStoreInterface } from '../service/storage/cache';
 import { Game, GameStates, GameEvents } from '../models';
 import EngineInterface from './engine.interface';
 
-export interface GameEngineInterface {
+export interface GameEngineInterface extends EngineInterface {
 	// emitter wrapper
 	emit(type: GameEvents, ...args: any[]);
 	handleGameStateChanged(key: string);
@@ -30,7 +30,7 @@ export interface GameEngineInterface {
 	time: number;
 }
 
-export class GameEngine implements GameEngineInterface, EngineInterface {
+export class GameEngine implements GameEngineInterface {
 	private _emitter: EventEmitter = new EventEmitter();
 	private _observerClock;
 	private _observerGameState;
@@ -72,6 +72,7 @@ export class GameEngine implements GameEngineInterface, EngineInterface {
 	dispose() {
 		this._clock.unobserve(this._observerClock);
 		this._gameState.unobserve(this._observerGameState);
+		console.log('GameEngine dispose');
 	}
 
 	handleGameStateChanged(key: string) {

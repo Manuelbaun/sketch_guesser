@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
 import { Player } from '../../models';
-import { GameEngineInterface, PlayerEngineInterface } from '../../engines';
+import { PlayerEngineInterface } from '../../engines';
 import { Input, Avatar } from '../../components';
 import { getPublicIpAddress } from '../../service/communication';
-import './room.css';
+import './waiting_room.css';
 
-type MenuProps = {
-	gameEngine: GameEngineInterface;
+type Props = {
 	playerEngine: PlayerEngineInterface;
 };
 
-export const RoomPage: React.FC<MenuProps> = ({ gameEngine, playerEngine }) => {
+export const WaitingRoom: React.FC<Props> = ({ playerEngine }) => {
 	const [ players, setPlayers ] = useState<Array<Player>>(playerEngine.getAllPlayers());
 	const [ ipAddress, setIpAddress ] = useState<string>('');
 	const handleSubmit = (msg: string) => {

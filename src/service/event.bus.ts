@@ -4,11 +4,12 @@ export interface EventBusInterface {
 	on(type: EventBusType, listener: (...args: any[]) => void);
 	off(type: EventBusType, listener: (...args: any[]) => void);
 	onPlayerConnection(id: string, connected: boolean);
+	dispose();
 }
 
 type EventBusType = 'CONNECTION';
 
-export class EventBus {
+export class EventBus implements EventBusInterface {
 	private emitter: EventEmitter = new EventEmitter();
 
 	// emitter wrapper
@@ -26,5 +27,10 @@ export class EventBus {
 			connected,
 			id
 		});
+	}
+
+	dispose() {
+		this.emitter.removeAllListeners();
+		console.log('Eventbus dispose');
 	}
 }

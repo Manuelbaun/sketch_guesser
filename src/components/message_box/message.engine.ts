@@ -29,7 +29,7 @@ export class MessageManager extends Subject<Message[]> {
 	}
 
 	dispose() {
-		console.log('Dispose DrawingManager');
+		console.log('Dispose MessageManager');
 		this.clearAllMessages();
 		this.store.unobserve(this.observer);
 	}

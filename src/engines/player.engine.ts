@@ -10,7 +10,7 @@ import { PersistentStore } from '../service/storage';
 import EngineInterface from './engine.interface';
 
 // A Little hack to get the Subject Methods onto the PlayerEngineInterface
-export interface PlayerEngineInterface extends Subject<Array<Player>> {
+export interface PlayerEngineInterface extends Subject<Array<Player>>, EngineInterface {
 	playerNum: number;
 	playerName: string;
 	localID: string;
@@ -32,7 +32,7 @@ type PlayerEngineProps = {
 	playerTimeout: number;
 };
 // Now the Subject class implements the Subject interface
-export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngineInterface, EngineInterface {
+export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngineInterface {
 	/**
 	 * @type {YMap<Player>}
 	 */
@@ -105,6 +105,7 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 
 	dispose() {
 		this.store.unobserveDeep(this._observerDeep);
+		console.log('PlayerEngine dispose');
 	}
 
 	public playerExists(peerId: string) {

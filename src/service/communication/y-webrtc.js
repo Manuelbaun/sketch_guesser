@@ -462,6 +462,7 @@ export class Room {
  */
 const openRoom = (doc, provider, name, key, peerID) => {
 	// there must only be one room
+	console.log(rooms);
 	if (rooms.has(name)) {
 		throw error.create(`A Yjs Doc connected to room "${name}" already exists!`);
 	}
@@ -658,13 +659,12 @@ export class WebrtcProvider extends Observable {
 	/**
 	 * @async function
 	 */
-	async destroy() {
+	destroy() {
 		// need to wait for key before deleting room
-		await this.key;
-		// .then(() => {});
-
-		/** @type {Room} */ this.room.destroy();
-		rooms.delete(this.roomName);
+		this.key.then(() => {
+			/** @type {Room} */ this.room.destroy();
+			rooms.delete(this.roomName);
+		});
 		super.destroy();
 	}
 }

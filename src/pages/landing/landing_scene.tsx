@@ -9,7 +9,7 @@ type Props = {
 	onCreateGame(): void;
 };
 
-export const LandingPage = (props: Props) => {
+export const LandingScene = (props: Props) => {
 	const joinGame = (roomID: string) => {
 		props.onJoinGame(roomID);
 	};

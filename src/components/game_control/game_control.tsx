@@ -9,6 +9,7 @@ import './game_control.css';
 
 type Props = {
 	gameEngine: GameEngineInterface;
+	goBackToMenu: Function;
 };
 
 /**
@@ -17,7 +18,7 @@ type Props = {
  * This class provides buttons to start, stop, or reset the Game. It is just for
  * prototype purpose. It also provides a button to go to the next round.
  */
-export const GameControl = ({ gameEngine }: Props) => {
+export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 	const [ gameStarted, setGameStarted ] = useState(false);
 	const setupGame = () => {
 		gameEngine.setupGame({
@@ -41,6 +42,11 @@ export const GameControl = ({ gameEngine }: Props) => {
 		gameEngine.stopGame();
 	};
 	const nextRound = () => gameEngine.nextRound();
+
+	const cancelGame = () => {
+		stopGame();
+		onCancel();
+	};
 	console.log('game stated', gameStarted);
 	return (
 		<div className="game-controller">
@@ -50,6 +56,7 @@ export const GameControl = ({ gameEngine }: Props) => {
 			<Button onClick={stopGame}> Stop </Button>
 			<Button onClick={setupGame}> Reset </Button>
 			<Button onClick={nextRound}> Next Round </Button>
+			<Button onClick={cancelGame}> Go Back to Menu </Button>
 		</div>
 	);
 };
