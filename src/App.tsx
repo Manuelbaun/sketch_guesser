@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-
-import { LandingScene, GameScene } from './pages';
-
+import { LandingScene, GameScene } from './scenes';
 import './App.css';
 
 enum AppState {
