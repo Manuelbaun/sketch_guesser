@@ -1,13 +1,14 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
-import Chance from 'chance';
-
+import ulog from 'ulog';
 import { CacheStoreInterface } from '../service/storage/cache';
 import { EventBusInterface } from '../service/event.bus';
-
 import { Player } from '../models';
 import { PersistentStore } from '../service/storage';
 import EngineInterface from './engine.interface';
+import { RandomGenerator } from '../service';
+
+const log = ulog('player.engine');
 
 // A Little hack to get the Subject Methods onto the PlayerEngineInterface
 export interface PlayerEngineInterface extends Subject<Array<Player>>, EngineInterface {
@@ -36,10 +37,10 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	/**
 	 * @type {YMap<Player>}
 	 */
-	private store = new Y.Map();
+	private _store = new Y.Map();
 
 	public get playerNum(): number {
-		return this.store.values.length;
+		return this._store.values.length;
 	}
 
 	public get playerName(): string {
@@ -56,7 +57,7 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	getAllPlayers(): Array<Player> {
 		const arr = new Array<Player>();
 
-		this.store.forEach((player: any) => {
+		this._store.forEach((player: any) => {
 			// This here, could be toJSON
 			try {
 				const p = {
@@ -71,22 +72,16 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 				};
 				arr.push(p as Player);
 			} catch (err) {
-				console.error(player, err);
+				log.error(player, err);
 			}
 		});
 
 		return arr;
 	}
 
-	private _onPlayerConnectionHandler = (event) => {
-		if (!event.connected) this.setPlayerOffline(event.id);
-		if (event.connected) this.setPlayerOnline(event.id);
-	};
-
-	private _observerDeep;
 	private _localPlayer = new Y.Map();
-	private _chance;
 	private _playerTimeout;
+	private _eventBus: EventBusInterface;
 
 	constructor(
 		cacheStore: CacheStoreInterface,
@@ -96,24 +91,36 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 		super();
 
 		this._playerTimeout = props.playerTimeout;
-		this.store = cacheStore.players;
+		this._store = cacheStore.players;
+		this._eventBus = eventBus;
+		this._setup();
+	}
 
-		eventBus.on('CONNECTION', this._onPlayerConnectionHandler);
+	// setup Listeners
+	_setup() {
+		log.debug('PlayerEngine init');
+		// subscribe
+		this._eventBus.on('CONNECTION', this._peerConnectionHandler);
+		this._store.observeDeep(this._observerDeep);
 
-		this._observerDeep = () => this.next(this.getAllPlayers());
-		this.store.observeDeep(this._observerDeep);
-
-		console.log('PlayerEngine init');
 		this.addLocalPlayer();
 	}
 
+	// calls dispose function
 	dispose() {
-		this.store.unobserveDeep(this._observerDeep);
-		console.log('PlayerEngine dispose');
+		this._store.unobserveDeep(this._observerDeep);
+		this._eventBus.off('CONNECTION', this._peerConnectionHandler);
 	}
 
+	_observerDeep = () => this.next(this.getAllPlayers());
+
+	_peerConnectionHandler = (event) => {
+		if (!event.connected) this.setPlayerOffline(event.id);
+		if (event.connected) this.setPlayerOnline(event.id);
+	};
+
 	public playerExists(peerId: string) {
-		return this.store.has(peerId);
+		return this._store.has(peerId);
 	}
 
 	public addLocalPlayer() {
@@ -122,35 +129,36 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 		const name = PersistentStore.localName;
 
 		this._localPlayer = new Y.Map();
-		this._chance = Chance();
 
-		const xx = this._chance.floating({ min: 0.2, max: 0.85 });
-		const yy = this._chance.floating({ min: 0.25, max: 0.75 });
+		const xx = RandomGenerator.float({ min: 0.2, max: 0.85 });
+		const yy = RandomGenerator.float({ min: 0.2, max: 0.85 });
 
 		this._localPlayer.set('id', id);
 		this._localPlayer.set('doc_id', docId);
 		this._localPlayer.set('online', true);
-		// workaround for delete
-		this._localPlayer.set('gone', false);
-
 		this._localPlayer.set('name', name);
 		this._localPlayer.set('points', 0);
 		this._localPlayer.set('x', xx);
 		this._localPlayer.set('y', yy);
 
-		this.store.set(id, this._localPlayer);
+		// workaround for delete
+		this._localPlayer.set('gone', false);
+
+		this._store.set(id, this._localPlayer);
+		log.debug('add local Player with name:', name);
 	}
 
 	updateLocalName(name: string) {
 		// update sessionStorage
 		PersistentStore.localName = name;
-		this._chance = Chance(name);
 		this._localPlayer.set('name', name);
+		log.debug('update local player name:', name);
 	}
 
 	addLocalPoints(points: number) {
 		const _points = (this._localPlayer.get('points') as number) + points;
 		this._localPlayer.set('points', _points);
+		log.debug('add local Player points:', points);
 	}
 
 	changeLocalPosition(peerId: string, x, y) {
@@ -164,16 +172,16 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	}
 
 	setPlayerOnline(id) {
-		console.log('Player online ', id);
+		log.debug('Player online ', id);
 		let p = new Y.Map();
 		//@ts-ignore
-		p = this.store.get(id);
+		p = this._store.get(id);
 		if (p) {
 			const timer = this.offlineTimer.get(id);
 			p.set('online', true);
 			// delete workround
 			p.set('gone', false);
-			console.log('Player is back online');
+			log.debug('Player is back online');
 
 			if (timer) {
 				clearTimeout(timer);
@@ -185,10 +193,10 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	// we set the player just offline
 	offlineTimer = new Map<string, NodeJS.Timeout>();
 	setPlayerOffline(id: string) {
-		console.log('Remove Player', id);
+		log.debug('Remove Player', id);
 		let p = new Y.Map();
 		//@ts-ignore
-		p = this.store.get(id);
+		p = this._store.get(id);
 
 		if (p) {
 			p.set('online', false);

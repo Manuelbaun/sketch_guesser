@@ -1,5 +1,4 @@
-import * as random from 'lib0/dist/random.js';
-import Chance from 'chance';
+import { RandomGenerator } from '../random_generator';
 /**
  * Class that stores some data persistent on that Tab session like the id
  * so if the Tab refreshed, the ID stays the same
@@ -18,7 +17,7 @@ export class PersistentStore {
 	public static get localID(): string {
 		const key: SessionKeys = 'local_peer_id';
 		if (!(this._localID = sessionStorage.getItem(key) || '')) {
-			this._localID = random.uuidv4();
+			this._localID = RandomGenerator.uuidv4();
 			sessionStorage.setItem(key, this._localID);
 		}
 
@@ -29,7 +28,7 @@ export class PersistentStore {
 		const key: SessionKeys = 'local_doc_id';
 		let clientID = '';
 		if (!(clientID = sessionStorage.getItem(key) || '')) {
-			this._clientID = random.uint32();
+			this._clientID = RandomGenerator.uint32();
 			sessionStorage.setItem(key, this._clientID.toString());
 		} else {
 			this._clientID = parseInt(clientID);
@@ -45,7 +44,7 @@ export class PersistentStore {
 	public static get localName(): string {
 		const key: SessionKeys = 'local_name';
 		if (!(this._localName = sessionStorage.getItem(key) || '')) {
-			this._localName = Chance(this._localID).name();
+			this._localName = RandomGenerator.avatarName();
 			sessionStorage.setItem(key, this._localName);
 		}
 		return this._localName;

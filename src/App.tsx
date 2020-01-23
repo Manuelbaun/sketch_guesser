@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { LandingScene, GameScene } from './scenes';
 import './App.css';
+import ulog from 'ulog';
+
+ulog.level = ulog.DEBUG;
 
 enum AppState {
 	MENU,
