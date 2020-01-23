@@ -1,7 +1,7 @@
 import Chance from 'chance';
 
 import { EventBusInterface } from '../event.bus';
-import { WebrtcProvider } from './y-webrtc';
+import { WebrtcProvider } from './y-webrtc/WebrtcProvider';
 
 import { CacheStoreInterface, PersistentStore } from '../../storage';
 
@@ -24,6 +24,17 @@ import { CacheStoreInterface, PersistentStore } from '../../storage';
  * in order to sync the y document => no further sync mechanics are required for a 
  * basic functional game. Since this is a prove of concept, it shows, 
  * that this is sufficient enough.
+ * 
+ * 
+ * TODO: implement awareness, that a player is connected....
+ * The awareness protocol withing y-protocol, does the job.
+ * but needs adjustments, to fit the game needs.
+ * 
+ * until this is implemented in the player.engine.ts under keepalive
+ * and _sweepDeadPlayers timers..
+ * 
+ * This strategy works only for a full mesh. Partial meshed needs 
+ * a proper strategy
  */
 
 export class CommunicationService {
@@ -42,6 +53,7 @@ export class CommunicationService {
 		this._provider = new WebrtcProvider(room, store.yDoc, {
 			password: null,
 			peerID: PersistentStore.localID
+			// signaling: [ 'ws://localhost:4444' ]
 		});
 
 		this._provider.on('synced', (synced) => {
@@ -61,6 +73,7 @@ export class CommunicationService {
 	// cleanup
 	async dispose(event?) {
 		console.log('Communication service dispose');
+		// await this._provider.disconnect();
 		await this._provider.destroy();
 
 		let ev = event || window.event;

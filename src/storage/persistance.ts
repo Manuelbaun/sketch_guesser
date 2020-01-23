@@ -55,4 +55,8 @@ export class PersistentStore {
 		const key: SessionKeys = 'local_name';
 		sessionStorage.setItem(key, this._localName);
 	}
+
+	public static dispose() {
+		sessionStorage.clear();
+	}
 }

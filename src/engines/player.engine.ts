@@ -1,12 +1,12 @@
-import * as Y from 'yjs';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import ulog from 'ulog';
 import { CacheStoreInterface } from '../storage/cache';
 import { EventBusInterface } from '../service/event.bus';
-import { Player } from '../models';
+import { Player, PlayerProps } from '../models';
 import { PersistentStore } from '../storage';
 import EngineInterface from './engine.interface';
 import { RandomGenerator } from '../service';
+import { PlayerStoreAdapter } from '../storage/player_store.adapter';
 
 const log = ulog('player.engine');
 
@@ -18,7 +18,6 @@ export interface PlayerEngineInterface extends Subject<Array<Player>>, EngineInt
 
 	getAllPlayers(): Player[];
 	isLocalPlayer(id: string): boolean;
-	playerExists(peerId: string): boolean;
 	addLocalPlayer();
 	updateLocalName(name: string);
 	addLocalPoints(points: number);
@@ -34,54 +33,30 @@ type PlayerEngineProps = {
 };
 // Now the Subject class implements the Subject interface
 export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngineInterface {
-	/**
-	 * @type {YMap<Player>}
-	 */
-	private _store = new Y.Map();
+	private _localPlayer: Player;
+	private _playerTimeout;
+	private _eventBus: EventBusInterface;
+	private _adapter: PlayerStoreAdapter;
 
 	public get playerNum(): number {
-		return this._store.values.length;
+		return this._adapter.players.length;
 	}
 
 	public get playerName(): string {
-		return this._localPlayer.get('name') as string;
+		return this._localPlayer.name;
 	}
 
 	public isLocalPlayer(id: string) {
 		return PersistentStore.localID === id;
 	}
+
 	public get localID(): string {
 		return PersistentStore.localID;
 	}
 
 	getAllPlayers(): Array<Player> {
-		const arr = new Array<Player>();
-
-		this._store.forEach((player: any) => {
-			// This here, could be toJSON
-			try {
-				const p = {
-					id: player.get('id'),
-					clientID: player.get('doc_id'),
-					online: player.get('online'),
-					gone: player.get('gone'),
-					name: player.get('name'),
-					points: player.get('points'),
-					x: player.get('x'),
-					y: player.get('y')
-				};
-				arr.push(p as Player);
-			} catch (err) {
-				log.error(player, err);
-			}
-		});
-
-		return arr;
+		return this._adapter.players;
 	}
-
-	private _localPlayer = new Y.Map();
-	private _playerTimeout;
-	private _eventBus: EventBusInterface;
 
 	constructor(
 		cacheStore: CacheStoreInterface,
@@ -90,102 +65,114 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	) {
 		super();
 
+		if (!cacheStore || !cacheStore.players) {
+			throw new Error('Error with storage: CacheStore is null');
+		}
+
 		this._playerTimeout = props.playerTimeout;
-		this._store = cacheStore.players;
+		this._adapter = new PlayerStoreAdapter(cacheStore);
 		this._eventBus = eventBus;
 		this._setup();
 	}
 
+	sub: Subscription;
+	_keepAlive;
+	_sweepDeadPlayers;
 	// setup Listeners
 	_setup() {
 		log.debug('PlayerEngine init');
 		// subscribe
 		this._eventBus.on('CONNECTION', this._peerConnectionHandler);
-		this._store.observeDeep(this._observerDeep);
-
+		// pass on from
+		this.sub = this._adapter.subscribe((player) => this.next(player));
 		this.addLocalPlayer();
+
+		// setup a keep alive interval to
+		this._keepAlive = setInterval(() => {
+			this._localPlayer.lastOnline = Date.now();
+		}, 1000);
+
+		/** 
+		 * This is a workaround until the communication server
+		 * 
+		 **/
+
+		this._sweepDeadPlayers = setInterval(() => {
+			const deadPlayer: string[] = [];
+			this._adapter.players.forEach((player) => {
+				const diff = Date.now() - player.lastOnline;
+				if (diff > this._playerTimeout) {
+					deadPlayer.push(player.id);
+				}
+			}, this._playerTimeout);
+
+			deadPlayer.forEach((id) => this._adapter.deletePlayerById(id));
+		});
 	}
 
 	// calls dispose function
 	dispose() {
-		this._store.unobserveDeep(this._observerDeep);
 		this._eventBus.off('CONNECTION', this._peerConnectionHandler);
+		clearInterval(this._keepAlive);
+		clearInterval(this._sweepDeadPlayers);
+		this.sub.unsubscribe();
 	}
 
-	_observerDeep = () => this.next(this.getAllPlayers());
+	_observerDeep = () => this.next(this._adapter.players);
 
 	_peerConnectionHandler = (event) => {
 		if (!event.connected) this.setPlayerOffline(event.id);
 		if (event.connected) this.setPlayerOnline(event.id);
 	};
 
-	public playerExists(peerId: string) {
-		return this._store.has(peerId);
-	}
-
 	public addLocalPlayer() {
 		const id = PersistentStore.localID;
-		const docId = PersistentStore.clientID;
+		const clientID = PersistentStore.clientID;
 		const name = PersistentStore.localName;
+		// needs to set from outside!
+		const props: PlayerProps = {
+			clientID,
+			id,
+			name,
+			lastOnline: Date.now(),
+			online: true,
+			points: 0,
+			x: RandomGenerator.float({ min: 0.2, max: 0.85 }),
+			y: RandomGenerator.float({ min: 0.2, max: 0.85 })
+		};
 
-		this._localPlayer = new Y.Map();
-
-		const xx = RandomGenerator.float({ min: 0.2, max: 0.85 });
-		const yy = RandomGenerator.float({ min: 0.2, max: 0.85 });
-
-		this._localPlayer.set('id', id);
-		this._localPlayer.set('doc_id', docId);
-		this._localPlayer.set('online', true);
-		this._localPlayer.set('name', name);
-		this._localPlayer.set('points', 0);
-		this._localPlayer.set('x', xx);
-		this._localPlayer.set('y', yy);
-
-		// workaround for delete
-		this._localPlayer.set('gone', false);
-
-		this._store.set(id, this._localPlayer);
-		log.debug('add local Player with name:', name);
+		this._localPlayer = this._adapter.addPlayer(props);
 	}
 
 	updateLocalName(name: string) {
 		// update sessionStorage
 		PersistentStore.localName = name;
-		this._localPlayer.set('name', name);
+		this._localPlayer.name = name;
 		log.debug('update local player name:', name);
 	}
 
 	addLocalPoints(points: number) {
-		const _points = (this._localPlayer.get('points') as number) + points;
-		this._localPlayer.set('points', _points);
+		this._localPlayer.points += points;
 		log.debug('add local Player points:', points);
 	}
 
 	changeLocalPosition(peerId: string, x, y) {
 		if (this.localID === peerId) {
-			this._localPlayer.doc &&
-				this._localPlayer.doc.transact(() => {
-					this._localPlayer.set('x', x);
-					this._localPlayer.set('y', y);
-				});
+			this._localPlayer.x = x;
+			this._localPlayer.y = y;
 		}
 	}
 
 	setPlayerOnline(id) {
 		log.debug('Player online ', id);
-		let p = new Y.Map();
-		//@ts-ignore
-		p = this._store.get(id);
-		if (p) {
-			const timer = this.offlineTimer.get(id);
-			p.set('online', true);
-			// delete workround
-			p.set('gone', false);
-			log.debug('Player is back online');
+		const player = this._adapter.getPlayerById(id);
 
-			if (timer) {
-				clearTimeout(timer);
-			}
+		if (player) {
+			const timer = this.offlineTimer.get(id);
+			if (timer) clearTimeout(timer);
+
+			log.debug('Player is back online');
+			player.online = true;
 		}
 	}
 
@@ -193,28 +180,22 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	// we set the player just offline
 	offlineTimer = new Map<string, NodeJS.Timeout>();
 	setPlayerOffline(id: string) {
-		log.debug('Remove Player', id);
-		let p = new Y.Map();
-		//@ts-ignore
-		p = this._store.get(id);
+		const player = this._adapter.getPlayerById(id);
 
-		if (p) {
-			p.set('online', false);
-
+		log.debug('Remove Player', id, player);
+		if (player) {
+			// player still exits
+			player.online = false;
 			// let timer run, to delete player, when longer offline
 			// then the player should
 			const timer = setTimeout(() => {
-				// TODO: Delete and readd does not work
-				// some sync issue, because of a missing update package
-				// via yjs. For now, just set offline is fine!
-				// this.store.delete(id);
-				// workaround for the delete
-				p.set('gone', true);
+				// player.gone = true;
+				// this._adapter.deletePlayerById(id);
+
 				this.offlineTimer.delete(id);
 			}, this._playerTimeout);
 
-			// store timer
-			this.offlineTimer.set(id, timer);
+			this.offlineTimer.set(id, timer); // store timer
 		}
 	}
 }

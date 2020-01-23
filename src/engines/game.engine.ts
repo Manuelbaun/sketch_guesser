@@ -120,7 +120,6 @@ export class GameEngine implements GameEngineInterface {
 
 		this._transact(() => {
 			for (const key in game) {
-				console.log(key, game[key]);
 				this._gameState.set(key, game[key]);
 			}
 			this.resetTime();
