@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Avatars from '@dicebear/avatars';
 import sprites from '@dicebear/avatars-bottts-sprites';
 
@@ -21,5 +21,5 @@ type Props = {
 };
 
 export const Avatar: React.FC<Props> = ({ name }) => {
-	return <img src={createAvatar(name)} height="100" width="100" />;
+	return <img src={createAvatar(name)} height="100" width="100" alt="Your Avatar" />;
 };

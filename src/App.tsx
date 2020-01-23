@@ -11,8 +11,6 @@ const App: React.FC = () => {
 	const [ appState, setAppState ] = useState<AppState>(AppState.MENU);
 	const [ roomName, setRoomName ] = useState<string>('');
 
-	let services: any = {};
-
 	const startGame = (_roomName = '') => {
 		// set URL
 		const url = window.location.origin + '/' + _roomName;
@@ -27,12 +25,20 @@ const App: React.FC = () => {
 		setAppState(AppState.MENU);
 	};
 
-	return (
-		<div className="App">
-			{appState == AppState.MENU && <LandingScene onJoinGame={startGame} onCreateGame={startGame} />}
-			{appState == AppState.GAME && <GameScene roomName={roomName} onLeaveGame={leaveGame} />}
-		</div>
-	);
+	let scene;
+
+	switch (appState) {
+		case AppState.MENU:
+			scene = <LandingScene key="landing-scene" onJoinGame={startGame} onCreateGame={startGame} />;
+			break;
+		case AppState.GAME:
+			scene = <GameScene key="game-scene" roomName={roomName} onLeaveGame={leaveGame} />;
+			break;
+		default:
+			scene = <div>Error, this should never happen. State unknown</div>;
+	}
+
+	return <div className="App">{scene}</div>;
 };
 
 export default App;

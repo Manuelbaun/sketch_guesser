@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import { DrawingManager } from './draw_manager';
 import { Coordinate, DrawingPath } from '../../models';
+import { Subscription } from 'rxjs';
 import './drawing_area.css';
 
 const colorPalette = [
@@ -20,24 +21,91 @@ const colorPalette = [
 	'#ffffff'
 ];
 
-// TODO: Remove all listener, when user is not the current presenter
-// define some sizes, when acting as presenter or as guesser
-interface Props {
+type Props = {
 	width: number;
 	height: number;
 	drawingManager: DrawingManager;
-}
+};
 
-export const DrawingArea: React.FC<Props> = (props: Props) => {
-	const { width, height, drawingManager } = props;
-	const canvasRef = useRef<HTMLCanvasElement>(null);
+type State = {
+	isPainting: boolean;
+	color: string;
+};
 
-	const [ isPainting, setIsPainting ] = useState(false);
-	const [ color, setColor ] = useState(colorPalette[0]);
+export class DrawingArea extends React.Component<Props, State> {
+	private canvasRef = React.createRef<HTMLCanvasElement>();
+	private drawingManager: DrawingManager;
 
-	const drawPath = ({ color, origin, line }: DrawingPath): void => {
-		if (!canvasRef.current) return;
-		const canvas: HTMLCanvasElement = canvasRef.current;
+	private drawingSub: Subscription;
+
+	constructor(props: Props) {
+		super(props);
+		this.drawingManager = props.drawingManager;
+
+		this.state = {
+			isPainting: false,
+			color: colorPalette[0]
+		};
+
+		let currentPaths = 0;
+		this.drawingSub = this.drawingManager.subscribe((paths) => {
+			// Clear the canvas
+			if (paths.length === 0) {
+				this.clearCanvas();
+				currentPaths = 0;
+			} else if (paths.length !== currentPaths) {
+				// check how many paths already drawn
+				for (let i = currentPaths; i < paths.length; i++) {
+					this.drawPath(paths[i]);
+				}
+				currentPaths = paths.length;
+			} else {
+				// redraw the last path.
+				// TODO Optimize this one
+				const p = paths[paths.length - 1];
+				this.drawPath(p);
+			}
+		});
+	}
+
+	componentDidMount() {
+		if (!this.canvasRef.current) return;
+
+		const canvas = this.canvasRef.current;
+		// TODO: this ref issue
+		canvas.addEventListener('mousemove', this.paint);
+		canvas.addEventListener('touchmove', this.paintTouch);
+
+		canvas.addEventListener('mousedown', this.startPaint);
+		canvas.addEventListener('touchstart', this.startPaintTouch);
+
+		canvas.addEventListener('mouseup', this.exitPaint);
+		canvas.addEventListener('mouseleave', this.exitPaint);
+		canvas.addEventListener('touchcancel', this.exitPaint);
+		canvas.addEventListener('touchend', this.exitPaint);
+	}
+
+	componentWillUnmount() {
+		// remove subscription from the drawing manager!
+
+		this.drawingSub.unsubscribe();
+		if (!this.canvasRef.current) return;
+
+		const canvas = this.canvasRef.current;
+		canvas.removeEventListener('mousemove', this.paint);
+		canvas.removeEventListener('touchmove', this.paintTouch);
+		canvas.removeEventListener('mousedown', this.startPaint);
+		canvas.removeEventListener('touchstart', this.startPaintTouch);
+
+		canvas.removeEventListener('mouseup', this.exitPaint);
+		canvas.removeEventListener('mouseleave', this.exitPaint);
+		canvas.removeEventListener('touchcancel', this.exitPaint);
+		canvas.removeEventListener('touchend', this.exitPaint);
+	}
+
+	drawPath = ({ color, origin, line }: DrawingPath) => {
+		if (!this.canvasRef.current) return;
+		const canvas: HTMLCanvasElement = this.canvasRef.current;
 		const ctx = canvas.getContext('2d');
 
 		if (ctx != null) {
@@ -59,11 +127,10 @@ export const DrawingArea: React.FC<Props> = (props: Props) => {
 	};
 
 	// Returns the PointerCoordinates relatively to the canvas
-	const calculateCoordinates = (x: number, y: number): Coordinate | undefined => {
-		if (!canvasRef.current) return;
+	calculateCoordinates = (x: number, y: number): Coordinate | undefined => {
+		if (!this.canvasRef.current) return;
 
-		const canvas: HTMLCanvasElement = canvasRef.current;
-		const canvasRect = canvas.getBoundingClientRect();
+		const canvasRect = this.canvasRef.current.getBoundingClientRect();
 
 		return {
 			x: x / canvasRect.width,
@@ -71,11 +138,11 @@ export const DrawingArea: React.FC<Props> = (props: Props) => {
 		};
 	};
 
-	const calculateTouchCoordinates = (x: number, y: number): Coordinate | undefined => {
-		if (!canvasRef.current) return;
+	calculateTouchCoordinates = (x: number, y: number): Coordinate | undefined => {
+		if (!this.canvasRef.current) return;
 
-		const canvas: HTMLCanvasElement = canvasRef.current;
-		const canvasRect = canvas.getBoundingClientRect();
+		const canvasRect = this.canvasRef.current.getBoundingClientRect();
+
 		const cor = {
 			x: (x - canvasRect.left) / canvasRect.width,
 			y: (y - canvasRect.top) / canvasRect.height
@@ -84,185 +151,113 @@ export const DrawingArea: React.FC<Props> = (props: Props) => {
 		return cor;
 	};
 
-	const startPaint = useCallback(
-		(event) => {
-			const { offsetX: x, offsetY: y } = event;
-			const origin = calculateCoordinates(x, y);
-			if (origin) {
-				setIsPainting(true);
-				drawingManager.addNewPath(origin, color);
+	startPaint = (event) => {
+		const { offsetX: x, offsetY: y } = event;
+		const { color } = this.state;
+		const origin = this.calculateCoordinates(x, y);
+
+		if (origin) {
+			this.setState({ isPainting: true });
+			this.drawingManager.addNewPath(origin, color);
+		}
+	};
+
+	startPaintTouch = (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		const { clientX: x, clientY: y } = event.touches[0];
+		const { color } = this.state;
+		const origin = this.calculateTouchCoordinates(x, y);
+		if (origin) {
+			this.setState({ isPainting: true });
+			this.drawingManager.addNewPath(origin, color);
+		}
+	};
+
+	paintTouch = (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		const { isPainting } = this.state;
+		const { clientX: x, clientY: y } = event.touches[0];
+
+		if (isPainting) {
+			const newCoordinates = this.calculateTouchCoordinates(x, y);
+			if (newCoordinates) {
+				this.drawingManager.appendCoordinates(newCoordinates);
 			}
-		},
-		[ color ]
-	);
+		}
+	};
 
-	const startPaintTouch = useCallback(
-		(event) => {
-			event.preventDefault();
-			event.stopPropagation();
-			const { clientX: x, clientY: y } = event.touches[0];
-			const origin = calculateTouchCoordinates(x, y);
-			if (origin) {
-				setIsPainting(true);
-				drawingManager.addNewPath(origin, color);
+	paint = (event) => {
+		const { offsetX: x, offsetY: y } = event;
+		const { isPainting } = this.state;
+		if (isPainting) {
+			const newCoordinates = this.calculateCoordinates(x, y);
+
+			if (newCoordinates) {
+				this.drawingManager.appendCoordinates(newCoordinates);
 			}
-		},
-		[ color ]
-	);
+		}
+	};
 
-	const paintTouch = useCallback(
-		(event) => {
-			event.preventDefault();
-			event.stopPropagation();
-			const { clientX: x, clientY: y } = event.touches[0];
+	exitPaint = () => this.setState({ isPainting: false });
 
-			if (isPainting) {
-				const newCoordinates = calculateTouchCoordinates(x, y);
-				if (newCoordinates) {
-					drawingManager.appendCoordinates(newCoordinates);
-				}
-			}
-		},
-		[ isPainting ]
-	);
+	clearCanvas = () => {
+		if (!this.canvasRef.current) return;
 
-	const paint = useCallback(
-		(event) => {
-			const { offsetX: x, offsetY: y } = event;
-			if (isPainting) {
-				const newCoordinates = calculateCoordinates(x, y);
-
-				if (newCoordinates) {
-					drawingManager.appendCoordinates(newCoordinates);
-				}
-			}
-		},
-		[ isPainting ]
-	);
-
-	const exitPaint = useCallback(() => setIsPainting(false), []);
-
-	const clearCanvas = () => {
-		if (!canvasRef.current) return;
-
-		const canvas: HTMLCanvasElement = canvasRef.current;
-		const ctx = canvas.getContext('2d');
+		const ctx = this.canvasRef.current.getContext('2d');
 
 		if (ctx) {
-			drawingManager.clearPaths();
+			this.drawingManager.clearPaths();
 			ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		}
 	};
 
-	// setup useEffect
-	useEffect(() => {
-		let currentPaths: number = 0;
-		drawingManager.subscribe((paths) => {
-			// Clear the canvas
-			if (paths.length === 0) {
-				clearCanvas();
-				currentPaths = 0;
-			} else if (paths.length != currentPaths) {
-				// check how many paths already drawn
-				for (let i = currentPaths; i < paths.length; i++) {
-					drawPath(paths[i]);
-				}
-				currentPaths = paths.length;
-			} else {
-				// redraw the last path.
-				// TODO Optimize this one
-				const p = paths[paths.length - 1];
-				drawPath(p);
-			}
-		});
-	}, []);
+	render() {
+		const { height, width } = this.props;
 
-	useEffect(
-		() => {
-			if (!canvasRef.current) return;
-
-			const canvas: HTMLCanvasElement = canvasRef.current;
-			canvas.addEventListener('mousedown', startPaint);
-			canvas.addEventListener('touchstart', startPaintTouch);
-
-			return () => {
-				canvas.removeEventListener('mousedown', startPaint);
-				canvas.removeEventListener('touchstart', startPaintTouch);
-			};
-		},
-		[ startPaint ]
-	);
-
-	useEffect(
-		() => {
-			if (!canvasRef.current) return;
-
-			const canvas: HTMLCanvasElement = canvasRef.current;
-			canvas.addEventListener('mousemove', paint);
-			canvas.addEventListener('touchmove', paintTouch);
-			return () => {
-				canvas.removeEventListener('mousemove', paint);
-				canvas.removeEventListener('touchmove', paintTouch);
-			};
-		},
-		[ paint, paintTouch ]
-	);
-
-	useEffect(
-		() => {
-			if (!canvasRef.current) return;
-
-			const canvas: HTMLCanvasElement = canvasRef.current;
-			canvas.addEventListener('mouseup', exitPaint);
-			canvas.addEventListener('mouseleave', exitPaint);
-			canvas.addEventListener('touchcancel', exitPaint);
-			canvas.addEventListener('touchend', exitPaint);
-
-			return () => {
-				canvas.removeEventListener('mouseup', exitPaint);
-				canvas.removeEventListener('mouseleave', exitPaint);
-				canvas.removeEventListener('touchcancel', exitPaint);
-				canvas.removeEventListener('touchend', exitPaint);
-			};
-		},
-		[ exitPaint ]
-	);
-
-	return (
-		<div className="drawing-container">
-			<canvas ref={canvasRef} height={height} width={width} />
-			<div className="toolbar">
-				<ButtonToolbar>
-					{colorPalette.map((color) => (
-						<Button
-							key={color}
-							variant="dark"
-							className="rounded-circle"
+		return (
+			<div className="drawing-container">
+				<canvas ref={this.canvasRef} height={height} width={width} />
+				<div className="toolbar">
+					<ButtonToolbar>
+						{colorPalette.map((color) => (
+							<Button
+								key={color}
+								variant="dark"
+								className="rounded-circle"
+								style={{
+									backgroundColor: color,
+									height: 40,
+									width: 40,
+									margin: '0.2em'
+								}}
+								onClick={(): void => this.setState({ color })}
+							/>
+						))}
+						<div
 							style={{
-								backgroundColor: color,
-								height: 40,
-								width: 40,
-								margin: '0.2em'
+								paddingLeft: '2em'
 							}}
-							onClick={(): void => setColor(color)}
-						/>
-					))}
-				</ButtonToolbar>
-				<Button
-					className="rounded-circle"
-					style={{
-						backgroundColor: '#ffffff',
-						borderColor: '#ffffff',
-						color: 'black',
-						height: 50,
-						width: 50,
-						margin: '0.2em'
-					}}
-					onClick={clearCanvas}
-				>
-					X
-				</Button>
+						>
+							<Button
+								className="rounded-circle"
+								style={{
+									backgroundColor: '#ffffff',
+									borderColor: '#ffffff',
+									color: 'black',
+									height: 50,
+									width: 50,
+									margin: '0.2em'
+								}}
+								onClick={() => this.clearCanvas()}
+							>
+								X
+							</Button>
+						</div>
+					</ButtonToolbar>
+				</div>
 			</div>
-		</div>
-	);
-};
+		);
+	}
+}

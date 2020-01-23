@@ -54,7 +54,7 @@ export const WaitingRoom: React.FC<Props> = ({ playerEngine }) => {
 				<tbody>
 					{players.length > 0 &&
 						players.map((player) => (
-							<tr key={player.id} className="player-disp">
+							<tr key={player.id} className={player.online ? 'player-disp' : 'player-disp-offline'}>
 								<td>
 									<Avatar name={player.name} />
 								</td>

@@ -47,7 +47,7 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	}
 
 	public isLocalPlayer(id: string) {
-		return PersistentStore.localID == id;
+		return PersistentStore.localID === id;
 	}
 	public get localID(): string {
 		return PersistentStore.localID;
@@ -88,10 +88,14 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	private _chance;
 	private _playerTimeout;
 
-	constructor(cacheStore: CacheStoreInterface, eventBus: EventBusInterface, { playerTimeout = 5000 } = {}) {
+	constructor(
+		cacheStore: CacheStoreInterface,
+		eventBus: EventBusInterface,
+		props: PlayerEngineProps = { playerTimeout: 5000 }
+	) {
 		super();
 
-		this._playerTimeout = playerTimeout;
+		this._playerTimeout = props.playerTimeout;
 		this.store = cacheStore.players;
 
 		eventBus.on('CONNECTION', this._onPlayerConnectionHandler);

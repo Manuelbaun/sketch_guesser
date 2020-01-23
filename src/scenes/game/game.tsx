@@ -9,17 +9,20 @@ type Props = {
 };
 
 export const Game = ({ gameEngine, store }: Props) => {
-	let drawingManager: DrawingManager = new DrawingManager(store);
-	let messageManager: MessageManager = new MessageManager(store);
+	const drawingManager: DrawingManager = new DrawingManager(store);
+	const messageManager: MessageManager = new MessageManager(store);
 
-	useEffect(() => {
-		console.log('Create Game');
-		// clean up!!
-		return () => {
-			drawingManager.dispose();
-			messageManager.dispose();
-		};
-	}, []);
+	useEffect(
+		() => {
+			console.log('Create Game');
+			// clean up!!
+			return () => {
+				drawingManager.dispose();
+				messageManager.dispose();
+			};
+		},
+		[ drawingManager, messageManager ]
+	);
 
 	return (
 		<div>

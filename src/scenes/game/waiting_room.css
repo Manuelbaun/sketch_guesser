@@ -3,6 +3,11 @@
 	font-size: 1.52em;
 }
 
+.player-disp-offline {
+	color: rgb(255, 94, 94);
+	font-size: 1.52em;
+}
+
 .player-table {
 	width: 100%;
 }

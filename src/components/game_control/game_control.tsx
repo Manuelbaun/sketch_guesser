@@ -52,7 +52,7 @@ export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 		stopGame();
 		onCancel();
 	};
-	console.log('game stated', gameStarted);
+
 	return (
 		<div className="game-controller">
 			<Button onClick={startGame} disabled={gameStarted}>

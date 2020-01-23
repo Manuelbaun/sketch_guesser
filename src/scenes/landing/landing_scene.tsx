@@ -21,7 +21,7 @@ export const LandingScene = (props: Props) => {
 	return (
 		<div className="landing-page">
 			<div className="header">
-				<img src={mySvg} height={200} width={200} />
+				<img src={mySvg} height={200} width={200} alt="Sketchguessr LOGO" />
 			</div>
 			<h1>Welcome to SketchGuessr</h1>
 

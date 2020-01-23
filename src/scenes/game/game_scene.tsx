@@ -42,7 +42,7 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 
 	startGame;
 	stopGame;
-	componentWillMount() {
+	UNSAFE_componentWillMount() {
 		this.eventBus = new EventBus();
 		this.cacheStore = new CacheStore();
 		this.playerEngine = new PlayerEngine(this.cacheStore, this.eventBus);
@@ -74,16 +74,27 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		const { onLeaveGame } = this.props;
 		const { gameState } = this.state;
 
-		if (gameState == GameState.LOADING) {
-			return <div>Please Wait</div>;
-		}
+		let scene;
 
+		// convert from string to number
+		switch (+gameState) {
+			case GameState.LOADING:
+				scene = <div>Please Wait</div>;
+				break;
+			case GameState.WAITING_ROOM:
+				scene = <WaitingRoom playerEngine={this.playerEngine} />;
+				break;
+			case GameState.PLAY:
+				scene = <Game gameEngine={this.gameEngine} store={this.cacheStore} />;
+				break;
+			default:
+				scene = <div>Unknown State</div>;
+		}
 		// If Game, it means, connection to peers are established
 		return (
 			<React.Fragment>
 				<GameControl gameEngine={this.gameEngine} goBackToMenu={onLeaveGame} />
-				{gameState == GameState.WAITING_ROOM && <WaitingRoom playerEngine={this.playerEngine} />}
-				{gameState == GameState.PLAY && <Game gameEngine={this.gameEngine} store={this.cacheStore} />}
+				{scene}
 			</React.Fragment>
 		);
 	}
