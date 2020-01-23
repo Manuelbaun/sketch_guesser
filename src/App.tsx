@@ -3,7 +3,7 @@ import { LandingScene, GameScene } from './scenes';
 import './App.css';
 import ulog from 'ulog';
 
-ulog.level = ulog.DEBUG;
+ulog.level = process.env.NODE_ENV === 'development' ? ulog.DEBUG : ulog.INFO;
 
 enum AppState {
 	MENU,
