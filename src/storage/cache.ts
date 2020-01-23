@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import { Message, DrawingPath } from '../../models';
+import { Message, DrawingPath } from '../models';
 import { PersistentStore } from './persistance';
 
 export interface CacheStoreInterface {

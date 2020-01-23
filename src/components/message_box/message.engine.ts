@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
-import { CacheStoreInterface } from '../../service/storage/cache';
+import { CacheStoreInterface } from '../../storage/cache';
 import { Message } from '../../models/message';
-import { PersistentStore } from '../../service/storage';
+import { PersistentStore } from '../../storage';
 
 export class MessageManager extends Subject<Message[]> {
 	/**

@@ -1,6 +1,6 @@
 import sha256 from 'sha256';
 import { EventEmitter } from 'events';
-import { CacheStoreInterface } from '../service/storage/cache';
+import { CacheStoreInterface } from '../storage/cache';
 import { Game, GameStates, GameEvents } from '../models';
 import EngineInterface from './engine.interface';
 

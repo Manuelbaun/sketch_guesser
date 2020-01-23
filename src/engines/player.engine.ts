@@ -1,10 +1,10 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
 import ulog from 'ulog';
-import { CacheStoreInterface } from '../service/storage/cache';
+import { CacheStoreInterface } from '../storage/cache';
 import { EventBusInterface } from '../service/event.bus';
 import { Player } from '../models';
-import { PersistentStore } from '../service/storage';
+import { PersistentStore } from '../storage';
 import EngineInterface from './engine.interface';
 import { RandomGenerator } from '../service';
 
