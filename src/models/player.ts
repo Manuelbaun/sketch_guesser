@@ -5,7 +5,6 @@ export type PlayerProps = {
 	clientID: number; // this is the yjs doc id, possible removable
 	name: string;
 	points: number;
-	online: boolean;
 	lastOnline: number;
 	x: number; // between 0 and 1 => normalized
 	y: number; // between 0 and 1
@@ -23,6 +22,9 @@ export class Player {
 	private _id: string = '';
 	private _map;
 
+	static offlineTimeout = 1000;
+	static goneTimeout = 10000; //
+
 	constructor(props?) {
 		if (props) {
 			this._map = new Y.Map<any>();
@@ -33,9 +35,7 @@ export class Player {
 			this.x = props.x || 0.5;
 			this.y = props.y || 0.5;
 			this.points = props.points || 0;
-			this.online = true;
-			// workaround for delete
-			this._map.set('gone', false);
+			this.lastOnline = props.lastOnline;
 		}
 	}
 
@@ -59,19 +59,14 @@ export class Player {
 		return this._map;
 	}
 
-	public get gone(): boolean {
-		return this._map.get('gone');
-	}
-
-	public set gone(gone: boolean) {
-		this._map.set('gone', gone);
-	}
-
+	// indicates that the player is online, maybe an glicht or so
 	public get online(): boolean {
-		return this._map.get('online');
+		return Date.now() - this.lastOnline < Player.offlineTimeout;
 	}
-	public set online(online: boolean) {
-		this._map.set('online', online);
+
+	// indicates that the player is not online anymore and gone...
+	public get gone(): boolean {
+		return Date.now() - this.lastOnline > Player.goneTimeout;
 	}
 
 	public set lastOnline(ts: number) {

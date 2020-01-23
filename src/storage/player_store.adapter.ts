@@ -19,7 +19,7 @@ export class PlayerStoreAdapter extends Subject<Array<Player>> {
 
 	constructor(store: CacheStoreInterface) {
 		super();
-		console.log(store.players);
+		log.debug(store.players);
 		this.store = store.players;
 
 		/**
@@ -28,26 +28,24 @@ export class PlayerStoreAdapter extends Subject<Array<Player>> {
 		  * on the key -value level, not the actual player props
 		  */
 		this.observer = (event, tran) => {
-			// console.log(event);
-			// console.log(event.changes.keys);
-
-			console.log('Transaction happend local :', tran.local);
+			log.debug('Transaction happend local :', tran.local);
 
 			for (let [ key, changeAction ] of event.changes.keys) {
-				console.log(key, changeAction);
+				log.debug(key, changeAction);
 				if (changeAction.action == 'add') {
 					this._convertYMapIntoPlayerClass(key);
 				}
 
 				if (changeAction.action === 'delete') {
-					// console.log('other action');
+					// log.debug('other action');
 				}
 			}
 		};
 
 		// this will listen also to changes on player props
 		this.observerDepp = (event, tran) => {
-			this.next(this.players);
+			const player = this.players.filter((player) => !player.gone);
+			this.next(player);
 		};
 
 		this.store.observe(this.observer);

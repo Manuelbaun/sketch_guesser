@@ -76,8 +76,7 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	}
 
 	sub: Subscription;
-	_keepAlive;
-	_sweepDeadPlayers;
+	heartBeat;
 	// setup Listeners
 	_setup() {
 		log.debug('PlayerEngine init');
@@ -88,33 +87,16 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 		this.addLocalPlayer();
 
 		// setup a keep alive interval to
-		this._keepAlive = setInterval(() => {
+		this.heartBeat = setInterval(() => {
 			this._localPlayer.lastOnline = Date.now();
 		}, 1000);
-
-		/** 
-		 * This is a workaround until the communication server
-		 * 
-		 **/
-
-		this._sweepDeadPlayers = setInterval(() => {
-			const deadPlayer: string[] = [];
-			this._adapter.players.forEach((player) => {
-				const diff = Date.now() - player.lastOnline;
-				if (diff > this._playerTimeout) {
-					deadPlayer.push(player.id);
-				}
-			}, this._playerTimeout);
-
-			deadPlayer.forEach((id) => this._adapter.deletePlayerById(id));
-		});
 	}
 
 	// calls dispose function
 	dispose() {
 		this._eventBus.off('CONNECTION', this._peerConnectionHandler);
-		clearInterval(this._keepAlive);
-		clearInterval(this._sweepDeadPlayers);
+		clearInterval(this.heartBeat);
+
 		this.sub.unsubscribe();
 	}
 
@@ -135,7 +117,6 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 			id,
 			name,
 			lastOnline: Date.now(),
-			online: true,
 			points: 0,
 			x: RandomGenerator.float({ min: 0.2, max: 0.85 }),
 			y: RandomGenerator.float({ min: 0.2, max: 0.85 })
@@ -165,15 +146,15 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 
 	setPlayerOnline(id) {
 		log.debug('Player online ', id);
-		const player = this._adapter.getPlayerById(id);
+		// const player = this._adapter.getPlayerById(id);
 
-		if (player) {
-			const timer = this.offlineTimer.get(id);
-			if (timer) clearTimeout(timer);
+		// if (player) {
+		// 	const timer = this.offlineTimer.get(id);
+		// 	if (timer) clearTimeout(timer);
 
-			log.debug('Player is back online');
-			player.online = true;
-		}
+		// 	log.debug('Player is back online');
+		// 	player.online = true;
+		// }
 	}
 
 	// For now, the player does not get removed, we could, be
@@ -183,19 +164,19 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 		const player = this._adapter.getPlayerById(id);
 
 		log.debug('Remove Player', id, player);
-		if (player) {
-			// player still exits
-			player.online = false;
-			// let timer run, to delete player, when longer offline
-			// then the player should
-			const timer = setTimeout(() => {
-				// player.gone = true;
-				// this._adapter.deletePlayerById(id);
+		// if (player) {
+		// 	// player still exits
+		// 	player.online = false;
+		// 	// let timer run, to delete player, when longer offline
+		// 	// then the player should
+		// 	const timer = setTimeout(() => {
+		// 		// player.gone = true;
+		// 		// this._adapter.deletePlayerById(id);
 
-				this.offlineTimer.delete(id);
-			}, this._playerTimeout);
+		// 		this.offlineTimer.delete(id);
+		// 	}, this._playerTimeout);
 
-			this.offlineTimer.set(id, timer); // store timer
-		}
+		// 	this.offlineTimer.set(id, timer); // store timer
+		// }
 	}
 }

@@ -27,14 +27,15 @@ import { CacheStoreInterface, PersistentStore } from '../../storage';
  * 
  * 
  * TODO: implement awareness, that a player is connected....
- * The awareness protocol withing y-protocol, does the job.
- * but needs adjustments, to fit the game needs.
+ * At the moment, each player sends a heartbeat, meaning, the player sets the
+ * lastOnline attribute on every seconds (just unix timestamp) 
+ * and when the time difference is greater then f.e. 3 seconds, the *online*
+ * attribute of each player evaluates to offline. When the *gone* attribute time difference is greater then f.e. 10 it evaluates to true.
  * 
- * until this is implemented in the player.engine.ts under keepalive
- * and _sweepDeadPlayers timers..
+ * Then the frontend does not render the player..
  * 
- * This strategy works only for a full mesh. Partial meshed needs 
- * a proper strategy
+ * this way, even in a not fully connected network, the approach shows on and offline players..
+ * 
  */
 
 export class CommunicationService {
