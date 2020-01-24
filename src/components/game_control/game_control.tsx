@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
-
 import { GameStates } from '../../models';
 import { GameEngineInterface } from '../../engines';
 import { PersistentStore } from '../../service/sync';
@@ -20,28 +19,21 @@ type Props = {
  */
 export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 	const [ gameStarted, setGameStarted ] = useState(false);
-	const setupGame = () => {
+
+	const startGame = () => {
+		console.debug('Start Game');
+		gameEngine.setNewGuessWord('test');
 		gameEngine.setupGame({
 			codeWordHash: '',
 			currentRound: 1,
 			rounds: 3,
 			currentMasterID: PersistentStore.clientID.toString(),
 			state: GameStates.WAITING,
-			time: 60
+			currentTime: 60,
+			timePerRound: 60
 		});
-	};
-
-	const startGame = () => {
-		console.debug('Start Game');
-		gameEngine.model.codeWordHash = 'test';
-		setupGame();
 		setGameStarted(true);
 		gameEngine.startGame();
-	};
-
-	const resetGame = () => {
-		setupGame();
-		startGame();
 	};
 
 	const stopGame = () => {
@@ -49,6 +41,7 @@ export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 		setGameStarted(false);
 		gameEngine.stopGame();
 	};
+
 	const nextRound = () => gameEngine.nextRound();
 
 	const cancelGame = () => {
@@ -62,7 +55,7 @@ export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 				START
 			</Button>
 			<Button onClick={stopGame}> Stop </Button>
-			<Button onClick={resetGame}> Reset </Button>
+			<Button onClick={startGame}> Reset </Button>
 			<Button onClick={nextRound}> Next Round </Button>
 			<Button onClick={cancelGame}> Go Back to Menu </Button>
 		</div>

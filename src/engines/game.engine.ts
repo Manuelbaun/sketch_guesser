@@ -1,132 +1,101 @@
 import { EventEmitter } from 'events';
-import { CacheStoreInterface, Transact } from '../service/sync/cache';
-import { GameProps, GameStates, GameEvents, GameModel } from '../models';
+import { Subscription, Subject } from 'rxjs';
+import { GameStates, GameEvents, IGameModel } from '../models';
+import { IGameService } from '../service/game/game.service';
 import EngineInterface from './engine.interface';
-import { GameStoreAdapter } from '../service/sync/game_store.adapter';
-import { Subscription } from 'rxjs';
+import { IKeyValue } from '../service/sync/game_store.adapter';
 
-export interface GameEngineInterface extends EngineInterface {
-	// emitter wrapper
-	emit(type: GameEvents, ...args: any[]);
-	handleGameStateChanged(key: string, value: any);
-	nextRound();
-	// emitter wrapper
-	off(type: GameEvents, listener: (...args: any[]) => void);
-	// emitter wrapper
-	on(type: GameEvents, listener: (...args: any[]) => void);
-	resetTime();
-	setupGame(game: GameProps);
+export interface GameEngineInterface extends Subject<GameEngineEvents>, EngineInterface {
+	setupGame(game: IGameModel);
 	startGame();
 	stopGame();
+	nextRound();
+	setNewGuessWord(value: string);
 
-	model: GameModel;
+	time: number;
+	rounds: number;
+	currentRound: number;
 }
 
-export class GameEngine implements GameEngineInterface {
-	private _emitter: EventEmitter = new EventEmitter();
+interface GameEngineEvents {
+	key: GameEvents;
+	value: any;
+}
+
+export class GameEngine extends Subject<GameEngineEvents> implements GameEngineInterface {
 	private _timer: NodeJS.Timeout;
-	private _model: GameModel;
-	public get model() {
-		return this._model;
-	}
+	private _service: IGameService;
 
-	// Executes transaction in a batch
-	private _transact: Transact;
+	constructor(service: IGameService) {
+		super();
 
-	private _gameStoreAdapter: GameStoreAdapter;
-	constructor(store: CacheStoreInterface) {
-		this._transact = store.transact;
+		this._service = service;
 
-		this._gameStoreAdapter = new GameStoreAdapter(store);
-		this._model = this._gameStoreAdapter.gameModel;
-
-		this._sub = this._model.subscribe(({ key, value }) => {
-			this.handleGameStateChanged(key, value);
+		this._sub = this._service.subscribe(({ key, value }) => {
+			console.log('Hansle Updates', key, value);
+			this._handleGameStateChanged(key, value);
 		});
 
 		console.log('GameEngine init');
+
+		this.subscribe((event) => {
+			console.log('GAME-Engine-EVENTs', event);
+		});
 	}
 
 	private _sub: Subscription;
 
 	dispose() {
 		this._sub.unsubscribe();
-		this._model.dispose();
 		console.log('GameEngine dispose');
 	}
 
-	handleGameStateChanged(key: string, value: any) {
+	private _handleGameStateChanged(key: string, value: any) {
 		if (key === 'currentRound') {
-			this.emit(GameEvents.ROUND_CHANGE, value);
+			this.next({ key: GameEvents.ROUND_CHANGE, value });
 		}
 
 		// Map state to Events
 		if (key === 'state') {
-			this.emit(value, true);
-
 			switch (value) {
 				case GameStates.WAITING:
-					this.emit(GameEvents.GAME_PAUSED, true);
+					this.next({ key: GameEvents.GAME_PAUSED, value: true });
 					break;
 				case GameStates.CHOOSING_WORD:
-					this.emit(GameEvents.CHOOSING_WORD, true);
+					this.next({ key: GameEvents.CHOOSING_WORD, value: true });
 					break;
 				case GameStates.STARTED:
-					this.emit(GameEvents.GAME_STARTED, true);
+					this.next({ key: GameEvents.GAME_STARTED, value: true });
 					break;
 				case GameStates.STOPPED:
-					this.emit(GameEvents.GAME_STOPPED, true);
+					this.next({ key: GameEvents.GAME_STOPPED, value: true });
 					break;
 			}
 		}
 
 		if (key === 'time') {
-			this.emit(GameEvents.CLOCK_UPDATE, this._model.time);
+			this.next({ key: GameEvents.CLOCK_UPDATE, value: this._service.currentTime });
 		}
 	}
 
-	// emitter wrapper
-	emit(type: GameEvents, ...args: any[]) {
-		this._emitter.emit(type, args);
-	}
-
-	// emitter wrapper
-	on(type: GameEvents, listener: (...args: any[]) => void) {
-		this._emitter.on(type, listener);
-	}
-
-	// emitter wrapper
-	off(type: GameEvents, listener: (...args: any[]) => void) {
-		this._emitter.off(type, listener);
-	}
-
-	setupGame(game: GameProps) {
+	setupGame(game: IGameModel) {
 		clearInterval(this._timer);
-
-		this._model.setProps(game);
-		this.resetTime();
-	}
-
-	resetTime() {
-		this._model.time = 60;
+		this._service.setProps(game);
 	}
 
 	startGame() {
-		const state = this._model.state;
+		const state = this._service.state;
 		if (state === GameStates.STARTED || state === GameStates.CHOOSING_WORD) return;
-		console.log(this);
-		this._transact(() => {
-			this.resetTime();
-			this._model.state = GameStates.STARTED;
-		});
 
+		console.log('START GAME');
+		this._service.state = GameStates.STARTED;
 		// setup the game time
 		clearInterval(this._timer);
 		this._timer = setInterval(() => {
-			this._model.time -= 1;
+			this._service.currentTime -= 1;
 
-			if (this._model.time < 1) {
-				if (this._model.currentRound <= this._model.rounds) this.nextRound();
+			if (this._service.currentTime < 1) {
+				if (this._service.currentRound <= this._service.rounds) this.nextRound();
 				else this.stopGame();
 			}
 		}, 1000);
@@ -134,11 +103,26 @@ export class GameEngine implements GameEngineInterface {
 
 	stopGame() {
 		clearInterval(this._timer);
-		this._model.state = GameStates.STOPPED;
+		this._service.state = GameStates.STOPPED;
 	}
 
+	// TODO: think, how to update via transact here....
 	nextRound() {
-		this._model.currentRound += 1;
-		this.resetTime();
+		this._service.currentRound += 1;
+		this._service.currentTime = this._service.timePerRound;
+	}
+
+	setNewGuessWord(value: string) {
+		this._service.codeWordHash = value;
+	}
+
+	get time() {
+		return this._service.currentTime;
+	}
+	get rounds() {
+		return this._service.rounds;
+	}
+	get currentRound() {
+		return this._service.currentRound;
 	}
 }

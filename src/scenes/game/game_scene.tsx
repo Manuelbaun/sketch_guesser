@@ -5,6 +5,9 @@ import { GameEvents } from '../../models';
 import { GameControl } from '../../components';
 import { WaitingRoom } from './waiting_room';
 import { Game } from './game';
+import { GameService } from '../../service/game/game.service';
+import { GameStoreAdapter } from '../../service/sync/game_store.adapter';
+import { Subscription } from 'rxjs';
 
 type TheGameProps = {
 	roomName;
@@ -42,14 +45,16 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		this.setState({ gameState: GameState.WAITING_ROOM });
 	}
 
-	startGame;
-	stopGame;
 	UNSAFE_componentWillMount() {
 		this.eventBus = new EventBus();
 		this.cacheStore = new CacheStore();
-		this.playerEngine = new PlayerEngine(this.cacheStore, this.eventBus);
-		this.gameEngine = new GameEngine(this.cacheStore);
 		this.commService = new CommunicationService(this.cacheStore, this.eventBus, this.props.roomName);
+
+		this.playerEngine = new PlayerEngine(this.cacheStore, this.eventBus);
+
+		const gameStoreAdapter = new GameStoreAdapter(this.cacheStore);
+		const gameService = new GameService(gameStoreAdapter);
+		this.gameEngine = new GameEngine(gameService);
 
 		this.eventBus.on('SYNCED', (data) => {
 			this.setState({ gameState: GameState.WAITING_ROOM });
@@ -58,19 +63,20 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 			}
 		});
 
-		// need to assign it, because of the scope
-		this.startGame = () => this.setState({ gameState: GameState.PLAY });
-		this.stopGame = () => this.setState({ gameState: GameState.WAITING_ROOM });
-
-		this.gameEngine.on(GameEvents.GAME_STARTED, this.startGame);
-		this.gameEngine.on(GameEvents.GAME_STOPPED, this.stopGame);
+		this.sub = this.gameEngine.subscribe((event) => {
+			switch (event.key) {
+				case GameEvents.GAME_STARTED:
+					this.setState({ gameState: GameState.PLAY });
+					break;
+				case GameEvents.GAME_STOPPED:
+					this.setState({ gameState: GameState.WAITING_ROOM });
+					break;
+			}
+		});
 	}
-
+	sub: Subscription;
 	componentWillUnmount() {
-		// unsubscribe
-		this.gameEngine.off(GameEvents.GAME_STARTED, this.startGame);
-		this.gameEngine.off(GameEvents.GAME_STOPPED, this.stopGame);
-
+		this.sub.unsubscribe();
 		// dispose all
 		this.commService.dispose();
 		this.playerEngine.dispose();

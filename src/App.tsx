@@ -3,11 +3,11 @@ import { LandingScene, GameScene } from './scenes';
 import './App.css';
 import ulog from 'ulog';
 
-ulog.level = process.env.NODE_ENV === 'development' ? ulog.DEBUG : ulog.INFO;
+// ulog.level = process.env.NODE_ENV === 'development' ? ulog.DEBUG : ulog.INFO;
 
 // set the y-js logger active
 if (process.env.NODE_ENV === 'development') {
-	localStorage.setItem('log', 'true');
+	// localStorage.setItem('log', 'true');
 }
 
 enum AppState {

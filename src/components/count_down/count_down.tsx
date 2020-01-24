@@ -9,19 +9,21 @@ interface CountDownProps {
 }
 
 export const CountDown: React.FC<CountDownProps> = ({ gameEngine }) => {
-	const [ time, setTime ] = useState(gameEngine.model.time);
-	const [ currentRound, setCurrentRound ] = useState(gameEngine.model.currentRound);
+	const [ time, setTime ] = useState(gameEngine.time);
+	const [ currentRound, setCurrentRound ] = useState(gameEngine.currentRound);
 
 	useEffect(
 		() => {
-			const updateTime = (time) => setTime(time);
-			const updateRound = (round) => setCurrentRound(round);
-			gameEngine.on(GameEvents.CLOCK_UPDATE, updateTime);
-			gameEngine.on(GameEvents.ROUND_CHANGE, updateRound);
+			const sub = gameEngine.subscribe((event) => {
+				if (event.key === GameEvents.CLOCK_UPDATE) {
+					setTime(event.value);
+				} else if (event.key === GameEvents.ROUND_CHANGE) {
+					setCurrentRound(event.value);
+				}
+			});
 
 			return () => {
-				gameEngine.off(GameEvents.CLOCK_UPDATE, updateTime);
-				gameEngine.off(GameEvents.ROUND_CHANGE, updateRound);
+				sub.unsubscribe();
 			};
 		},
 		[ gameEngine ]
@@ -31,7 +33,7 @@ export const CountDown: React.FC<CountDownProps> = ({ gameEngine }) => {
 		<div className="game-info">
 			<span className="count-down"> "{time}"</span>;
 			<span className="current-round"> "{currentRound}/</span>
-			<span className="rounds">{gameEngine.model.rounds}" </span>
+			<span className="rounds">{gameEngine.rounds}" </span>
 		</div>
 	);
 };
