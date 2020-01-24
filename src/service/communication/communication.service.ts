@@ -61,6 +61,7 @@ export class CommunicationService {
 
 		this._provider.on('synced', (synced) => {
 			log('synced!', synced);
+			eventBus.onSync(synced);
 		});
 
 		this._provider.on('peers', (peers) => {
@@ -76,7 +77,6 @@ export class CommunicationService {
 	// cleanup
 	async dispose(event?) {
 		console.log('Communication service dispose');
-		// await this._provider.disconnect();
 		await this._provider.destroy();
 
 		let ev = event || window.event;

@@ -3,11 +3,12 @@ import { EventEmitter } from 'events';
 export interface EventBusInterface {
 	on(type: EventBusType, listener: (...args: any[]) => void);
 	off(type: EventBusType, listener: (...args: any[]) => void);
+	onSync(data: any);
 	onPlayerConnection(id: string, connected: boolean);
 	dispose();
 }
 
-type EventBusType = 'CONNECTION';
+type EventBusType = 'CONNECTION' | 'SYNCED';
 
 export class EventBus implements EventBusInterface {
 	private emitter: EventEmitter = new EventEmitter();
@@ -27,6 +28,10 @@ export class EventBus implements EventBusInterface {
 			connected,
 			id
 		});
+	}
+
+	onSync(data: any) {
+		this.emitter.emit('SYNCED', data);
 	}
 
 	dispose() {

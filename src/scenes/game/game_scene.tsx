@@ -13,6 +13,7 @@ type TheGameProps = {
 
 type TheGameState = {
 	gameState: GameState;
+	syncing: boolean;
 };
 
 enum GameState {
@@ -32,7 +33,8 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		super(props);
 
 		this.state = {
-			gameState: GameState.LOADING
+			gameState: GameState.LOADING,
+			syncing: true
 		};
 	}
 
@@ -48,6 +50,13 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		this.playerEngine = new PlayerEngine(this.cacheStore, this.eventBus);
 		this.gameEngine = new GameEngine(this.cacheStore);
 		this.commService = new CommunicationService(this.cacheStore, this.eventBus, this.props.roomName);
+
+		this.eventBus.on('SYNCED', (data) => {
+			this.setState({ gameState: GameState.WAITING_ROOM });
+			if (data.synced) {
+				this.setState({ syncing: false });
+			}
+		});
 
 		// need to assign it, because of the scope
 		this.startGame = () => this.setState({ gameState: GameState.PLAY });
