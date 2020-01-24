@@ -206,10 +206,21 @@ export const broadcastRoomMessage = (room, m) => {
  * @param {Uint8Array} m
  */
 const broadcastWebrtcConn = (room, m) => {
-	log('broadcast message in ', logging.BOLD, room.name, logging.UNBOLD);
+	log(
+		'broadcast message in: ',
+		logging.GREEN,
+		logging.BOLD,
+		'WEBRTC - ',
+		logging.UNCOLOR,
+		'Room: ',
+		room.name,
+		logging.UNBOLD
+	);
 	room.webrtcConns.forEach((conn) => {
 		try {
 			conn.peer.send(m);
-		} catch (e) {}
+		} catch (e) {
+			log(logging.BOLD, logging.RED, 'Could not send to peer', conn.peer);
+		}
 	});
 };

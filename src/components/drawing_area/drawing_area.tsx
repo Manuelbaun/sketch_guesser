@@ -215,7 +215,7 @@ export class DrawingArea extends React.Component<Props, State> {
 
 	render() {
 		const { height, width } = this.props;
-
+		console.log('render', this.drawingManager);
 		return (
 			<div className="drawing-container">
 				<canvas ref={this.canvasRef} height={height} width={width} />

@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
-import { CacheStoreInterface, Transact } from '../storage/cache';
+import { CacheStoreInterface, Transact } from '../service/sync/cache';
 import { GameProps, GameStates, GameEvents, GameModel } from '../models';
 import EngineInterface from './engine.interface';
-import { GameStoreAdapter } from '../storage/game_store.adapter';
+import { GameStoreAdapter } from '../service/sync/game_store.adapter';
 import { Subscription } from 'rxjs';
 
 export interface GameEngineInterface extends EngineInterface {

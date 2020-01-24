@@ -1,7 +1,7 @@
-import { PlayerProps, Player } from '../models';
+import { PlayerProps, Player } from '../../models';
 import { Map as YMap } from 'yjs';
 import ulog from 'ulog';
-import { CacheStoreInterface } from '../service';
+import { CacheStoreInterface } from '..';
 import { Subject } from 'rxjs';
 
 const log = ulog('player.adapter');

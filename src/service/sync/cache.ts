@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
-import { Message, DrawingPath } from '../models';
-import { PersistentStore } from './persistance';
+import { Message, DrawingPath } from '../../models';
+import { PersistentStore } from '../store/persistance';
 
 export type Transact = (f: (arg0: any) => void) => void;
 

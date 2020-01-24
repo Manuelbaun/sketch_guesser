@@ -1,7 +1,7 @@
-import { GameModel } from '../models';
+import { GameModel } from '../../models';
 import { Map as YMap } from 'yjs';
 import ulog from 'ulog';
-import { CacheStoreInterface } from '../service';
+import { CacheStoreInterface } from '..';
 
 const log = ulog('player.adapter');
 

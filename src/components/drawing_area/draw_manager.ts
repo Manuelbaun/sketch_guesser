@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import { Subject } from 'rxjs';
 import { DrawingPath, Coordinate } from '../../models';
-import { CacheStoreInterface } from '../../storage';
+import { CacheStoreInterface } from '../../service/sync';
 
 /**
  * 

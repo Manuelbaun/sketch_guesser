@@ -1,14 +1,13 @@
 import * as encoding from 'lib0/encoding.js';
 import * as decoding from 'lib0/decoding.js';
-import * as logging from 'lib0/logging.js';
 import * as bc from 'lib0/broadcastchannel.js';
 import * as buffer from 'lib0/buffer.js';
-
 import * as syncProtocol from 'y-protocols/sync.js';
 import * as awarenessProtocol from 'y-protocols/awareness.js';
 import * as cryptoutils from './crypto.js';
 
-const log = logging.createModuleLogger('y-webrtc');
+// import * as logging from 'lib0/logging.js';
+// const log = logging.createModuleLogger('y-webrtc');
 
 export const messageSync = 0;
 export const messageQueryAwareness = 3;

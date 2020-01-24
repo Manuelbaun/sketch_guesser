@@ -1,12 +1,12 @@
 import { Subject, Subscription } from 'rxjs';
 import ulog from 'ulog';
-import { CacheStoreInterface } from '../storage/cache';
+import { CacheStoreInterface } from '../service/sync/cache';
 import { EventBusInterface } from '../service/event.bus';
 import { Player, PlayerProps } from '../models';
-import { PersistentStore } from '../storage';
+import { PersistentStore } from '../service/sync';
 import EngineInterface from './engine.interface';
 import { RandomGenerator } from '../service';
-import { PlayerStoreAdapter } from '../storage/player_store.adapter';
+import { PlayerStoreAdapter } from '../service/sync/player_store.adapter';
 
 const log = ulog('player.engine');
 

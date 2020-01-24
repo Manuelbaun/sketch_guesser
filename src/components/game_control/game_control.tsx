@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 
 import { GameStates } from '../../models';
 import { GameEngineInterface } from '../../engines';
-import { PersistentStore } from '../../storage';
+import { PersistentStore } from '../../service/sync';
 
 import './game_control.css';
 
