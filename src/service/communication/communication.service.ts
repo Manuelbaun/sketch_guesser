@@ -59,6 +59,7 @@ export class CommunicationService {
 
 		this._provider.on('synced', (synced) => {
 			console.log('synced!', synced);
+			alert('now its synced');
 		});
 
 		this._provider.on('peers', (peers) => {

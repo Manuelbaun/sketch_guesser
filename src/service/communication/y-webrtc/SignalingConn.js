@@ -4,7 +4,10 @@ import * as buffer from 'lib0/buffer.js';
 import { rooms } from './Room';
 import * as cryptoutils from './crypto.js';
 import { WebrtcConn } from './WebrtcConn';
-import { log, publishSignalingMessage } from './y-webrtc';
+import { publishSignalingMessage } from './y-webrtc';
+import * as logging from 'lib0/logging.js';
+
+const log = logging.createModuleLogger('y-SignalingConn');
 
 export class SignalingConn extends ws.WebsocketClient {
 	constructor(url) {

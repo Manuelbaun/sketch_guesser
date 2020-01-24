@@ -8,7 +8,7 @@ import * as syncProtocol from 'y-protocols/sync.js';
 import * as awarenessProtocol from 'y-protocols/awareness.js';
 import * as cryptoutils from './crypto.js';
 
-export const log = logging.createModuleLogger('y-webrtc');
+const log = logging.createModuleLogger('y-webrtc');
 
 export const messageSync = 0;
 export const messageQueryAwareness = 3;
@@ -19,23 +19,6 @@ export const messageBcPeerId = 4;
  * @type {Map<string, SignalingConn>}
  */
 export const signalingConns = new Map();
-
-/**
- * @param {Room} room
- */
-export const checkIsSynced = (room) => {
-	let synced = true;
-	room.webrtcConns.forEach((peer) => {
-		if (!peer.synced) {
-			synced = false;
-		}
-	});
-	if ((!synced && room.synced) || (synced && !room.synced)) {
-		room.synced = synced;
-		room.provider.emit('synced', [ { synced } ]);
-		log('synced ', logging.BOLD, room.name, logging.UNBOLD, ' with all peers');
-	}
-};
 
 /**
  * @param {Room} room
@@ -115,56 +98,11 @@ export const readMessage = (room, buf, syncedCallback) => {
 };
 
 /**
- * @param {WebrtcConn} webrtcConn
- * @param {encoding.Encoder} encoder
- */
-export const sendWebrtcConn = (webrtcConn, encoder) => {
-	log(
-		'send message to ',
-		logging.BOLD,
-		webrtcConn.remotePeerId,
-		logging.UNBOLD,
-		logging.GREY,
-		' (',
-		webrtcConn.room.name,
-		')',
-		logging.UNCOLOR
-	);
-	try {
-		webrtcConn.peer.send(encoding.toUint8Array(encoder));
-	} catch (e) {}
-};
-
-/**
- * @param {Room} room
- * @param {Uint8Array} m
- */
-const broadcastWebrtcConn = (room, m) => {
-	log('broadcast message in ', logging.BOLD, room.name, logging.UNBOLD);
-	room.webrtcConns.forEach((conn) => {
-		try {
-			conn.peer.send(m);
-		} catch (e) {}
-	});
-};
-
-/**
  * @param {Room} room
  * @param {Uint8Array} m
  */
 export const broadcastBcMessage = (room, m) =>
 	cryptoutils.encrypt(m, room.key).then((data) => room.mux(() => bc.publish(room.name, data)));
-
-/**
- * @param {Room} room
- * @param {Uint8Array} m
- */
-export const broadcastRoomMessage = (room, m) => {
-	if (room.bcconnected) {
-		broadcastBcMessage(room, m);
-	}
-	broadcastWebrtcConn(room, m);
-};
 
 /**
  * @param {Room} room

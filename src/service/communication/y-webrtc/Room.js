@@ -6,12 +6,12 @@ import * as syncProtocol from 'y-protocols/sync.js';
 import * as awarenessProtocol from 'y-protocols/awareness.js';
 import * as bc from 'lib0/broadcastchannel.js';
 import * as cryptoutils from './crypto.js';
+import * as logging from 'lib0/logging.js';
 
 import {
 	readMessage,
 	broadcastBcMessage,
 	messageSync,
-	broadcastRoomMessage,
 	messageAwareness,
 	announceSignalingInfo,
 	broadcastBcPeerId,
@@ -19,6 +19,8 @@ import {
 	signalingConns,
 	messageBcPeerId
 } from './y-webrtc';
+
+const log = logging.createModuleLogger('y-Room');
 
 /**
  * @type {Map<string,Room>}
@@ -187,3 +189,27 @@ export class Room {
 		this.disconnect();
 	}
 }
+
+/**
+ * @param {Room} room
+ * @param {Uint8Array} m
+ */
+export const broadcastRoomMessage = (room, m) => {
+	if (room.bcconnected) {
+		broadcastBcMessage(room, m);
+	}
+	broadcastWebrtcConn(room, m);
+};
+
+/**
+ * @param {Room} room
+ * @param {Uint8Array} m
+ */
+const broadcastWebrtcConn = (room, m) => {
+	log('broadcast message in ', logging.BOLD, room.name, logging.UNBOLD);
+	room.webrtcConns.forEach((conn) => {
+		try {
+			conn.peer.send(m);
+		} catch (e) {}
+	});
+};

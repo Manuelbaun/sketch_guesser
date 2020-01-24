@@ -5,6 +5,9 @@ import ulog from 'ulog';
 
 ulog.level = process.env.NODE_ENV === 'development' ? ulog.DEBUG : ulog.INFO;
 
+// set the y-js logger active
+localStorage.setItem('log', 'true');
+
 enum AppState {
 	MENU,
 	GAME

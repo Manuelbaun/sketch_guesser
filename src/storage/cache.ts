@@ -13,15 +13,15 @@ export interface CacheStoreInterface {
 	 * @type {YArray<DrawingPath>}
 	 */
 	drawPaths;
-	/**
-	* @type {YMap<GameState>}
-	**/
-	gameState;
-	hasGameState: boolean;
-	/**
-	 * @type {YMap<any>}
-	 */
-	clock;
+	// /**
+	// * @type {YMap<GameState>}
+	// **/
+	// gameState;
+	// hasGameState: boolean;
+	// /**
+	//  * @type {YMap<any>}
+	//  */
+	// clock;
 	/**
 	 * @type {YArray<Message>}
 	 */
@@ -79,23 +79,23 @@ export class CacheStore implements CacheStoreInterface {
 		return this.yDoc.getArray<Message>('messages');
 	}
 
-	// private _gameState = ;
-	public get gameState() {
-		console.debug('REmove me !!');
-		return this.yDoc.getMap('gameState');
-	}
+	// // private _gameState = ;
+	// public get gameState() {
+	// 	console.debug('REmove me !!');
+	// 	return this.yDoc.getMap('gameState');
+	// }
 
-	public get hasGameState() {
-		console.log(this.yDoc.share, this._yDoc.store);
-		return this.yDoc.share.has('gameState');
-	}
+	// public get hasGameState() {
+	// 	console.log(this.yDoc.share, this._yDoc.store);
+	// 	return this.yDoc.share.has('gameState');
+	// }
 
 	// private _clock = ;
 
-	public get clock() {
-		console.trace('Do not use Clock');
-		return this.yDoc.getMap('clock');
-	}
+	// public get clock() {
+	// 	console.trace('Do not use Clock');
+	// 	return this.yDoc.getMap('clock');
+	// }
 
 	public get players() {
 		return this.yDoc.getMap('players');

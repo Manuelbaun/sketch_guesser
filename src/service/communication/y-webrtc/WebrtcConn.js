@@ -4,16 +4,9 @@ import * as encoding from 'lib0/encoding.js';
 import * as syncProtocol from 'y-protocols/sync.js';
 import * as awarenessProtocol from 'y-protocols/awareness.js';
 
-import {
-	log,
-	publishSignalingMessage,
-	messageSync,
-	sendWebrtcConn,
-	messageAwareness,
-	checkIsSynced,
-	announceSignalingInfo,
-	readMessage
-} from './y-webrtc';
+import { publishSignalingMessage, messageSync, messageAwareness, announceSignalingInfo, readMessage } from './y-webrtc';
+
+const log = logging.createModuleLogger('y-WebrtcConn');
 
 export class WebrtcConn {
 	/**
@@ -125,4 +118,44 @@ export const readPeerMessage = (peerConn, buf) => {
 		log('synced ', logging.BOLD, room.name, logging.UNBOLD, ' with ', logging.BOLD, peerConn.remotePeerId);
 		checkIsSynced(room);
 	});
+};
+
+/**
+ * @param {WebrtcConn} webrtcConn
+ * @param {encoding.Encoder} encoder
+ */
+export const sendWebrtcConn = (webrtcConn, encoder) => {
+	log(
+		'send message to ',
+		logging.BOLD,
+		webrtcConn.remotePeerId,
+		logging.UNBOLD,
+		logging.GREY,
+		' (',
+		webrtcConn.room.name,
+		')',
+		logging.UNCOLOR
+	);
+	try {
+		webrtcConn.peer.send(encoding.toUint8Array(encoder));
+	} catch (e) {}
+};
+
+/**
+ * @param {Room} room
+ */
+export const checkIsSynced = (room) => {
+	let synced = true;
+
+	console.log('CHEKC, if SYNCED');
+	room.webrtcConns.forEach((peer) => {
+		if (!peer.synced) {
+			synced = false;
+		}
+	});
+	if ((!synced && room.synced) || (synced && !room.synced)) {
+		room.synced = synced;
+		room.provider.emit('synced', [ { synced } ]);
+		log('synced ', logging.BOLD, room.name, logging.UNBOLD, ' with all peers');
+	}
 };

@@ -32,7 +32,7 @@ export class PlayerStoreAdapter extends Subject<Array<Player>> {
 
 			for (let [ key, changeAction ] of event.changes.keys) {
 				log.debug(key, changeAction);
-				if (changeAction.action == 'add') {
+				if (changeAction.action === 'add') {
 					this._convertYMapIntoPlayerClass(key);
 				}
 
