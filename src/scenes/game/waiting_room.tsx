@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Player } from '../../models';
 import { PlayerEngineInterface } from '../../engines';
 import { Input, Avatar } from '../../components';
-import { getPublicIpAddress } from '../../service/communication';
 import './waiting_room.css';
 
 type Props = {
@@ -12,7 +11,6 @@ type Props = {
 
 export const WaitingRoom: React.FC<Props> = ({ playerEngine }) => {
 	const [ players, setPlayers ] = useState<Array<Player>>(playerEngine.getAllPlayers());
-	const [ ipAddress, setIpAddress ] = useState<string>('');
 	const handleSubmit = (msg: string) => {
 		playerEngine.updateLocalName(msg);
 	};
@@ -23,12 +21,6 @@ export const WaitingRoom: React.FC<Props> = ({ playerEngine }) => {
 			setPlayers(online);
 		});
 
-		getPublicIpAddress()
-			.then((data: any) => {
-				setIpAddress(data.msg);
-			})
-			.catch((err) => console.error(err));
-
 		return () => {
 			sub.unsubscribe();
 		};
@@ -36,7 +28,6 @@ export const WaitingRoom: React.FC<Props> = ({ playerEngine }) => {
 
 	return (
 		<div className="menu">
-			<div className="player-disp"> Your IP address: {ipAddress} </div>
 			<Input
 				onSubmit={handleSubmit}
 				options={{ placeholder: 'your name', label: 'Alias', buttonLabel: 'Submit' }}

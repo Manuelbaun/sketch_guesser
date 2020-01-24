@@ -5,6 +5,8 @@ import { WebrtcProvider } from './y-webrtc/WebrtcProvider';
 
 import { CacheStoreInterface, PersistentStore } from '../../storage';
 
+import * as logging from 'lib0/logging.js';
+const log = logging.createModuleLogger('communication-Service');
 /**
  * This is the CommunicationService.
  * 
@@ -58,8 +60,7 @@ export class CommunicationService {
 		});
 
 		this._provider.on('synced', (synced) => {
-			console.log('synced!', synced);
-			alert('now its synced');
+			log('synced!', synced);
 		});
 
 		this._provider.on('peers', (peers) => {
