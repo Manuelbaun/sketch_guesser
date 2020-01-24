@@ -28,7 +28,7 @@ export class PlayerStoreAdapter extends Subject<Array<Player>> {
 		  * on the key -value level, not the actual player props
 		  */
 		this.observer = (event, tran) => {
-			log.debug('Transaction happend local :', tran.local);
+			log.debug('Transaction happend local :', tran);
 
 			for (let [ key, changeAction ] of event.changes.keys) {
 				log.debug(key, changeAction);

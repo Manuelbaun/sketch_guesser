@@ -22,8 +22,11 @@ export class Player {
 	private _id: string = '';
 	private _map;
 
-	static offlineTimeout = 1000;
-	static goneTimeout = 10000; //
+	// time, when in the player lost connection, and
+	// is probably not gone
+	static timeOutOffline = 1000;
+	// the time, when the player is definitely left the game
+	static timeOutTotal = 10000; //
 
 	constructor(props?) {
 		if (props) {
@@ -36,6 +39,8 @@ export class Player {
 			this.y = props.y || 0.5;
 			this.points = props.points || 0;
 			this.lastOnline = props.lastOnline;
+		} else {
+			console.log('Created via YMap and Id');
 		}
 	}
 
@@ -61,12 +66,12 @@ export class Player {
 
 	// indicates that the player is online, maybe an glicht or so
 	public get online(): boolean {
-		return Date.now() - this.lastOnline < Player.offlineTimeout;
+		return Date.now() - this.lastOnline < Player.timeOutOffline;
 	}
 
 	// indicates that the player is not online anymore and gone...
 	public get gone(): boolean {
-		return Date.now() - this.lastOnline > Player.goneTimeout;
+		return Date.now() - this.lastOnline > Player.timeOutTotal;
 	}
 
 	public set lastOnline(ts: number) {

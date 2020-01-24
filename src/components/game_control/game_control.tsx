@@ -26,12 +26,14 @@ export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 			currentRound: 1,
 			rounds: 3,
 			currentMasterID: PersistentStore.clientID.toString(),
-			state: GameStates.WAITING
+			state: GameStates.WAITING,
+			time: 60
 		});
 	};
 
 	const startGame = () => {
-		gameEngine.guessWord = 'test';
+		console.debug('Start Game');
+		gameEngine.model.codeWordHash = 'test';
 		setupGame();
 		setGameStarted(true);
 		gameEngine.startGame();
@@ -43,6 +45,7 @@ export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 	};
 
 	const stopGame = () => {
+		console.debug('Game Stopped');
 		setGameStarted(false);
 		gameEngine.stopGame();
 	};
@@ -52,7 +55,7 @@ export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
 		stopGame();
 		onCancel();
 	};
-
+	console.debug('Game Started: ', gameStarted);
 	return (
 		<div className="game-controller">
 			<Button onClick={startGame} disabled={gameStarted}>

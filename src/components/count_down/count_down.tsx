@@ -9,8 +9,8 @@ interface CountDownProps {
 }
 
 export const CountDown: React.FC<CountDownProps> = ({ gameEngine }) => {
-	const [ time, setTime ] = useState(gameEngine.time);
-	const [ currentRound, setCurrentRound ] = useState(gameEngine.currentRound);
+	const [ time, setTime ] = useState(gameEngine.model.time);
+	const [ currentRound, setCurrentRound ] = useState(gameEngine.model.currentRound);
 
 	useEffect(
 		() => {
@@ -31,7 +31,7 @@ export const CountDown: React.FC<CountDownProps> = ({ gameEngine }) => {
 		<div className="game-info">
 			<span className="count-down"> "{time}"</span>;
 			<span className="current-round"> "{currentRound}/</span>
-			<span className="rounds">{gameEngine.rounds}" </span>
+			<span className="rounds">{gameEngine.model.rounds}" </span>
 		</div>
 	);
 };

@@ -29,12 +29,12 @@ export interface PlayerEngineInterface extends Subject<Array<Player>>, EngineInt
 }
 
 type PlayerEngineProps = {
-	playerTimeout: number;
+	timeOutTotal: number;
+	timeOutOffline: number;
 };
 // Now the Subject class implements the Subject interface
 export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngineInterface {
 	private _localPlayer: Player;
-	private _playerTimeout;
 	private _eventBus: EventBusInterface;
 	private _adapter: PlayerStoreAdapter;
 
@@ -61,7 +61,7 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	constructor(
 		cacheStore: CacheStoreInterface,
 		eventBus: EventBusInterface,
-		props: PlayerEngineProps = { playerTimeout: 5000 }
+		props: PlayerEngineProps = { timeOutTotal: 10000, timeOutOffline: 1000 }
 	) {
 		super();
 
@@ -69,7 +69,9 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 			throw new Error('Error with storage: CacheStore is null');
 		}
 
-		this._playerTimeout = props.playerTimeout;
+		Player.timeOutTotal = props.timeOutTotal;
+		Player.timeOutOffline = props.timeOutOffline;
+
 		this._adapter = new PlayerStoreAdapter(cacheStore);
 		this._eventBus = eventBus;
 		this._setup();
@@ -94,13 +96,10 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 
 	// calls dispose function
 	dispose() {
-		this._eventBus.off('CONNECTION', this._peerConnectionHandler);
 		clearInterval(this.heartBeat);
-
+		this._eventBus.off('CONNECTION', this._peerConnectionHandler);
 		this.sub.unsubscribe();
 	}
-
-	_observerDeep = () => this.next(this._adapter.players);
 
 	_peerConnectionHandler = (event) => {
 		if (!event.connected) this.setPlayerOffline(event.id);
@@ -145,38 +144,14 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 	}
 
 	setPlayerOnline(id) {
-		log.debug('Player online ', id);
-		// const player = this._adapter.getPlayerById(id);
-
-		// if (player) {
-		// 	const timer = this.offlineTimer.get(id);
-		// 	if (timer) clearTimeout(timer);
-
-		// 	log.debug('Player is back online');
-		// 	player.online = true;
-		// }
+		const player = this._adapter.getPlayerById(id);
+		log.debug('Player is online ', id, player);
 	}
 
 	// For now, the player does not get removed, we could, be
 	// we set the player just offline
-	offlineTimer = new Map<string, NodeJS.Timeout>();
 	setPlayerOffline(id: string) {
 		const player = this._adapter.getPlayerById(id);
-
-		log.debug('Remove Player', id, player);
-		// if (player) {
-		// 	// player still exits
-		// 	player.online = false;
-		// 	// let timer run, to delete player, when longer offline
-		// 	// then the player should
-		// 	const timer = setTimeout(() => {
-		// 		// player.gone = true;
-		// 		// this._adapter.deletePlayerById(id);
-
-		// 		this.offlineTimer.delete(id);
-		// 	}, this._playerTimeout);
-
-		// 	this.offlineTimer.set(id, timer); // store timer
-		// }
+		log.debug('Player is Offline', id, player);
 	}
 }
