@@ -60,7 +60,7 @@ export class CommunicationService {
 		});
 
 		this._provider.on('synced', (synced) => {
-			log('synced!', synced);
+			console.error('synced!', synced);
 			eventBus.onSync(synced);
 		});
 

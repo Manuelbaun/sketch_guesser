@@ -1,7 +1,8 @@
 import { Observable } from 'lib0/observable';
 import { Map as YMap } from 'yjs';
-import ulog from 'ulog';
 import { CacheStoreInterface } from './cache';
+import ulog from 'ulog';
+import { GAME_STORE_NAME, GameStoreKeys } from '../../models';
 
 // const log = ulog('Game-Store-Adapter');
 type GameStoreAdapterEvents = 'update';
@@ -13,7 +14,7 @@ export interface IGameStoreAdapter extends Observable<GameStoreAdapterEvents> {
 }
 
 export interface IKeyValue {
-	key: string;
+	key: GameStoreKeys;
 	value: any;
 }
 
@@ -34,10 +35,10 @@ export class GameStoreAdapter extends Observable<GameStoreAdapterEvents> impleme
 		// therefore check if it exits before
 		// if not, then setting props must happen, otherwise not
 		// TODO: Check if game exits
-		const gameStateDidExist = store.yDoc.share.has('gameState');
+		const gameStateDidExist = store.yDoc.share.has(GAME_STORE_NAME);
 
 		// creates the Map of GameState, if exits, it will yield the exiting one
-		this._store = store.yDoc.getMap('gameState');
+		this._store = store.yDoc.getMap(GAME_STORE_NAME);
 		// Observe the changes on that map
 		this._store.observe(this._observeHandler);
 
@@ -51,21 +52,19 @@ export class GameStoreAdapter extends Observable<GameStoreAdapterEvents> impleme
 
 	// TODO: do a proper type
 	private _observeHandler = (event, transation) => {
-		// console.log(event, transation);
-
-		Array.from<string>(event.keysChanged).forEach((key) => {
+		Array.from<GameStoreKeys>(event.keysChanged).forEach((key) => {
 			const value = this.get(key);
-			console.log(key, value);
+			console.log(key, value, this._store.toJSON());
+
 			this.emit('update', [ { key, value } ]);
 		});
 	};
 
 	dispose() {
 		this._store.unobserve(this._observeHandler);
-		// super.destroy()
 	}
 
-	public set(key: string, value: any) {
+	public set(key: GameStoreKeys, value: any) {
 		this._store.set(key, value);
 	}
 
@@ -78,7 +77,7 @@ export class GameStoreAdapter extends Observable<GameStoreAdapterEvents> impleme
 		});
 	}
 
-	public get(key: string) {
+	public get(key: GameStoreKeys) {
 		return this._store.get(key);
 	}
 }

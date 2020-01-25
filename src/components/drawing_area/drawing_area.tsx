@@ -72,7 +72,6 @@ export class DrawingArea extends React.Component<Props, State> {
 		if (!this.canvasRef.current) return;
 
 		const canvas = this.canvasRef.current;
-		// TODO: this ref issue
 		canvas.addEventListener('mousemove', this.paint);
 		canvas.addEventListener('touchmove', this.paintTouch);
 
@@ -215,7 +214,7 @@ export class DrawingArea extends React.Component<Props, State> {
 
 	render() {
 		const { height, width } = this.props;
-		console.log('render', this.drawingManager);
+
 		return (
 			<div className="drawing-container">
 				<canvas ref={this.canvasRef} height={height} width={width} />

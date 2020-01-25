@@ -64,7 +64,7 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		});
 
 		this.sub = this.gameEngine.subscribe((event) => {
-			switch (event.key) {
+			switch (event.type) {
 				case GameEvents.GAME_STARTED:
 					this.setState({ gameState: GameState.PLAY });
 					break;
@@ -108,7 +108,7 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		// If Game, it means, connection to peers are established
 		return (
 			<React.Fragment>
-				<GameControl gameEngine={this.gameEngine} goBackToMenu={onLeaveGame} />
+				<GameControl gameEngine={this.gameEngine} onCancel={onLeaveGame} />
 				{scene}
 			</React.Fragment>
 		);

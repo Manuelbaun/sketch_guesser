@@ -1,5 +1,5 @@
 import { IGameStoreAdapter, IKeyValue } from '../sync/game_store.adapter';
-import { IGameModel, GameStates } from '../../models';
+import { IGameModel, GameStates, GameStoreKeys } from '../../models';
 import { Subject } from 'rxjs';
 import sha256 from 'sha256';
 
@@ -44,38 +44,38 @@ export class GameService extends Subject<IKeyValue> implements IGameService {
      * @return {string}
      */
 	public get currentMasterID(): string {
-		return this._adapter.get('currentMasterID');
+		return this._adapter.get(GameStoreKeys.CURRENT_MASTER_ID);
 	}
 
-	get currentTime(): number {
-		return this._adapter.get('currentTime');
+	get time(): number {
+		return this._adapter.get(GameStoreKeys.TIME);
 	}
 
-	set currentTime(value: number) {
-		this._adapter.set('currentTime', value);
+	set time(value: number) {
+		this._adapter.set(GameStoreKeys.TIME, value);
 	}
 
 	get timePerRound(): number {
-		return this._adapter.get('timePerRound');
+		return this._adapter.get(GameStoreKeys.TIME_PER_ROUND);
 	}
 
 	set timePerRound(value: number) {
-		this._adapter.set('timePerRound', value);
+		this._adapter.set(GameStoreKeys.TIME_PER_ROUND, value);
 	}
 	/**
      * Getter currentRound
      * @return {number}
      */
-	public get currentRound(): number {
-		return this._adapter.get('currentRound');
+	public get round(): number {
+		return this._adapter.get(GameStoreKeys.ROUND);
 	}
 
 	/**
      * Getter rounds
      * @return {number}
      */
-	public get rounds(): number {
-		return this._adapter.get('rounds');
+	public get roundsPerGame(): number {
+		return this._adapter.get(GameStoreKeys.ROUNDS_PER_GAME);
 	}
 
 	/**
@@ -83,7 +83,7 @@ export class GameService extends Subject<IKeyValue> implements IGameService {
      * @return {string}
      */
 	public get codeWordHash(): string {
-		return this._adapter.get('codeWordHash');
+		return this._adapter.get(GameStoreKeys.CODE_WORD_HASH);
 	}
 
 	/**
@@ -91,7 +91,7 @@ export class GameService extends Subject<IKeyValue> implements IGameService {
      * @return {GameStates}
      */
 	public get state(): GameStates {
-		return this._adapter.get('state') as GameStates;
+		return this._adapter.get(GameStoreKeys.STATE) as GameStates;
 	}
 
 	/**
@@ -99,23 +99,23 @@ export class GameService extends Subject<IKeyValue> implements IGameService {
      * @param {string} value
      */
 	public set currentMasterID(value: string) {
-		this._adapter.set('currentMasterID', value);
+		this._adapter.set(GameStoreKeys.CURRENT_MASTER_ID, value);
 	}
 
 	/**
      * Setter currentRound
      * @param {number} value
      */
-	public set currentRound(value: number) {
-		this._adapter.set('currentRound', value);
+	public set round(value: number) {
+		this._adapter.set(GameStoreKeys.ROUND, value);
 	}
 
 	/**
      * Setter rounds
      * @param {number} value
      */
-	public set rounds(value: number) {
-		this._adapter.set('rounds', value);
+	public set roundsPerGame(value: number) {
+		this._adapter.set(GameStoreKeys.ROUNDS_PER_GAME, value);
 	}
 
 	/**
@@ -123,7 +123,7 @@ export class GameService extends Subject<IKeyValue> implements IGameService {
      * @param {string} value
      */
 	public set codeWordHash(value: string) {
-		this._adapter.set('codeWordHash', sha256(value));
+		this._adapter.set(GameStoreKeys.CODE_WORD_HASH, sha256(value));
 	}
 
 	/**
@@ -131,6 +131,6 @@ export class GameService extends Subject<IKeyValue> implements IGameService {
      * @param {GameStates} value
      */
 	public set state(value: GameStates) {
-		this._adapter.set('state', value);
+		this._adapter.set(GameStoreKeys.STATE, value);
 	}
 }
