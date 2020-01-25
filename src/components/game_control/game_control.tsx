@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Button from 'react-bootstrap/Button';
-import { GameStates } from '../../models';
 import { GameEngineInterface } from '../../engines';
-import { PersistentStore } from '../../service/sync';
 
 import './game_control.css';
 

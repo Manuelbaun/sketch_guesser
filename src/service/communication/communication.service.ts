@@ -5,8 +5,8 @@ import { WebrtcProvider } from './y-webrtc/WebrtcProvider';
 
 import { CacheStoreInterface, PersistentStore } from '../sync';
 
-import * as logging from 'lib0/logging.js';
-const log = logging.createModuleLogger('communication-Service');
+// import * as logging from 'lib0/logging.js';
+// const log = logging.createModuleLogger('communication-Service');
 /**
  * This is the CommunicationService.
  * 

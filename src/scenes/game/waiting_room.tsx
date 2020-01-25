@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
-import { Player } from '../../models';
+import { IPlayer } from '../../models';
 import { PlayerEngineInterface } from '../../engines';
 import { Input, Avatar } from '../../components';
 import './waiting_room.css';
@@ -10,16 +9,13 @@ type Props = {
 };
 
 export const WaitingRoom: React.FC<Props> = ({ playerEngine }) => {
-	const [ players, setPlayers ] = useState<Array<Player>>(playerEngine.getAllPlayers());
+	const [ players, setPlayers ] = useState<Array<IPlayer>>(playerEngine.getAllPlayers());
 	const handleSubmit = (msg: string) => {
 		playerEngine.updateLocalName(msg);
 	};
 
 	useEffect(() => {
-		const sub = playerEngine.subscribe((players) => {
-			const online = players.filter((player) => !player.gone);
-			setPlayers(online);
-		});
+		const sub = playerEngine.subscribe((players) => setPlayers(players));
 
 		return () => {
 			sub.unsubscribe();
@@ -43,20 +39,35 @@ export const WaitingRoom: React.FC<Props> = ({ playerEngine }) => {
 					</tr>
 				</thead>
 				<tbody>
-					{players.length > 0 &&
-						players.map((player) => (
-							<tr key={player.id} className={player.online ? 'player-disp' : 'player-disp-offline'}>
-								<td>
-									<Avatar name={player.name} />
-								</td>
-								<td>{playerEngine.isLocalPlayer(player.id) ? player.name + ' (You)' : player.name}</td>
-								<td>{player.points}</td>
-								<td>{player.clientID}</td>
-								<td>{player.online ? 'online' : 'offline'}</td>
-							</tr>
-						))}
+					{players.map((player) => (
+						<PlayerRow
+							key={player.clientID}
+							player={player}
+							local={playerEngine.isLocalPlayer(player.id)}
+						/>
+					))}
 				</tbody>
 			</table>
 		</div>
+	);
+};
+
+//
+interface PlayerRowProps {
+	player: IPlayer;
+	local: boolean;
+}
+
+const PlayerRow: React.FC<PlayerRowProps> = ({ player, local }) => {
+	return (
+		<tr key={player.id} className={player.online() ? 'player-disp' : 'player-disp-offline'}>
+			<td>
+				<Avatar name={player.name} />
+			</td>
+			<td>{local ? player.name + ' (You)' : player.name}</td>
+			<td>{player.points}</td>
+			<td>{player.clientID}</td>
+			<td>{player.online() ? 'online' : 'offline'}</td>
+		</tr>
 	);
 };

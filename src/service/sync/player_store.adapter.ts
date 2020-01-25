@@ -1,119 +1,94 @@
-import { PlayerProps, Player } from '../../models';
+import { PLAYER_STORE_NAME, IPlayerProps } from '../../models';
 import { Map as YMap } from 'yjs';
-import ulog from 'ulog';
-import { CacheStoreInterface } from '..';
-import { Subject } from 'rxjs';
+import { CacheStoreInterface } from './cache';
 
-const log = ulog('player.adapter');
+// import ulog from 'ulog';
 
-export class PlayerStoreAdapter extends Subject<Array<Player>> {
-	store = new YMap<any>();
-	private _playerMap = new Map<string, Player>();
+// const log = ulog('player.adapter');
 
-	get players(): Array<Player> {
-		return Array.from(this._playerMap.values());
-	}
+export interface IPlayerStoreAdapter {
+	dispose();
+	has(id: string);
+	setNewPlayerByProps(id: string, props: IPlayerProps): void;
+	/**
+	 * This function needs to be overwritten
+	 */
+	onPlayerUpdate: (id: string, action: string, map: any) => void;
+	/**
+	 * This function needs to be overwritten
+	 */
+	onPlayerPropsUpdate: (event, transaction) => void;
+}
 
-	observer;
-	observerDepp;
+export class PlayerStoreAdapter {
+	private _store = new YMap<any>();
+	// a transaction in one batch function
+	// private _transact;
+
+	private _observer;
+	private _observerDepp;
 
 	constructor(store: CacheStoreInterface) {
-		super();
-		log.debug(store.players);
-		this.store = store.players;
+		// store ref to transact.
+		// this._transact = store.transact;
+		// will yield map, if exits, otherwise creates it
+		this._store = store.yDoc.getMap(PLAYER_STORE_NAME);
 
 		/**
 		  * This observer gets notified, when the store changes
 		  * either, player gets added, updated, or removed 
 		  * on the key -value level, not the actual player props
 		  */
-		this.observer = (event, tran) => {
-			log.debug('Transaction happend local :', tran);
-
+		this._observer = (event, tran) => {
 			for (let [ key, changeAction ] of event.changes.keys) {
-				log.debug(key, changeAction);
-				if (changeAction.action === 'add') {
-					this._convertYMapIntoPlayerClass(key);
-				}
-
-				if (changeAction.action === 'delete') {
-					// log.debug('other action');
-				}
+				// or should just get that key
+				const map = this._store.get(key);
+				this.onPlayerUpdate(key, changeAction.action, map);
 			}
 		};
 
 		// this will listen also to changes on player props
-		this.observerDepp = (event, tran) => {
-			const player = this.players.filter((player) => !player.gone);
-			this.next(player);
+		this._observerDepp = (event, tran) => {
+			this.onPlayerPropsUpdate(event, tran);
 		};
 
-		this.store.observe(this.observer);
-		this.store.observeDeep(this.observerDepp);
+		this._store.observe(this._observer);
+		this._store.observeDeep(this._observerDepp);
 	}
 
 	// clean up!
 	dispose() {
-		this.store.unobserve(this.observer);
-		this.store.unobserveDeep(this.observerDepp);
-	}
-
-	// sets player with id define in props, or return
-	// the player with the prop
-	addPlayer(props: PlayerProps): Player {
-		if (this.store.has(props.id)) {
-			log.debug('User already exits with id', props.id);
-
-			// @ts-ignore
-			return this._playerMap.get(props.id);
-		}
-
-		log.debug('add local Player with name:', props.name);
-
-		const player = new Player(props);
-		this._playerMap.set(props.id, player);
-		this.store.set(props.id, player.map);
-		return player;
-	}
-
-	getPlayerById(id: string): Player | undefined {
-		log.debug('get local Player with name:', id);
-		let player = this._playerMap.get(id);
-		if (!player) {
-			player = this._convertYMapIntoPlayerClass(id);
-		}
-		return player;
+		this._store.unobserve(this._observer);
+		this._store.unobserveDeep(this._observerDepp);
 	}
 
 	/**
-	 * this function converts a map, which is already in the store 
-	 * into an Player Object for this peer by the given ID
-	 * 
-	 * this function assumes, that such a map with the key of ID
-	 * exits!
-	 * 
-	 * @param  id 
+	 * observe if a player gets added or deleted
 	 */
-	private _convertYMapIntoPlayerClass(id: string) {
-		// convert from map to a player class
-		const playerYMap = this.store.get(id);
-		let player;
-		if (playerYMap) {
-			player = Player.fromYMap(id, playerYMap);
-			this._playerMap.set(id, player);
+	onPlayerUpdate = (id: string, action: string, map: any): void => {
+		console.error('TODO: FIXME, this could be a race condition', id, action, map);
+		// throw new Error('Please overwrite me!');
+	};
+
+	/**
+	 * a deep observe of an player property
+	 */
+	onPlayerPropsUpdate = (event, transaction): void => {
+		console.error('TODO: FIXME, this could be a race condition', event, transaction);
+
+		// throw new Error('plase overwrite me!');
+	};
+
+	has(id: string) {
+		return this._store.has(id);
+	}
+
+	setNewPlayerByProps(id: string, props: IPlayerProps) {
+		const map = new YMap<any>();
+		for (let key in props) {
+			map.set(key, props[key]);
 		}
-		return player;
-	}
 
-	// This function will be triggerd, when a remote peer deletes
-	// the player from the store
-	private _deletePlayerByID(id) {
-		this._playerMap.delete(id);
-	}
-
-	// this function can be called from the local peer
-	deletePlayerById(id: string) {
-		this._playerMap.delete(id);
-		this.store.delete(id);
+		this._store.set(id, map);
 	}
 }

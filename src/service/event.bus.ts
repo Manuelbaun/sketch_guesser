@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { IGameService } from './game/game.service';
 import { Subscription } from 'rxjs';
+import { IService } from './game/i.service';
 
 export interface EventBusInterface {
 	on(type: EventBusType, listener: (...args: any[]) => void);
@@ -44,7 +44,9 @@ export class EventBus implements EventBusInterface {
 	}
 
 	subs = new Array<Subscription>();
-	addService(service: IGameService) {
-		this.subs.push(service.subscribe((data) => console.log(service.constructor.name, data)));
+	addService(service: IService<any>) {
+		const sub = service.subscribe((data) => console.log(service.constructor.name, data));
+
+		this.subs.push(sub);
 	}
 }

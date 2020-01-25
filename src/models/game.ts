@@ -48,7 +48,7 @@ export interface IGameModel {
 /**
  * The name of the game store within the yjs doc
  */
-export const GAME_STORE_NAME = 'gameState';
+export const GAME_STORE_NAME = 'game';
 /**
  * 
  */

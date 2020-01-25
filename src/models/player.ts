@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 
-export type PlayerProps = {
+export interface IPlayerProps {
 	id: string; // this is the peer id
 	clientID: number; // this is the yjs doc id, possible removable
 	name: string;
@@ -8,8 +8,26 @@ export type PlayerProps = {
 	lastOnline: number;
 	x: number; // between 0 and 1 => normalized
 	y: number; // between 0 and 1
-};
+}
 
+export enum PlayerMapKeys {
+	ID = 'id',
+	CLIENT_ID = 'clientID',
+	NAME = 'name',
+	POINTS = 'points',
+	LAST_ONLINE = 'lastOnline',
+	X = 'x',
+	Y = 'y'
+}
+
+export interface IPlayer extends IPlayerProps {
+	gone(): boolean;
+	online(): boolean;
+	onChange(f: (event) => void): void;
+	offChange(f: (event) => void): void;
+}
+
+export const PLAYER_STORE_NAME = 'players';
 /**
  * 
  * This class Wraps the YMap 
@@ -18,42 +36,29 @@ export type PlayerProps = {
  * Settings on of the attributes, will trigger 
  * y-js and send the changes to all peers
  */
-export class Player {
-	private _id: string = '';
-	private _map;
-
-	// time, when in the player lost connection, and
-	// is probably not gone
-	static timeOutOffline = 1000;
-	// the time, when the player is definitely left the game
-	static timeOutTotal = 10000; //
-
-	constructor(props?) {
-		if (props) {
-			this._map = new Y.Map<any>();
-			this._id = props.id;
-			this._map.set('id', props.id);
-			this._map.set('clientID', props.clientID);
-			this.name = props.name || props.id;
-			this.x = props.x || 0.5;
-			this.y = props.y || 0.5;
-			this.points = props.points || 0;
-			this.lastOnline = props.lastOnline;
-		} else {
-			console.log('Created via YMap and Id');
-		}
-	}
+export class Player implements IPlayer {
+	private _map = new Y.Map<any>();
 
 	/**
-	 * static factory function
-	 * @param {string} id player peer id
-	 * @param {Y.Map} [map] - a Yjs - map
+	 * time, when in the player lost connection, and
+	 * is probably not gone
 	 */
-	static fromYMap(id: string, map): Player {
-		const player = new Player();
-		player._id = id;
-		player._map = map;
-		return player;
+	static timeOutOffline = 1000;
+	/**
+	 * the time, when the player is definitely left the game 
+	 */
+	static timeOutTotal = 10000; //
+
+	constructor(map) {
+		this._map = map;
+	}
+
+	onChange(f: (event: any) => void): void {
+		this._map.observe(f);
+	}
+
+	offChange(f: (event: any) => void): void {
+		this._map.unobserve(f);
 	}
 
 	toJSON() {
@@ -64,58 +69,58 @@ export class Player {
 		return this._map;
 	}
 
-	// indicates that the player is online, maybe an glicht or so
-	public get online(): boolean {
+	// indicates that the player is online, maybe an glitch or so
+	public online(): boolean {
 		return Date.now() - this.lastOnline < Player.timeOutOffline;
 	}
 
 	// indicates that the player is not online anymore and gone...
-	public get gone(): boolean {
+	public gone(): boolean {
 		return Date.now() - this.lastOnline > Player.timeOutTotal;
 	}
 
 	public set lastOnline(ts: number) {
-		this._map.set('lastOnline', ts);
+		this._map.set(PlayerMapKeys.LAST_ONLINE, ts);
 	}
 
 	public get lastOnline(): number {
-		return this._map.get('lastOnline');
+		return this._map.get(PlayerMapKeys.LAST_ONLINE);
 	}
 
 	public get id(): string {
-		return this._id;
+		return this._map.get(PlayerMapKeys.ID);
 	}
 
-	public get clientID(): string {
-		return this._map.get('clientID');
+	public get clientID(): number {
+		return this._map.get(PlayerMapKeys.CLIENT_ID);
 	}
 
 	public get name(): string {
-		return this._map.get('name') as string;
+		return this._map.get(PlayerMapKeys.NAME) as string;
 	}
 
 	public set name(name: string) {
-		this._map.set('name', name);
+		this._map.set(PlayerMapKeys.NAME, name);
 	}
 
 	public get x() {
-		return this._map.get('x');
+		return this._map.get(PlayerMapKeys.X);
 	}
 	public set x(value: number) {
-		this._map.set('x', value);
+		this._map.set(PlayerMapKeys.X, value);
 	}
 
 	public get y(): number {
-		return this._map.get('y') as number;
+		return this._map.get(PlayerMapKeys.Y) as number;
 	}
 	public set y(value: number) {
-		this._map.set('y', value);
+		this._map.set(PlayerMapKeys.Y, value);
 	}
 
 	public get points(): number {
-		return this._map.get('points') as number;
+		return this._map.get(PlayerMapKeys.POINTS) as number;
 	}
 	public set points(value: number) {
-		this._map.set('points', value);
+		this._map.set(PlayerMapKeys.POINTS, value);
 	}
 }

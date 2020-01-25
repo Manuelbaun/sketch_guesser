@@ -8,6 +8,8 @@ import { Game } from './game';
 import { GameService } from '../../service/game/game.service';
 import { GameStoreAdapter } from '../../service/sync/game_store.adapter';
 import { Subscription } from 'rxjs';
+import { PlayerStoreAdapter } from '../../service/sync/player_store.adapter';
+import { PlayerService } from '../../service/game/player.service';
 
 type TheGameProps = {
 	roomName;
@@ -48,13 +50,17 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 	UNSAFE_componentWillMount() {
 		this.eventBus = new EventBus();
 		this.cacheStore = new CacheStore();
-		this.commService = new CommunicationService(this.cacheStore, this.eventBus, this.props.roomName);
-
-		this.playerEngine = new PlayerEngine(this.cacheStore, this.eventBus);
 
 		const gameStoreAdapter = new GameStoreAdapter(this.cacheStore);
 		const gameService = new GameService(gameStoreAdapter);
+
+		const playerStoreAdapter = new PlayerStoreAdapter(this.cacheStore);
+		const playerService = new PlayerService(playerStoreAdapter);
+
+		this.playerEngine = new PlayerEngine(playerService);
 		this.gameEngine = new GameEngine(gameService);
+		// setup to synchronies
+		this.commService = new CommunicationService(this.cacheStore, this.eventBus, this.props.roomName);
 
 		this.eventBus.on('SYNCED', (data) => {
 			this.setState({ gameState: GameState.WAITING_ROOM });
@@ -75,7 +81,9 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		});
 
 		this.eventBus.addService(gameService);
+		this.eventBus.addService(playerService);
 	}
+
 	sub: Subscription;
 	componentWillUnmount() {
 		this.sub.unsubscribe();
