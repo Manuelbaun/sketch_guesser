@@ -15,7 +15,9 @@ export const WaitingRoom: React.FC<Props> = ({ playerEngine }) => {
 	};
 
 	useEffect(() => {
-		const sub = playerEngine.subscribe((players) => setPlayers(players));
+		const sub = playerEngine.subscribe((players) => {
+			setPlayers(players);
+		});
 
 		return () => {
 			sub.unsubscribe();
@@ -59,6 +61,7 @@ interface PlayerRowProps {
 }
 
 const PlayerRow: React.FC<PlayerRowProps> = ({ player, local }) => {
+	if (player.gone()) return <React.Fragment />;
 	return (
 		<tr key={player.id} className={player.online() ? 'player-disp' : 'player-disp-offline'}>
 			<td>
