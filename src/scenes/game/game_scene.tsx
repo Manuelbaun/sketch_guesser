@@ -73,6 +73,8 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 					break;
 			}
 		});
+
+		this.eventBus.addService(gameService);
 	}
 	sub: Subscription;
 	componentWillUnmount() {

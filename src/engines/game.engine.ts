@@ -41,9 +41,6 @@ export class GameEngine extends Subject<GameEngineEvents> implements GameEngineI
 		this._service = service;
 		this._sub = this._service.subscribe(this._handleGameStateChanged);
 
-		this.subscribe((event) => {
-			console.log('GAME-Engine-EVENTs', event);
-		});
 		console.log('GameEngine init');
 	}
 
