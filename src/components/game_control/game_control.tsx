@@ -8,7 +8,7 @@ import './game_control.css';
 
 type Props = {
 	gameEngine: GameEngineInterface;
-	goBackToMenu: Function;
+	onCancel: Function;
 };
 
 /**
@@ -17,7 +17,7 @@ type Props = {
  * This class provides buttons to start, stop, or reset the Game. It is just for
  * prototype purpose. It also provides a button to go to the next round.
  */
-export const GameControl = ({ gameEngine, goBackToMenu: onCancel }: Props) => {
+export const GameControl = ({ gameEngine, onCancel }: Props) => {
 	const [ gameStarted, setGameStarted ] = useState(false);
 
 	const startGame = () => {
