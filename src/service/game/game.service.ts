@@ -1,32 +1,31 @@
-import { IGameStoreAdapter, IKeyValue } from '../sync/game_store.adapter';
+import { IGameStoreAdapter } from '../sync/game_store.adapter';
 import { IGameModel, GameStates, GameStoreKeys } from '../../models';
 import { Subject } from 'rxjs';
 import sha256 from 'sha256';
 
+export type IKeyValue = {
+	key: GameStoreKeys;
+	value: any;
+};
+
 export interface IGameService extends Subject<IKeyValue>, IGameModel {
 	setProps(props: IGameModel);
-	dispose();
 }
 
 export class GameService extends Subject<IKeyValue> implements IGameService {
-	private _adapter: IGameStoreAdapter;
+	private _adapter: IGameStoreAdapter<GameStoreKeys>;
 
-	constructor(adapter: IGameStoreAdapter) {
+	constructor(adapter: IGameStoreAdapter<GameStoreKeys>) {
 		super();
 		if (!adapter) {
 			throw new Error('Adapter for GameService is not defined');
 		}
 		this._adapter = adapter;
-		this._adapter.on('update', this._handleUpdate);
+		// callback!!
+		this._adapter.onUpdate = (key, value) => {
+			this.next({ key, value });
+		};
 	}
-
-	dispose() {
-		this._adapter.off('update', this._handleUpdate);
-	}
-
-	private _handleUpdate = (updates: IKeyValue) => {
-		this.next(updates);
-	};
 
 	public setProps(props: IGameModel) {
 		const arr = Object.entries(props).map(([ key, value ]) => {
@@ -36,7 +35,7 @@ export class GameService extends Subject<IKeyValue> implements IGameService {
 			} as IKeyValue;
 		});
 
-		this._adapter.setProps(arr);
+		this._adapter.setMulti(arr);
 	}
 
 	/**

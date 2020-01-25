@@ -2,7 +2,7 @@ import { Subject, Subscription } from 'rxjs';
 import ulog from 'ulog';
 import { CacheStoreInterface } from '../service/sync/cache';
 import { EventBusInterface } from '../service/event.bus';
-import { Player, PlayerProps } from '../models';
+import { Player, IPlayer } from '../models';
 import { PersistentStore } from '../service/sync';
 import EngineInterface from './engine.interface';
 import { RandomGenerator } from '../service';
@@ -111,7 +111,7 @@ export class PlayerEngine extends Subject<Array<Player>> implements PlayerEngine
 		const clientID = PersistentStore.clientID;
 		const name = PersistentStore.localName;
 		// needs to set from outside!
-		const props: PlayerProps = {
+		const props: IPlayer = {
 			clientID,
 			id,
 			name,

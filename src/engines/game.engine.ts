@@ -3,7 +3,6 @@ import { GameStates, GameEvents, IGameModel, GameStoreKeys, GameEngineEvents } f
 import { IGameService } from '../service/game/game.service';
 import EngineInterface from './engine.interface';
 import { PersistentStore } from '../service';
-import { IKeyValue } from '../service/sync/game_store.adapter';
 
 /**
  * Utility function to create GameEngine Events
@@ -56,7 +55,7 @@ export class GameEngine extends Subject<GameEngineEvents> implements GameEngineI
 	}
 
 	// sorted after probability of occurring
-	private _handleGameStateChanged = ({ key, value }: IKeyValue) => {
+	private _handleGameStateChanged = ({ key, value }) => {
 		if (key === GameStoreKeys.TIME) {
 			this.next(createEvent(GameEvents.CLOCK_UPDATE, value));
 		} else if (key === GameStoreKeys.STATE) {
