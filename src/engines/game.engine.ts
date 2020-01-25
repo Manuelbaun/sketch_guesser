@@ -1,9 +1,24 @@
 import { Subscription, Subject } from 'rxjs';
-import { GameStates, GameEvents, IGameModel, GameStoreKeys } from '../models';
+import { GameStates, GameEvents, IGameModel, GameStoreKeys, GameEngineEvents } from '../models';
 import { IGameService } from '../service/game/game.service';
 import EngineInterface from './engine.interface';
 import { PersistentStore } from '../service';
 import { IKeyValue } from '../service/sync/game_store.adapter';
+
+/**
+ * Utility function to create GameEngine Events
+ * faster then using class. Use this, until, a class is needed
+ * meanwhile plain objects are fine
+ * 
+ * @param type : GameEvents
+ * @param value : any
+ */
+const createEvent = (type: GameEvents, value?: any): GameEngineEvents => {
+	return {
+		type,
+		value
+	};
+};
 
 export interface GameEngineInterface extends Subject<GameEngineEvents>, EngineInterface {
 	setupGame(game?: IGameModel);
@@ -15,11 +30,6 @@ export interface GameEngineInterface extends Subject<GameEngineEvents>, EngineIn
 	time: number;
 	roundsPerGame: number;
 	round: number;
-}
-
-interface GameEngineEvents {
-	type: GameEvents;
-	value: any;
 }
 
 export class GameEngine extends Subject<GameEngineEvents> implements GameEngineInterface {
@@ -45,33 +55,29 @@ export class GameEngine extends Subject<GameEngineEvents> implements GameEngineI
 		console.log('GameEngine dispose');
 	}
 
-	private _handleGameStateChanged = (event: IKeyValue) => {
-		const { key, value } = event;
-
-		if (key === GameStoreKeys.ROUND) {
-			this.next({ type: GameEvents.ROUND_CHANGE, value });
-		}
-
-		// Map state to Events
-		if (key === GameStoreKeys.STATE) {
+	// sorted after probability of occurring
+	private _handleGameStateChanged = ({ key, value }: IKeyValue) => {
+		if (key === GameStoreKeys.TIME) {
+			this.next(createEvent(GameEvents.CLOCK_UPDATE, value));
+		} else if (key === GameStoreKeys.STATE) {
+			// Map state to Events
 			switch (value) {
-				case GameStates.WAITING:
-					this.next({ type: GameEvents.GAME_PAUSED, value: true });
-					break;
 				case GameStates.CHOOSING_WORD:
-					this.next({ type: GameEvents.CHOOSING_WORD, value: true });
+					this.next(createEvent(GameEvents.CHOOSING_WORD));
+					break;
+				case GameStates.WAITING:
+					// ??? do we need this Event
+					this.next(createEvent(GameEvents.GAME_PAUSED));
 					break;
 				case GameStates.STARTED:
-					this.next({ type: GameEvents.GAME_STARTED, value: true });
+					this.next(createEvent(GameEvents.GAME_STARTED));
 					break;
 				case GameStates.STOPPED:
-					this.next({ type: GameEvents.GAME_STOPPED, value: true });
+					this.next(createEvent(GameEvents.GAME_STOPPED));
 					break;
 			}
-		}
-
-		if (key === GameStoreKeys.TIME) {
-			this.next({ type: GameEvents.CLOCK_UPDATE, value: this._service.time });
+		} else if (key === GameStoreKeys.ROUND) {
+			this.next(createEvent(GameEvents.ROUND_CHANGE, value));
 		}
 	};
 
