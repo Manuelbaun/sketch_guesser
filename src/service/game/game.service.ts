@@ -1,7 +1,8 @@
 import { IGameStoreAdapter } from '../sync/game_store.adapter';
 import { IGameModel, GameStates, GameStoreKeys } from '../../models';
 import { Subject } from 'rxjs';
-import sha256 from 'sha256';
+// import sha256 from 'sha256';
+import Crypto from 'crypto';
 
 export type IKeyValue = {
 	key: GameStoreKeys;
@@ -10,6 +11,10 @@ export type IKeyValue = {
 
 export interface IGameService extends Subject<IKeyValue>, IGameModel {
 	setProps(props: IGameModel);
+}
+
+function hashString(value) {
+	return Crypto.createHash('sha256').update(value).digest('base64');
 }
 
 export class GameService extends Subject<IKeyValue> implements IGameService {
@@ -121,8 +126,11 @@ export class GameService extends Subject<IKeyValue> implements IGameService {
      * Setter codeWordHash
      * @param {string} value
      */
+	// eslint-disable-next-line @typescript-eslint/adjacent-overload-signatures
 	public set codeWordHash(value: string) {
-		this._adapter.set(GameStoreKeys.CODE_WORD_HASH, sha256(value));
+		const hash = hashString(value);
+		console.error(hash);
+		this._adapter.set(GameStoreKeys.CODE_WORD_HASH, hash);
 	}
 
 	/**

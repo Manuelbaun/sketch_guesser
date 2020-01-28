@@ -1,5 +1,5 @@
 import Chance from 'chance';
-import * as random from 'lib0/dist/random.js';
+import * as random from 'lib0/random.js';
 
 export class RandomGenerator {
 	static _chance = Chance();

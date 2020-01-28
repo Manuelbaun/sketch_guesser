@@ -1,12 +1,8 @@
 import Chance from 'chance';
-
+import { WebrtcProvider } from './y-plugings/y-webrtc';
 import { EventBusInterface } from '../event.bus';
-import { WebrtcProvider } from './y-webrtc/WebrtcProvider';
-
 import { CacheStoreInterface, PersistentStore } from '../sync';
 
-// import * as logging from 'lib0/logging.js';
-// const log = logging.createModuleLogger('communication-Service');
 /**
  * This is the CommunicationService.
  * 
@@ -44,7 +40,7 @@ export class CommunicationService {
 	private _provider;
 	roomID: string;
 
-	constructor(store: CacheStoreInterface, eventBus: EventBusInterface, roomName: string = '') {
+	constructor(store: CacheStoreInterface, eventBus: EventBusInterface, roomName = '') {
 		const peerID = PersistentStore.clientID;
 		// create random room name based on the peerID as seed.
 		this.roomID = roomName === '' ? Chance(peerID).string({ length: 20, alpha: true, numeric: true }) : roomName;
@@ -53,11 +49,7 @@ export class CommunicationService {
 
 		const room = 'sketchguessr-' + this.roomID;
 
-		this._provider = new WebrtcProvider(room, store.yDoc, {
-			password: null,
-			peerID: PersistentStore.localID
-			// signaling: [ 'ws://localhost:4444' ]
-		});
+		this._provider = new WebrtcProvider(room, store.yDoc);
 
 		this._provider.on('synced', (synced) => {
 			console.error('synced!', synced);
@@ -79,7 +71,7 @@ export class CommunicationService {
 		console.log('Communication service dispose');
 		await this._provider.destroy();
 
-		let ev = event || window.event;
+		const ev = event || window.event;
 		ev.preventDefault = true;
 		ev.cancelBubble = true;
 		ev.returnValue = '';
