@@ -3,8 +3,16 @@ import { PlayerStorePort } from './player.store.port';
 import { PlayerModel, PlayerProps } from './player.model';
 import { CacheStoreInterface } from '../../service';
 
+// workaround to use the YMap as Type for proper intellisense
+// remove when types on yjs exits
+export declare type YMap<T> = {
+	toJSON(): { [P in keyof T]?: T[P] };
+	set(key: string, value: T);
+	get(key: string): T | undefined;
+};
+
 export class PlayerStoreAdapter implements PlayerStorePort {
-	private _store = new YMap<any>();
+	private _store = new YMap<YMap<PlayerModel>>();
 	private _transact;
 	private _localID;
 	constructor(store: CacheStoreInterface) {
