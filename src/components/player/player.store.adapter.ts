@@ -1,5 +1,5 @@
 import { Map as YMap } from 'yjs';
-import { PlayerStorePort } from './player_store.port';
+import { PlayerStorePort } from './player.store.port';
 import { PlayerModel, PlayerProps } from './player.model';
 import { CacheStoreInterface } from '../../service';
 

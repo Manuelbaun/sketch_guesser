@@ -1,4 +1,4 @@
-import { PlayerStorePort } from './player_store.port';
+import { PlayerStorePort } from './player.store.port';
 import { PlayerModel, Player } from './player.model';
 import { Subject } from 'rxjs';
 import { PlayerServiceInterface } from './player.service.interface';
