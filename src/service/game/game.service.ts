@@ -1,8 +1,7 @@
 import { IGameStoreAdapter } from '../sync/game_store.adapter';
 import { IGameModel, GameStates, GameStoreKeys } from '../../models';
 import { Subject } from 'rxjs';
-// import sha256 from 'sha256';
-import Crypto from 'crypto';
+import { hashString } from '../utilitize';
 
 export type IKeyValue = {
 	key: GameStoreKeys;
@@ -11,10 +10,6 @@ export type IKeyValue = {
 
 export interface IGameService extends Subject<IKeyValue>, IGameModel {
 	setProps(props: IGameModel);
-}
-
-function hashString(value): string {
-	return Crypto.createHash('sha256').update(value).digest('base64');
 }
 
 export class GameService extends Subject<IKeyValue> implements IGameService {

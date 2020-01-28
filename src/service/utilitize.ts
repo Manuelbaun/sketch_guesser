@@ -1,5 +1,10 @@
 import Chance from 'chance';
 import * as random from 'lib0/random.js';
+import Crypto from 'crypto';
+
+export function hashString(value): string {
+	return Crypto.createHash('sha256').update(value).digest('base64');
+}
 
 export class RandomGenerator {
 	static _chance = Chance();
