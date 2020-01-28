@@ -9,6 +9,8 @@ export interface CacheStoreInterface {
 	 * @type {YDoc<any>}
 	 */
 	yDoc;
+
+	id: number;
 	/**
 	 * @type {YArray<DrawingPath>}
 	 */
@@ -45,6 +47,10 @@ export interface CacheStoreInterface {
 
 export class CacheStore implements CacheStoreInterface {
 	private _yDoc = new Y.Doc();
+
+	get id(): number {
+		return this._yDoc.clientID;
+	}
 
 	public get transact() {
 		return this._yDoc.transact;

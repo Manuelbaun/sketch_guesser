@@ -1,9 +1,17 @@
 import { Map as YMap } from 'yjs';
 import { CacheStoreInterface } from './cache';
 import { GAME_STORE_NAME, GameStoreKeys } from '../../models';
-import { IStoreAdapter } from './store.adapter';
+
 // import ulog from 'ulog';
 // const log = ulog('Game-Store-Adapter');
+
+// use as a base class?
+export interface IStoreAdapter<Keys> {
+	set(key: Keys, value: any): void;
+	setMulti(arg0: Array<{ key: Keys; value: any }>): void;
+	get(key: Keys): any;
+	dispose();
+}
 
 // Utility helper type
 export interface IGameStoreAdapter<Keys> extends IStoreAdapter<Keys> {

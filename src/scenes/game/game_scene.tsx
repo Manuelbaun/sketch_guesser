@@ -1,6 +1,6 @@
 import React from 'react';
-import { EventBus, CacheStoreInterface, CommunicationService, CacheStore } from '../../service';
-import { PlayerEngineInterface, GameEngineInterface, PlayerEngine, GameEngine } from '../../engines';
+import { EventBus, CacheStoreInterface, CommunicationService, CacheStore, PersistentStore } from '../../service';
+import { GameEngineInterface, GameEngine } from '../../engines';
 import { GameEvents } from '../../models';
 import { GameControl } from '../../ui-components';
 import { WaitingRoom } from './waiting_room';
@@ -8,8 +8,7 @@ import { Game } from './game';
 import { GameService } from '../../service/game/game.service';
 import { GameStoreAdapter } from '../../service/sync/game_store.adapter';
 import { Subscription } from 'rxjs';
-import { PlayerStoreAdapter } from '../../service/sync/player_store.adapter';
-import { PlayerService } from '../../service/game/player.service';
+import { PlayerStoreAdapter, PlayerService } from '../../components/player';
 
 type TheGameProps = {
 	roomName;
@@ -30,7 +29,7 @@ enum GameState {
 export class GameScene extends React.Component<TheGameProps, TheGameState> {
 	eventBus: EventBus;
 	cacheStore: CacheStoreInterface;
-	playerEngine: PlayerEngineInterface;
+	// playerEngine: PlayerEngineInterface;
 	gameEngine: GameEngineInterface;
 	commService: CommunicationService;
 
@@ -47,6 +46,7 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		this.setState({ gameState: GameState.WAITING_ROOM });
 	}
 
+	playerService: PlayerService;
 	UNSAFE_componentWillMount() {
 		this.eventBus = new EventBus();
 		this.cacheStore = new CacheStore();
@@ -55,9 +55,9 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		const gameService = new GameService(gameStoreAdapter);
 
 		const playerStoreAdapter = new PlayerStoreAdapter(this.cacheStore);
-		const playerService = new PlayerService(playerStoreAdapter);
+		this.playerService = new PlayerService(playerStoreAdapter);
+		this.playerService.create(PersistentStore.localName);
 
-		this.playerEngine = new PlayerEngine(playerService);
 		this.gameEngine = new GameEngine(gameService);
 		// setup to synchronies
 		this.commService = new CommunicationService(this.cacheStore, this.eventBus, this.props.roomName);
@@ -80,8 +80,8 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 			}
 		});
 
-		this.eventBus.addService(gameService);
-		this.eventBus.addService(playerService);
+		// this.eventBus.addService(gameService);
+		this.eventBus.addService(this.playerService);
 	}
 
 	sub: Subscription;
@@ -89,10 +89,12 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		this.sub.unsubscribe();
 		// dispose all
 		this.commService.dispose();
-		this.playerEngine.dispose();
 		this.gameEngine.dispose();
 		this.cacheStore.dispose();
 		this.eventBus.dispose();
+
+		// new Player service
+		this.playerService.dispose();
 	}
 
 	render() {
@@ -107,7 +109,7 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 				scene = <div>Please Wait</div>;
 				break;
 			case GameState.WAITING_ROOM:
-				scene = <WaitingRoom playerEngine={this.playerEngine} />;
+				scene = <WaitingRoom service={this.playerService} />;
 				break;
 			case GameState.PLAY:
 				scene = <Game gameEngine={this.gameEngine} store={this.cacheStore} />;
