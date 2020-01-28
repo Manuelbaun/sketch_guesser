@@ -13,7 +13,7 @@ export interface IGameService extends Subject<IKeyValue>, IGameModel {
 	setProps(props: IGameModel);
 }
 
-function hashString(value) {
+function hashString(value): string {
 	return Crypto.createHash('sha256').update(value).digest('base64');
 }
 
