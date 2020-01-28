@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { IPlayer } from '../../models';
 import { PlayerEngineInterface } from '../../engines';
-import { Input, Avatar } from '../../components';
+import { Input, Avatar } from '../../ui-components';
 import './waiting_room.css';
 
 type Props = {

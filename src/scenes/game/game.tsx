@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { CountDown, MessageBox, DrawingArea, MessageManager, DrawingManager } from '../../components';
+import { CountDown, MessageBox, DrawingArea, MessageManager, DrawingManager } from '../../ui-components';
 import { GameEngineInterface } from '../../engines';
 import { CacheStoreInterface } from '../../service';
 

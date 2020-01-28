@@ -2,7 +2,7 @@ import React from 'react';
 import { EventBus, CacheStoreInterface, CommunicationService, CacheStore } from '../../service';
 import { PlayerEngineInterface, GameEngineInterface, PlayerEngine, GameEngine } from '../../engines';
 import { GameEvents } from '../../models';
-import { GameControl } from '../../components';
+import { GameControl } from '../../ui-components';
 import { WaitingRoom } from './waiting_room';
 import { Game } from './game';
 import { GameService } from '../../service/game/game.service';

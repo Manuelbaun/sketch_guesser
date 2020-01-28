@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from 'react-bootstrap/Button';
-import { Input } from '../../components/common/input';
+import { Input } from '../../ui-components/common/input';
 import mySvg from '../../logo.svg';
 import './landing.css';
 
