@@ -13,6 +13,11 @@ export interface EventBusInterface {
 
 type EventBusType = 'CONNECTION' | 'SYNCED';
 
+/**
+ * NOTE:
+ * At the Moment, the EVent bus is not really used other then
+ * subscribe to the services and log there events to the console
+ */
 export class EventBus implements EventBusInterface {
 	private emitter: EventEmitter = new EventEmitter();
 
