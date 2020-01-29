@@ -14,7 +14,7 @@ interface GameEvent {
 }
 
 /**
- * Utility function to create GameEngine Events
+ * Utility function to create GameService Events
  * faster then using class. Use this, until, a class is needed
  * meanwhile plain objects are fine
  * 
@@ -49,7 +49,7 @@ export class GameService implements ServiceInterface<GameEvent> {
 	}
 
 	dispose() {
-		console.log('GameEngine dispose');
+		console.log('GameService dispose');
 	}
 
 	// sorted after probability of occurring

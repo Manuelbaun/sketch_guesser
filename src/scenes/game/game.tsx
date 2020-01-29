@@ -5,17 +5,17 @@ import { GameService } from '../../components/game/game.service';
 import { MessageService } from '../../components/messages';
 
 type Props = {
-	service: GameService;
+	gameService: GameService;
 	messageService: MessageService;
 	drawingService: DrawingManager;
 };
 
-export const Game = ({ service, messageService, drawingService }: Props) => {
+export const Game = ({ gameService, messageService, drawingService }: Props) => {
 	console.log(messageService, drawingService);
 	return (
 		<div>
 			<div className="App-Message">
-				<CountDown gameEngine={service} />
+				<CountDown service={gameService} />
 				<MessageBox service={messageService} />
 			</div>
 

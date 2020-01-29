@@ -32,7 +32,7 @@ export class DrawingManager extends Subject<DrawingPath[]> {
 		};
 		this.store.observeDeep(this.observer);
 
-		console.log('MessageEngine init');
+		console.log('Drawing init');
 	}
 
 	dispose() {

@@ -29,8 +29,6 @@ enum GameState {
 export class GameScene extends React.Component<TheGameProps, TheGameState> {
 	eventBus: EventBus;
 	cacheStore: CacheStoreInterface;
-	// playerEngine: PlayerEngineInterface;
-	// gameEngine: GameEngineInterface;
 	commService: CommunicationService;
 
 	constructor(props: TheGameProps) {
@@ -130,7 +128,7 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 			case GameState.PLAY:
 				scene = (
 					<Game
-						service={this.gameService}
+						gameService={this.gameService}
 						messageService={this.messageService}
 						drawingService={this.drawingManager}
 					/>
