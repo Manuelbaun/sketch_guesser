@@ -6,31 +6,19 @@ import { RandomGenerator } from '../../util/utilitize';
  * Quick hack to get the session storage up and going
  */
 
-enum SessionKeys {
-	NAME = 'name',
-	PEER_ID = 'peer_id',
-	CLIENT_ID = 'client_id'
+interface SessionStore {
+	name: string;
+	id: number;
 }
 
+type SessionKeys = keyof SessionStore;
+
 export class PersistentStore {
-	private static _localID: string;
 	private static _clientID: number;
 	static chanceName;
 
-	// loads the id from the sessionStorage
-	// when no ID exist, create on
-	public static get localID(): string {
-		const key: SessionKeys = SessionKeys.PEER_ID;
-		if (!(this._localID = sessionStorage.getItem(key) || '')) {
-			this._localID = RandomGenerator.uuidv4();
-			sessionStorage.setItem(key, this._localID);
-		}
-
-		return this._localID;
-	}
-
-	public static get clientID(): number {
-		const key: SessionKeys = SessionKeys.CLIENT_ID;
+	public static get id(): number {
+		const key: SessionKeys = 'id';
 		let clientID = '';
 		if (!(clientID = sessionStorage.getItem(key) || '')) {
 			this._clientID = RandomGenerator.uint32();
@@ -47,7 +35,7 @@ export class PersistentStore {
 	 * */
 	private static _localName: string;
 	public static get localName(): string {
-		const key: SessionKeys = SessionKeys.NAME;
+		const key: SessionKeys = 'name';
 		if (!(this._localName = sessionStorage.getItem(key) || '')) {
 			this._localName = RandomGenerator.avatarName();
 			sessionStorage.setItem(key, this._localName);
@@ -57,11 +45,11 @@ export class PersistentStore {
 
 	public static set localName(value: string) {
 		this._localName = value;
-		const key: SessionKeys = SessionKeys.NAME;
+		const key: SessionKeys = 'name';
 		sessionStorage.setItem(key, this._localName);
 	}
 
-	public static dispose() {
+	public static dispose(): void {
 		sessionStorage.clear();
 	}
 }

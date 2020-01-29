@@ -4,6 +4,7 @@ import { GameModelProp, GameEvents, GameStates, GameModel, GameModelKeys } from 
 
 import { ServiceInterface } from '../base/service.interface';
 import { hashString } from '../../util';
+import { PersistentStore } from '../../service';
 
 /**
  * Events 
@@ -85,7 +86,7 @@ export class GameService implements ServiceInterface<GameEvent> {
 			codeWordHash: (props.codeWordHash && hashString(props.codeWordHash)) || hashString('test'),
 			round: props.round || 1,
 			roundsPerGame: props.roundsPerGame || 3,
-			currentMasterID: props.currentMasterID || this._adapter.id,
+			currentMasterID: props.currentMasterID || PersistentStore.id,
 			state: props.state || GameStates.WAITING,
 			time: props.time || 60,
 			timePerRound: props.timePerRound || 60

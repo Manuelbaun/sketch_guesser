@@ -4,11 +4,11 @@ import { CountDown, MessageBox, DrawingArea } from '../../ui-components';
 import { GameService } from '../../components/game/game.service';
 import { MessageService, MessageStoreAdapter } from '../../components/messages';
 import { DrawingService, DrawingStoreAdapter } from '../../components/drawing';
-import { CacheStoreInterface } from '../../service';
+import { CacheStoreSyncInterface } from '../../service';
 
 type Props = {
 	gameService: GameService;
-	store: CacheStoreInterface;
+	store: CacheStoreSyncInterface;
 };
 
 export const Game = ({ gameService, store }: Props) => {

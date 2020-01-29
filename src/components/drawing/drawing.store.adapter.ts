@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 import { DrawingStorePort } from './drawing.store.port';
-import { CacheStoreInterface } from '../../service';
+import { CacheStoreSyncInterface } from '../../service';
 import { DRAW_STORE_NAME, DrawingPath, Coordinate } from './drawing.model';
 
 export class DrawingStoreAdapter implements DrawingStorePort {
@@ -8,7 +8,7 @@ export class DrawingStoreAdapter implements DrawingStorePort {
 	private currentDrawElement = new Y.Map<any>();
 	private currentDrawPath = new Y.Array<Coordinate>();
 
-	constructor(store: CacheStoreInterface) {
+	constructor(store: CacheStoreSyncInterface) {
 		this.store = store.yDoc.getArray(DRAW_STORE_NAME);
 		this.store.observeDeep(this.observer);
 	}

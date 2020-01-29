@@ -1,12 +1,12 @@
 import * as Y from 'yjs';
 import { MessageStorePort } from './message.store.port';
-import { CacheStoreInterface } from '../../service';
+import { CacheStoreSyncInterface } from '../../service';
 import { Message, MESSAGES_STORE_NAME } from './message.model';
 
 export class MessageStoreAdapter implements MessageStorePort {
 	private _store = new Y.Array<Message>();
 
-	constructor(store: CacheStoreInterface) {
+	constructor(store: CacheStoreSyncInterface) {
 		this._store = store.yDoc.getArray(MESSAGES_STORE_NAME);
 		this._store.observe(this._observer);
 	}

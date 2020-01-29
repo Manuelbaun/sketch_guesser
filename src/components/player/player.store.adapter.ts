@@ -1,7 +1,7 @@
 import { Map as YMap } from 'yjs';
 import { PlayerStorePort } from './player.store.port';
 import { PlayerModel, PlayerProps } from './player.model';
-import { CacheStoreInterface } from '../../service';
+import { CacheStoreSyncInterface, PersistentStore } from '../../service';
 
 // workaround to use the YMap as Type for proper intellisense
 // remove when types on yjs exits
@@ -14,10 +14,10 @@ export declare type YMap<T> = {
 export class PlayerStoreAdapter implements PlayerStorePort {
 	private _store = new YMap<YMap<PlayerModel>>();
 	private _transact;
-	private _localID;
-	constructor(store: CacheStoreInterface) {
+
+	constructor(store: CacheStoreSyncInterface) {
 		this._store = store.yDoc.getMap('player');
-		this._localID = store.id;
+
 		this._transact = store.transact;
 		this._store.observe(this._observer);
 		this._store.observeDeep(this._onPlayerUpdate);
@@ -65,7 +65,7 @@ export class PlayerStoreAdapter implements PlayerStorePort {
 	add(player: PlayerModel): PlayerModel {
 		const p = new YMap<PlayerModel>();
 
-		player.id = this._localID;
+		player.id = PersistentStore.id;
 
 		// update in a batch
 		this._transact(() => {
@@ -73,7 +73,7 @@ export class PlayerStoreAdapter implements PlayerStorePort {
 			obj.forEach(([ key, value ]) => p.set(key, value));
 		});
 
-		this._store.set(this._localID, p);
+		this._store.set(PersistentStore.id.toString(), p);
 		return player;
 	}
 
@@ -81,7 +81,7 @@ export class PlayerStoreAdapter implements PlayerStorePort {
      * Function operates only on local player!
      */
 	updateProp(props: PlayerProps): void {
-		const p = this._store.get(this._localID);
+		const p = this._store.get(PersistentStore.id.toString());
 
 		if (p) {
 			// update in a batch

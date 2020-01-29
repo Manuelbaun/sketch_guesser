@@ -1,45 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LandingScene, GameScene } from './scenes';
 import './App.css';
-// import ulog from 'ulog';
-// ulog.level = process.env.NODE_ENV === 'development' ? ulog.DEBUG : ulog.INFO;
+import { AppService, AppEventType } from './service';
 
-// set the y-js logger active
-if (process.env.NODE_ENV === 'development') {
-	// localStorage.setItem('log', 'true');
-}
+const AppWrapper: React.FC = () => {
+	const appService = new AppService();
+	return <App service={appService} />;
+};
 
-enum AppState {
-	MENU,
-	GAME
-}
+type AppProps = {
+	service: AppService;
+};
 
-const App: React.FC = () => {
-	const [ appState, setAppState ] = useState<AppState>(AppState.MENU);
+const App: React.FC<AppProps> = ({ service }) => {
+	const [ appState, setAppState ] = useState<AppEventType>(AppEventType.GAME_END);
 	const [ roomName, setRoomName ] = useState<string>('');
 
-	const startGame = (_roomName = '') => {
-		// set URL
-		const url = window.location.origin + '/' + _roomName;
-		window.history.replaceState('', 'Room', url);
-
-		setRoomName(_roomName);
-		setAppState(AppState.GAME);
-	};
-
-	const exitGame = (): void => {
-		setRoomName('');
-		setAppState(AppState.MENU);
-	};
+	useEffect(
+		() => {
+			service.subject.subscribe((event) => {
+				if (event.type === AppEventType.GAME_START) {
+					// set URL
+					const url = window.location.origin + '/' + event.value;
+					window.history.replaceState('', 'Room', url);
+				}
+				console.log(event);
+				setAppState(event.type);
+				setRoomName(event.value);
+			});
+		},
+		[ service ]
+	);
 
 	let scene;
 
 	switch (appState) {
-		case AppState.MENU:
-			scene = <LandingScene key="landing-scene" onJoinGame={startGame} onCreateGame={startGame} />;
+		case AppEventType.GAME_END:
+			scene = <LandingScene key="landing-scene" service={service} />;
 			break;
-		case AppState.GAME:
-			scene = <GameScene key="game-scene" roomName={roomName} onExitGame={exitGame} />;
+		case AppEventType.GAME_START:
+			scene = <GameScene key="game-scene" service={service} />;
 			break;
 		default:
 			scene = <div>Error, this should never happen. State unknown</div>;
@@ -48,4 +48,4 @@ const App: React.FC = () => {
 	return <div className="App">{scene}</div>;
 };
 
-export default App;
+export default AppWrapper;

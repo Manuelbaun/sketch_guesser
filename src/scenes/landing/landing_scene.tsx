@@ -3,20 +3,15 @@ import Button from 'react-bootstrap/Button';
 import { Input } from '../../ui-components/common/input';
 import mySvg from '../../logo.svg';
 import './landing.css';
+import { AppService } from '../../service';
 
 type Props = {
-	onJoinGame(roomID: string): void;
-	onCreateGame(): void;
+	service: AppService;
 };
 
-export const LandingScene = (props: Props) => {
-	const joinGame = (roomID: string) => {
-		props.onJoinGame(roomID);
-	};
-
-	const createGame = () => {
-		props.onCreateGame();
-	};
+export const LandingScene: React.FC<Props> = ({ service }) => {
+	const createGame = (): void => service.startGame();
+	const joinGame = (roomID: string): void => service.startGame(roomID);
 
 	return (
 		<div className="landing-page">

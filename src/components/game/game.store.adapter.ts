@@ -1,6 +1,6 @@
 import { Map as YMap } from 'yjs';
 import { GameStorePort } from './game_store.port';
-import { CacheStoreInterface } from '../../service';
+import { CacheStoreSyncInterface } from '../../service';
 import { GAME_STORE_NAME, GameModelProp, GameModel, GameModelKeys } from './game.model';
 
 export declare type YMap<T> = {
@@ -12,14 +12,8 @@ export declare type YMap<T> = {
 export class GameStoreAdapter implements GameStorePort {
 	private _store = new YMap<GameModel>();
 	private _transact;
-	private _id: number;
 
-	get id(): number {
-		return this._id;
-	}
-
-	constructor(store: CacheStoreInterface) {
-		this._id = store.id;
+	constructor(store: CacheStoreSyncInterface) {
 		this._store = store.yDoc.getMap(GAME_STORE_NAME);
 		this._transact = store.transact;
 		this._store.observe(this._observer);

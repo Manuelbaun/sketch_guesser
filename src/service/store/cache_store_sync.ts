@@ -1,13 +1,13 @@
 import { Doc as YDoc } from 'yjs';
-import { PersistentStore } from '../store/persistance';
+import { PersistentStore } from './persistance';
 
-export interface CacheStoreInterface {
+export interface CacheStoreSyncInterface {
 	/**
 	 * @type {YDoc<any>}
 	 */
 	yDoc;
 
-	id: number;
+	// id: number;
 
 	/**
    * Changes that happen inside of a transaction are bundled. This means that
@@ -33,15 +33,11 @@ export interface CacheStoreInterface {
  * which 
  */
 
-export class CacheStore implements CacheStoreInterface {
+export class CacheStoreSync implements CacheStoreSyncInterface {
 	private _yDoc = new YDoc();
 
 	constructor() {
-		this._yDoc.clientID = PersistentStore.clientID;
-	}
-
-	get id(): number {
-		return this._yDoc.clientID;
+		this._yDoc.clientID = PersistentStore.id;
 	}
 
 	public get transact() {

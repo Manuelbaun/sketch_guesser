@@ -22,12 +22,12 @@ export class MessageService implements ServiceInterface<Array<Message>> {
 	}
 
 	isLocal(id: string): boolean {
-		return +id === PersistentStore.clientID;
+		return +id === PersistentStore.id;
 	}
 
 	sendMessage(msg: string): void {
 		this.adapter.add({
-			id: PersistentStore.clientID.toString(),
+			id: PersistentStore.id.toString(),
 			message: msg,
 			user: PersistentStore.localName,
 			ts: Date.now()

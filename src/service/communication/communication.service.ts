@@ -1,7 +1,7 @@
 import Chance from 'chance';
 import { WebrtcProvider } from './y-plugings/y-webrtc';
 import { EventBusInterface } from '../event.bus';
-import { CacheStoreInterface, PersistentStore } from '../sync';
+import { PersistentStore, CacheStoreSyncInterface } from '../store';
 
 /**
  * This is the CommunicationService.
@@ -40,8 +40,8 @@ export class CommunicationService {
 	private _provider;
 	roomID: string;
 
-	constructor(store: CacheStoreInterface, eventBus: EventBusInterface, roomName = '') {
-		const peerID = PersistentStore.clientID;
+	constructor(store: CacheStoreSyncInterface, eventBus: EventBusInterface, roomName = '') {
+		const peerID = PersistentStore.id;
 		// create random room name based on the peerID as seed.
 		this.roomID = roomName === '' ? Chance(peerID).string({ length: 20, alpha: true, numeric: true }) : roomName;
 

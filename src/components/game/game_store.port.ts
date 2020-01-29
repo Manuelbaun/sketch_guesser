@@ -1,7 +1,6 @@
 import { GameModelProp, GameModel } from './game.model';
 
 export interface GameStorePort {
-	id: number;
 	updateProp(props: GameModelProp): void;
 	onUpdate: (f: (prop: GameModelProp) => void) => void;
 	dispose();

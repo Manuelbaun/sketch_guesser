@@ -1,6 +1,13 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { EventBus, CacheStoreInterface, CommunicationService, CacheStore, PersistentStore } from '../../service';
+import {
+	EventBus,
+	CacheStoreSyncInterface,
+	CommunicationService,
+	CacheStoreSync,
+	PersistentStore,
+	AppService
+} from '../../service';
 
 import { GameControl } from '../../ui-components';
 import { WaitingRoom } from './waiting_room';
@@ -10,11 +17,10 @@ import { GameService, GameStoreAdapter, GameEvents } from '../../components/game
 import { PlayerStoreAdapter, PlayerService } from '../../components/player';
 
 type Props = {
-	roomName;
-	onExitGame: Function;
+	service: AppService;
 };
 
-type TheGameState = {
+type State = {
 	gameState: GameState;
 	syncing: boolean;
 };
@@ -25,9 +31,9 @@ enum GameState {
 	LOADING
 }
 
-export class GameScene extends React.Component<Props, TheGameState> {
+export class GameScene extends React.Component<Props, State> {
 	eventBus: EventBus;
-	cacheStore: CacheStoreInterface;
+	cacheStore: CacheStoreSyncInterface;
 	commService: CommunicationService;
 
 	constructor(props: Props) {
@@ -48,7 +54,7 @@ export class GameScene extends React.Component<Props, TheGameState> {
 
 	UNSAFE_componentWillMount(): void {
 		this.eventBus = new EventBus();
-		this.cacheStore = new CacheStore();
+		this.cacheStore = new CacheStoreSync();
 
 		const gameStoreAdapter = new GameStoreAdapter(this.cacheStore);
 		const playerStoreAdapter = new PlayerStoreAdapter(this.cacheStore);
@@ -59,7 +65,7 @@ export class GameScene extends React.Component<Props, TheGameState> {
 		this.playerService.create(PersistentStore.localName);
 
 		// setup to synchronies
-		this.commService = new CommunicationService(this.cacheStore, this.eventBus, this.props.roomName);
+		this.commService = new CommunicationService(this.cacheStore, this.eventBus, this.props.service.roomID);
 
 		this.eventBus.on('SYNCED', (data) => {
 			console.error('its Synced now', data);
@@ -103,7 +109,7 @@ export class GameScene extends React.Component<Props, TheGameState> {
 	}
 
 	render(): JSX.Element {
-		const { onExitGame } = this.props;
+		const { service } = this.props;
 		const { gameState } = this.state;
 
 		let scene;
@@ -125,7 +131,7 @@ export class GameScene extends React.Component<Props, TheGameState> {
 		// If Game, it means, connection to peers are established
 		return (
 			<React.Fragment>
-				<GameControl service={this.gameService} onExit={onExitGame} />
+				<GameControl service={this.gameService} onExit={(): void => service.exitGame()} />
 				{scene}
 			</React.Fragment>
 		);
