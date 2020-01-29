@@ -16,7 +16,8 @@ export class DrawingService implements ServiceInterface<DrawingPath[]> {
 
 	dispose(): void {
 		console.log('Dispose DrawingService');
-		this.clearPaths();
+		this.subject.complete();
+		this.clearDrawing();
 	}
 
 	// Classes cant be pushed into an array, it will just be an json object
@@ -28,7 +29,7 @@ export class DrawingService implements ServiceInterface<DrawingPath[]> {
 		this.adapter.appendToCurrentPath(coordinates);
 	}
 
-	clearPaths(): void {
+	clearDrawing(): void {
 		this.adapter.clearStore();
 	}
 }

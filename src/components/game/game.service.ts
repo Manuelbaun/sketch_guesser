@@ -51,6 +51,8 @@ export class GameService implements ServiceInterface<GameEvent> {
 
 	dispose() {
 		console.log('GameService dispose');
+		clearInterval(this._timer);
+		this._subject.complete();
 	}
 
 	// sorted after probability of occurring
@@ -148,5 +150,14 @@ export class GameService implements ServiceInterface<GameEvent> {
 	}
 	get round(): number {
 		return this._adapter.get('round') as number;
+	}
+
+	get gameState(): GameStates {
+		return this._adapter.get('state') as GameStates;
+	}
+
+	isGameRunning(): boolean {
+		const state = this.gameState;
+		return state === GameStates.CHOOSING_WORD || state === GameStates.STARTED;
 	}
 }

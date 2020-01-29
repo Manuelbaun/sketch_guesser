@@ -16,6 +16,7 @@ export class MessageService implements ServiceInterface<Array<Message>> {
 		this.messages = this.adapter.getCurrentContent().reverse();
 		return this.messages;
 	}
+
 	constructor(adapter: MessageStorePort) {
 		this.adapter = adapter;
 		// triggers, whenever there is a change in the adapter storage
@@ -38,8 +39,13 @@ export class MessageService implements ServiceInterface<Array<Message>> {
 		});
 	}
 
+	clearMessages() {
+		this.adapter.clearStore();
+	}
+
 	dispose(): void {
 		console.log('dispose Service');
-		this.adapter.clearStore();
+		this.clearMessages();
+		this.subject.complete();
 	}
 }

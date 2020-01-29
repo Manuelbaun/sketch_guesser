@@ -1,21 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Input, Avatar } from '../../ui-components';
-import { PlayerServiceInterface, Player } from '../../components/player';
+import { Player } from '../../components/player';
 
 import './waiting_room.css';
+import { AppContext } from '../../App';
 
-type Props = {
-	service: PlayerServiceInterface;
-};
+export const WaitingRoom: React.FC = (props) => {
+	const { service: { playerService } } = useContext(AppContext);
 
-export const WaitingRoom: React.FC<Props> = ({ service }) => {
-	const [ players, setPlayers ] = useState<Player[]>(service.players);
+	const [ players, setPlayers ] = useState<Player[]>(playerService.players);
 	const handleSubmit = (name: string): void => {
-		service.updateName(name);
+		playerService.updateName(name);
 	};
 
 	useEffect(() => {
-		const sub = service.subject.subscribe((players) => {
+		const sub = playerService.subject.subscribe((players) => {
 			setPlayers(players);
 		});
 
@@ -42,7 +41,7 @@ export const WaitingRoom: React.FC<Props> = ({ service }) => {
 				</thead>
 				<tbody>
 					{players.map((player) => (
-						<PlayerRow key={player.id} player={player} local={service.isLocalPlayer(player.id)} />
+						<PlayerRow key={player.id} player={player} local={playerService.isLocalPlayer(player.id)} />
 					))}
 				</tbody>
 			</table>

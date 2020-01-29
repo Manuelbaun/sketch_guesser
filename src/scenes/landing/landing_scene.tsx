@@ -7,8 +7,8 @@ import { AppContext } from '../../App';
 
 export const LandingScene: React.FC = (prop) => {
 	const { service } = useContext(AppContext);
-	const createGame = (): void => service.startGame();
-	const joinGame = (roomID: string): void => service.startGame(roomID);
+	const createGame = (): void => service.enterGame();
+	const joinGame = (roomID: string): void => service.enterGame(roomID);
 
 	return (
 		<div className="landing-page">

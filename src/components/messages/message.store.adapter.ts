@@ -17,7 +17,6 @@ export class MessageStoreAdapter implements MessageStorePort {
 	 * on the key -value level, not the actual player props
 	 */
 	_observer = (event, tran): void => {
-		console.log('hallo');
 		this._onUpdateListener(this._store.toArray());
 	};
 

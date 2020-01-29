@@ -206,7 +206,7 @@ export class DrawingArea extends React.Component<Props, State> {
 		const ctx = this.canvasRef.current.getContext('2d');
 
 		if (ctx) {
-			this.service.clearPaths();
+			this.service.clearDrawing();
 			ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		}
 	};

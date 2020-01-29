@@ -14,8 +14,6 @@ export const AppContext = React.createContext<AppProps>({
 });
 
 const AppWrapper: React.FC = () => {
-	service.subject.subscribe((event) => console.log(event));
-
 	return (
 		<AppContext.Provider value={{ service }}>
 			<App />;
@@ -23,9 +21,14 @@ const AppWrapper: React.FC = () => {
 	);
 };
 
+enum AppStates {
+	GAME,
+	MENU
+}
+
 const App: React.FC = () => {
 	const { service } = useContext(AppContext);
-	const [ appState, setAppState ] = useState<AppEventType>(AppEventType.GAME_END);
+	const [ appState, setAppState ] = useState<AppStates>(AppStates.MENU);
 
 	useEffect(
 		() => {
@@ -34,28 +37,22 @@ const App: React.FC = () => {
 					// set URL
 					const url = window.location.origin + '/' + event.value;
 					window.history.replaceState('', 'Room', url);
+					setAppState(AppStates.GAME);
+				} else {
+					window.history.replaceState('', 'Room', '');
+					setAppState(AppStates.MENU);
 				}
-
-				setAppState(event.type);
 			});
 		},
 		[ service ]
 	);
 
-	let scene;
-
-	switch (appState) {
-		case AppEventType.GAME_END:
-			scene = <LandingScene key="landing-scene" />;
-			break;
-		case AppEventType.GAME_START:
-			scene = <GameScene key="game-scene" service={service} />;
-			break;
-		default:
-			scene = <div>Error, this should never happen. State unknown</div>;
-	}
-
-	return <div className="App">{scene}</div>;
+	return (
+		<div className="App">
+			{appState === AppStates.MENU && <LandingScene key="landing-scene" />}
+			{appState === AppStates.GAME && <GameScene key="game-scene" />}
+		</div>
+	);
 };
 
 export default AppWrapper;
