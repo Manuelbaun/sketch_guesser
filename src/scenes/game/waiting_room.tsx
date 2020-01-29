@@ -8,7 +8,7 @@ type Props = {
 	service: PlayerServiceInterface;
 };
 
-export const WaitingRoom: React.FC<Props> = ({ service: service }) => {
+export const WaitingRoom: React.FC<Props> = ({ service }) => {
 	const [ players, setPlayers ] = useState<Player[]>(service.players);
 	const handleSubmit = (name: string): void => {
 		service.updateName(name);

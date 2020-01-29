@@ -1,4 +1,4 @@
-import { RandomGenerator } from '../utilitize';
+import { RandomGenerator } from '../../util/utilitize';
 /**
  * Class that stores some data persistent on that Tab session like the id
  * so if the Tab refreshed, the ID stays the same

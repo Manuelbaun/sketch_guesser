@@ -36,7 +36,7 @@ export class GameStoreAdapter implements GameStorePort {
 		for (const [ key, changeAction ] of event.changes.keys) {
 			const value = this._store.get(key);
 			// console.log(key, changeAction.action, value);
-			this._updateLister({ [key]: value });
+			this._updateListener({ [key]: value });
 		}
 	};
 
@@ -65,12 +65,16 @@ export class GameStoreAdapter implements GameStorePort {
 	/**
      * Override this function
      */
-	private _updateLister = (prop: Partial<GameModelProp>): void => {
+	private _updateListener = (prop: Partial<GameModelProp>): void => {
 		this.set('round', 1);
 		throw Error('Hey, nobody is listening to me!');
 	};
 
+	/**
+	 * Use this to override the _updateListener function
+	 * @param f Function callback 
+	 */
 	onUpdate(f: (prop: GameModelProp) => void): void {
-		this._updateLister = f;
+		this._updateListener = f;
 	}
 }

@@ -1,8 +1,9 @@
 import { Subject } from 'rxjs';
 import { GameStorePort } from './game_store.port';
 import { GameModelProp, GameEvents, GameStates, GameModel, GameModelKeys } from './game.model';
-import { hashString } from '../../service';
+
 import { ServiceInterface } from '../base/service.interface';
+import { hashString } from '../../util';
 
 /**
  * Events 

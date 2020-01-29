@@ -1,39 +1,26 @@
-import React, { useEffect } from 'react';
-import { CountDown, MessageBox, DrawingArea, MessageManager, DrawingManager } from '../../ui-components';
+import React from 'react';
+import { CountDown, MessageBox, DrawingArea, DrawingManager } from '../../ui-components';
 
-import { CacheStoreInterface } from '../../service';
 import { GameService } from '../../components/game/game.service';
+import { MessageService } from '../../components/messages';
 
 type Props = {
 	service: GameService;
-	store: CacheStoreInterface;
+	messageService: MessageService;
+	drawingService: DrawingManager;
 };
 
-export const Game = ({ service, store }: Props) => {
-	const drawingManager: DrawingManager = new DrawingManager(store);
-	const messageManager: MessageManager = new MessageManager(store);
-
-	useEffect(
-		() => {
-			console.log('Create Game');
-			// clean up!!
-			return (): void => {
-				drawingManager.dispose();
-				messageManager.dispose();
-			};
-		},
-		[ drawingManager, messageManager ]
-	);
-
+export const Game = ({ service, messageService, drawingService }: Props) => {
+	console.log(messageService, drawingService);
 	return (
 		<div>
 			<div className="App-Message">
 				<CountDown gameEngine={service} />
-				<MessageBox messageEngine={messageManager} />
+				<MessageBox service={messageService} />
 			</div>
 
 			<div className="App-Drawing">
-				<DrawingArea drawingManager={drawingManager} width={1000} height={500} />
+				<DrawingArea drawingManager={drawingService} width={1000} height={500} />
 			</div>
 		</div>
 	);
