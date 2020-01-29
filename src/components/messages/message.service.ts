@@ -12,6 +12,10 @@ export class MessageService implements ServiceInterface<Array<Message>> {
 	subject: Subject<Array<Message>> = new Subject();
 	messages: Array<Message> = new Array<Message>();
 
+	get allMessages() {
+		this.messages = this.adapter.getCurrentContent().reverse();
+		return this.messages;
+	}
 	constructor(adapter: MessageStorePort) {
 		this.adapter = adapter;
 		// triggers, whenever there is a change in the adapter storage
