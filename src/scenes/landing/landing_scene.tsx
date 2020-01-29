@@ -1,15 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Button from 'react-bootstrap/Button';
 import { Input } from '../../ui-components/common/input';
 import mySvg from '../../logo.svg';
 import './landing.css';
-import { AppService } from '../../service';
+import { AppContext } from '../../App';
 
-type Props = {
-	service: AppService;
-};
-
-export const LandingScene: React.FC<Props> = ({ service }) => {
+export const LandingScene: React.FC = (prop) => {
+	const { service } = useContext(AppContext);
 	const createGame = (): void => service.startGame();
 	const joinGame = (roomID: string): void => service.startGame(roomID);
 

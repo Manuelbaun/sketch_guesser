@@ -1,20 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { LandingScene, GameScene } from './scenes';
 import './App.css';
 import { AppService, AppEventType } from './service';
-
-const AppWrapper: React.FC = () => {
-	const appService = new AppService();
-	return <App service={appService} />;
-};
 
 type AppProps = {
 	service: AppService;
 };
 
-const App: React.FC<AppProps> = ({ service }) => {
+const service = new AppService();
+
+export const AppContext = React.createContext<AppProps>({
+	service
+});
+
+const AppWrapper: React.FC = () => {
+	service.subject.subscribe((event) => console.log(event));
+
+	return (
+		<AppContext.Provider value={{ service }}>
+			<App />;
+		</AppContext.Provider>
+	);
+};
+
+const App: React.FC = () => {
+	const { service } = useContext(AppContext);
 	const [ appState, setAppState ] = useState<AppEventType>(AppEventType.GAME_END);
-	const [ roomName, setRoomName ] = useState<string>('');
 
 	useEffect(
 		() => {
@@ -24,9 +35,8 @@ const App: React.FC<AppProps> = ({ service }) => {
 					const url = window.location.origin + '/' + event.value;
 					window.history.replaceState('', 'Room', url);
 				}
-				console.log(event);
+
 				setAppState(event.type);
-				setRoomName(event.value);
 			});
 		},
 		[ service ]
@@ -36,7 +46,7 @@ const App: React.FC<AppProps> = ({ service }) => {
 
 	switch (appState) {
 		case AppEventType.GAME_END:
-			scene = <LandingScene key="landing-scene" service={service} />;
+			scene = <LandingScene key="landing-scene" />;
 			break;
 		case AppEventType.GAME_START:
 			scene = <GameScene key="game-scene" service={service} />;

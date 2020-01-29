@@ -15,6 +15,8 @@ import { Game } from './game';
 import { GameService, GameStoreAdapter, GameEvents } from '../../components/game';
 
 import { PlayerStoreAdapter, PlayerService } from '../../components/player';
+import { MessageStoreAdapter } from '../../components/messages';
+import { DrawingStoreAdapter } from '../../components/drawing';
 
 type Props = {
 	service: AppService;
@@ -22,7 +24,6 @@ type Props = {
 
 type State = {
 	gameState: GameState;
-	syncing: boolean;
 };
 
 enum GameState {
@@ -40,8 +41,7 @@ export class GameScene extends React.Component<Props, State> {
 		super(props);
 
 		this.state = {
-			gameState: GameState.LOADING,
-			syncing: true
+			gameState: GameState.WAITING_ROOM
 		};
 	}
 
@@ -52,29 +52,28 @@ export class GameScene extends React.Component<Props, State> {
 	playerService: PlayerService;
 	gameService: GameService;
 
+	gameStoreAdapter: GameStoreAdapter;
+	playerStoreAdapter: PlayerStoreAdapter;
+	messageStoreAdapter: MessageStoreAdapter;
+	drawingStoreAdapter: DrawingStoreAdapter;
+
 	UNSAFE_componentWillMount(): void {
 		this.eventBus = new EventBus();
 		this.cacheStore = new CacheStoreSync();
 
-		const gameStoreAdapter = new GameStoreAdapter(this.cacheStore);
-		const playerStoreAdapter = new PlayerStoreAdapter(this.cacheStore);
-		this.gameService = new GameService(gameStoreAdapter);
-		this.playerService = new PlayerService(playerStoreAdapter);
+		this.gameStoreAdapter = new GameStoreAdapter(this.cacheStore);
+		this.playerStoreAdapter = new PlayerStoreAdapter(this.cacheStore);
+		this.messageStoreAdapter = new MessageStoreAdapter(this.cacheStore);
+		this.drawingStoreAdapter = new DrawingStoreAdapter(this.cacheStore);
+
+		this.gameService = new GameService(this.gameStoreAdapter);
+		this.playerService = new PlayerService(this.playerStoreAdapter);
 
 		// Player Init
 		this.playerService.create(PersistentStore.localName);
 
 		// setup to synchronies
 		this.commService = new CommunicationService(this.cacheStore, this.eventBus, this.props.service.roomID);
-
-		this.eventBus.on('SYNCED', (data) => {
-			console.error('its Synced now', data);
-			// this.setState({ gameState: GameState.WAITING_ROOM });
-
-			// if (data.synced) {
-			// 	this.setState({ syncing: false });
-			// }
-		});
 
 		this.sub = this.gameService.subject.subscribe((event) => {
 			switch (event.type) {
@@ -123,7 +122,13 @@ export class GameScene extends React.Component<Props, State> {
 				scene = <WaitingRoom service={this.playerService} />;
 				break;
 			case GameState.PLAY:
-				scene = <Game gameService={this.gameService} store={this.cacheStore} />;
+				scene = (
+					<Game
+						gameService={this.gameService}
+						drawingStoreAdapter={this.drawingStoreAdapter}
+						messageStoreAdapter={this.messageStoreAdapter}
+					/>
+				);
 				break;
 			default:
 				scene = <div>Unknown State</div>;

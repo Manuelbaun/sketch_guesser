@@ -1,8 +1,8 @@
 import { Subject } from 'rxjs';
 
 export enum AppEventType {
-	GAME_START,
-	GAME_END
+	GAME_START = 'game_start',
+	GAME_END = 'game_end'
 }
 
 export interface AppStateEvent {

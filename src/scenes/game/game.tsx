@@ -2,26 +2,24 @@ import React, { useEffect } from 'react';
 import { CountDown, MessageBox, DrawingArea } from '../../ui-components';
 
 import { GameService } from '../../components/game/game.service';
-import { MessageService, MessageStoreAdapter } from '../../components/messages';
-import { DrawingService, DrawingStoreAdapter } from '../../components/drawing';
-import { CacheStoreSyncInterface } from '../../service';
+import { MessageService, MessageStorePort } from '../../components/messages';
+import { DrawingService, DrawingStorePort } from '../../components/drawing';
 
 type Props = {
 	gameService: GameService;
-	store: CacheStoreSyncInterface;
+	messageStoreAdapter: MessageStorePort;
+	drawingStoreAdapter: DrawingStorePort;
 };
 
-export const Game = ({ gameService, store }: Props) => {
-	const messageStoreAdapter = new MessageStoreAdapter(store);
-	const drawingStoreAdapter = new DrawingStoreAdapter(store);
+export const Game = ({ gameService, messageStoreAdapter, drawingStoreAdapter }: Props) => {
 	const messageService = new MessageService(messageStoreAdapter);
 	const drawingService = new DrawingService(drawingStoreAdapter);
 
 	useEffect(() => {
-		console.log('Clean Up Game ');
+		console.log('Start Game ');
 		return (): void => {
-			messageService.dispose();
-			drawingService.dispose();
+			console.log('Clean Up Game ');
+
 			drawingStoreAdapter.dispose();
 			messageStoreAdapter.dispose();
 		};

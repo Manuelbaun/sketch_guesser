@@ -5,4 +5,5 @@ export interface DrawingStorePort {
 	appendToCurrentPath(coordinates: Coordinate): void;
 	onUpdate(handler: (values: DrawingPath[]) => void);
 	clearStore(): void;
+	dispose();
 }
