@@ -1,5 +1,4 @@
 import { Doc as YDoc } from 'yjs';
-import { DrawingPath } from '../../models';
 import { PersistentStore } from '../store/persistance';
 
 export interface CacheStoreInterface {
@@ -9,10 +8,6 @@ export interface CacheStoreInterface {
 	yDoc;
 
 	id: number;
-	/**
-	 * @type {YArray<DrawingPath>}
-	 */
-	drawPaths;
 
 	/**
    * Changes that happen inside of a transaction are bundled. This means that
@@ -55,10 +50,6 @@ export class CacheStore implements CacheStoreInterface {
 
 	public get yDoc() {
 		return this._yDoc;
-	}
-
-	public get drawPaths() {
-		return this.yDoc.getArray<DrawingPath>('drawState');
 	}
 
 	dispose() {

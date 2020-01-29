@@ -1,10 +1,10 @@
 import React from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-import { DrawingManager } from './draw_manager';
-import { Coordinate, DrawingPath } from '../../models';
+
 import { Subscription } from 'rxjs';
 import './drawing_area.css';
+import { DrawingService, DrawingPath, Coordinate } from '../../components/drawing';
 
 const colorPalette = [
 	'#e6194B',
@@ -24,7 +24,7 @@ const colorPalette = [
 type Props = {
 	width: number;
 	height: number;
-	drawingManager: DrawingManager;
+	service: DrawingService;
 };
 
 type State = {
@@ -34,13 +34,12 @@ type State = {
 
 export class DrawingArea extends React.Component<Props, State> {
 	private canvasRef = React.createRef<HTMLCanvasElement>();
-	private drawingManager: DrawingManager;
-
+	private service: DrawingService;
 	private drawingSub: Subscription;
 
 	constructor(props: Props) {
 		super(props);
-		this.drawingManager = props.drawingManager;
+		this.service = props.service;
 
 		this.state = {
 			isPainting: false,
@@ -48,7 +47,7 @@ export class DrawingArea extends React.Component<Props, State> {
 		};
 
 		let currentPaths = 0;
-		this.drawingSub = this.drawingManager.subscribe((paths) => {
+		this.drawingSub = this.service.subject.subscribe((paths) => {
 			// Clear the canvas
 			if (paths.length === 0) {
 				this.clearCanvas();
@@ -157,7 +156,7 @@ export class DrawingArea extends React.Component<Props, State> {
 
 		if (origin) {
 			this.setState({ isPainting: true });
-			this.drawingManager.addNewPath(origin, color);
+			this.service.addNewPath(origin, color);
 		}
 	};
 
@@ -169,7 +168,7 @@ export class DrawingArea extends React.Component<Props, State> {
 		const origin = this.calculateTouchCoordinates(x, y);
 		if (origin) {
 			this.setState({ isPainting: true });
-			this.drawingManager.addNewPath(origin, color);
+			this.service.addNewPath(origin, color);
 		}
 	};
 
@@ -182,7 +181,7 @@ export class DrawingArea extends React.Component<Props, State> {
 		if (isPainting) {
 			const newCoordinates = this.calculateTouchCoordinates(x, y);
 			if (newCoordinates) {
-				this.drawingManager.appendCoordinates(newCoordinates);
+				this.service.appendCoordinates(newCoordinates);
 			}
 		}
 	};
@@ -194,7 +193,7 @@ export class DrawingArea extends React.Component<Props, State> {
 			const newCoordinates = this.calculateCoordinates(x, y);
 
 			if (newCoordinates) {
-				this.drawingManager.appendCoordinates(newCoordinates);
+				this.service.appendCoordinates(newCoordinates);
 			}
 		}
 	};
@@ -207,7 +206,7 @@ export class DrawingArea extends React.Component<Props, State> {
 		const ctx = this.canvasRef.current.getContext('2d');
 
 		if (ctx) {
-			this.drawingManager.clearPaths();
+			this.service.clearPaths();
 			ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		}
 	};

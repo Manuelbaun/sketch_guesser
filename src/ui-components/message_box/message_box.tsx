@@ -11,7 +11,7 @@ type Props = {
 // - get local user to check
 export const MessageBox: React.FC<Props> = ({ service }) => {
 	const [ messages, setMessages ] = useState(service.messages);
-
+	console.log(messages, service.messages);
 	useEffect(
 		() => {
 			// subscribe to message updates

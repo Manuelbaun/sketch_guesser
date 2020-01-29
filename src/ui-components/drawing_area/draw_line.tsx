@@ -1,5 +1,5 @@
 import React from 'react';
-import { DrawingPath } from '../../models';
+import { DrawingPath } from '../../components/drawing';
 
 type Props = {
 	path: DrawingPath;

@@ -2,17 +2,16 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { EventBus, CacheStoreInterface, CommunicationService, CacheStore, PersistentStore } from '../../service';
 
-import { GameControl, DrawingManager } from '../../ui-components';
+import { GameControl } from '../../ui-components';
 import { WaitingRoom } from './waiting_room';
 import { Game } from './game';
 import { GameService, GameStoreAdapter, GameEvents } from '../../components/game';
 
 import { PlayerStoreAdapter, PlayerService } from '../../components/player';
-import { MessageService, MessageStoreAdapter } from '../../components/messages';
 
-type TheGameProps = {
+type Props = {
 	roomName;
-	onLeaveGame: Function;
+	onExitGame: Function;
 };
 
 type TheGameState = {
@@ -26,12 +25,12 @@ enum GameState {
 	LOADING
 }
 
-export class GameScene extends React.Component<TheGameProps, TheGameState> {
+export class GameScene extends React.Component<Props, TheGameState> {
 	eventBus: EventBus;
 	cacheStore: CacheStoreInterface;
 	commService: CommunicationService;
 
-	constructor(props: TheGameProps) {
+	constructor(props: Props) {
 		super(props);
 
 		this.state = {
@@ -46,8 +45,6 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 
 	playerService: PlayerService;
 	gameService: GameService;
-	messageService: MessageService;
-	drawingManager: DrawingManager;
 
 	UNSAFE_componentWillMount(): void {
 		this.eventBus = new EventBus();
@@ -55,11 +52,8 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 
 		const gameStoreAdapter = new GameStoreAdapter(this.cacheStore);
 		const playerStoreAdapter = new PlayerStoreAdapter(this.cacheStore);
-		const messageStoreAdapter = new MessageStoreAdapter(this.cacheStore);
-
 		this.gameService = new GameService(gameStoreAdapter);
 		this.playerService = new PlayerService(playerStoreAdapter);
-		this.messageService = new MessageService(messageStoreAdapter);
 
 		// Player Init
 		this.playerService.create(PersistentStore.localName);
@@ -68,22 +62,23 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		this.commService = new CommunicationService(this.cacheStore, this.eventBus, this.props.roomName);
 
 		this.eventBus.on('SYNCED', (data) => {
-			this.setState({ gameState: GameState.WAITING_ROOM });
-			if (data.synced) {
-				this.setState({ syncing: false });
-			}
+			console.error('its Synced now', data);
+			// this.setState({ gameState: GameState.WAITING_ROOM });
+
+			// if (data.synced) {
+			// 	this.setState({ syncing: false });
+			// }
 		});
 
 		this.sub = this.gameService.subject.subscribe((event) => {
 			switch (event.type) {
 				case GameEvents.GAME_STARTED:
-					this.drawingManager = new DrawingManager(this.cacheStore);
-					this.setState({ gameState: GameState.PLAY });
+					this.setState({ gameState: GameState.PLAY }, () => {
+						console.log('Set STate GameSTarted');
+					});
 
 					break;
 				case GameEvents.GAME_STOPPED:
-					this.messageService && this.messageService.dispose();
-					this.drawingManager && this.drawingManager.dispose();
 					this.setState({ gameState: GameState.WAITING_ROOM });
 					break;
 			}
@@ -91,7 +86,6 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 
 		this.eventBus.addService(this.gameService);
 		this.eventBus.addService(this.playerService);
-		this.eventBus.addService(this.messageService);
 	}
 
 	sub: Subscription;
@@ -100,9 +94,6 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		// dispose all
 		this.commService.dispose();
 
-		// The new services
-		this.messageService.dispose();
-		this.drawingManager.dispose();
 		this.playerService.dispose();
 		this.gameService.dispose();
 
@@ -112,7 +103,7 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 	}
 
 	render(): JSX.Element {
-		const { onLeaveGame } = this.props;
+		const { onExitGame } = this.props;
 		const { gameState } = this.state;
 
 		let scene;
@@ -126,13 +117,7 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 				scene = <WaitingRoom service={this.playerService} />;
 				break;
 			case GameState.PLAY:
-				scene = (
-					<Game
-						gameService={this.gameService}
-						messageService={this.messageService}
-						drawingService={this.drawingManager}
-					/>
-				);
+				scene = <Game gameService={this.gameService} store={this.cacheStore} />;
 				break;
 			default:
 				scene = <div>Unknown State</div>;
@@ -140,7 +125,7 @@ export class GameScene extends React.Component<TheGameProps, TheGameState> {
 		// If Game, it means, connection to peers are established
 		return (
 			<React.Fragment>
-				<GameControl service={this.gameService} onCancel={onLeaveGame} />
+				<GameControl service={this.gameService} onExit={onExitGame} />
 				{scene}
 			</React.Fragment>
 		);

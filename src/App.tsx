@@ -27,7 +27,7 @@ const App: React.FC = () => {
 		setAppState(AppState.GAME);
 	};
 
-	const leaveGame = () => {
+	const exitGame = (): void => {
 		setRoomName('');
 		setAppState(AppState.MENU);
 	};
@@ -39,7 +39,7 @@ const App: React.FC = () => {
 			scene = <LandingScene key="landing-scene" onJoinGame={startGame} onCreateGame={startGame} />;
 			break;
 		case AppState.GAME:
-			scene = <GameScene key="game-scene" roomName={roomName} onLeaveGame={leaveGame} />;
+			scene = <GameScene key="game-scene" roomName={roomName} onExitGame={exitGame} />;
 			break;
 		default:
 			scene = <div>Error, this should never happen. State unknown</div>;
