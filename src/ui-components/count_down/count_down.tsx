@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { GameEngineInterface } from '../../engines';
-import { GameEvents } from '../../models';
+import { GameService, GameEvents } from '../../components/game';
 
 import './count_down.css';
-
 interface CountDownProps {
-	gameEngine: GameEngineInterface;
+	gameEngine: GameService;
 }
 
 export const CountDown: React.FC<CountDownProps> = ({ gameEngine }) => {
@@ -14,7 +12,7 @@ export const CountDown: React.FC<CountDownProps> = ({ gameEngine }) => {
 
 	useEffect(
 		() => {
-			const sub = gameEngine.subscribe((event) => {
+			const sub = gameEngine.subject.subscribe((event) => {
 				if (event.type === GameEvents.CLOCK_UPDATE) {
 					setTime(event.value);
 				} else if (event.type === GameEvents.ROUND_CHANGE) {

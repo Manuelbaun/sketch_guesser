@@ -1,11 +1,11 @@
 import React from 'react';
 import Button from 'react-bootstrap/Button';
-import { GameEngineInterface } from '../../engines';
+import { GameService } from '../../components/game/game.service';
 
 import './game_control.css';
 
 type Props = {
-	gameEngine: GameEngineInterface;
+	service: GameService;
 	onCancel: Function;
 };
 
@@ -15,16 +15,16 @@ type Props = {
  * This class provides buttons to start, stop, or reset the Game. It is just for
  * prototype purpose. It also provides a button to go to the next round.
  */
-export const GameControl = ({ gameEngine, onCancel }: Props) => {
-	const startGame = () => {
-		gameEngine.setupGame();
-		gameEngine.startGame();
+export const GameControl = ({ service, onCancel }: Props) => {
+	const startGame = (): void => {
+		service.setupGame({});
+		service.startGame();
 	};
 
-	const stopGame = () => gameEngine.stopGame();
-	const nextRound = () => gameEngine.nextRound();
+	const stopGame = (): void => service.stopGame();
+	const nextRound = (): void => service.nextRound();
 
-	const cancelGame = () => {
+	const cancelGame = (): void => {
 		stopGame();
 		onCancel();
 	};
