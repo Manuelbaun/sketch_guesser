@@ -1,6 +1,13 @@
 # SketchGuessr
 
-Dieses Projekt stellt eine unvollständige Implementierung des SketchGuessrs Konzept dar. Momentan ist das Erstellen oder das Beitreten eines Spiels möglich, 
+Dieses Projekt stellt eine unvollständige Implementierung des SketchGuessrs Konzept dar. Momentan ist das Erstellen oder das Beitreten eines Spiels möglich. 
+
+Der Spieler wird in einem Warteraum gebracht, der alle verbundenen Spiele aufzeigt. Es kann der Name geändert werden. 
+
+Mit dem Controllern oben am Bildschirm, kann eine Spielsession gestartet werden.
+Anschließen öffnet sich die Spielsession.
+
+Momentan ist keine richtige Spiellogik enthalten. So kann jeder eine Nachricht verschicken und auf der Zeichenoberfläche zeichnen.
 
 Das Spiel wird auf Netlify gehostet und kann unter diesem [SketchGuessr](https://sketchguessr.netlify.com/) erreicht werden. 
 
