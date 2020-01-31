@@ -1,0 +1,598 @@
+@startuml
+interface PortBaseMap<T> {
+    +get(key: K): T[K]
+    +set(key: K, value: T[K]): void
+}
+interface ServiceInterface<T> {
+    +subject: Subject<T>
+    +dispose(): any
+}
+interface DrawingStorePort {
+    +addNewPath(color: string, origin: Coordinate): void
+    +appendToCurrentPath(coordinates: Coordinate): void
+    +onUpdate(handler: (values: DrawingPath[]) => void): any
+    +clearStore(): void
+    +dispose(): any
+}
+class DrawingService implements ServiceInterface {
+    +subject: Subject<DrawingPath[]>
+    +adapter: DrawingStorePort
+    +dispose(): void
+    +addNewPath(origin: Coordinate, color: string): void
+    +appendCoordinates(coordinates: Coordinate): void
+    +clearDrawing(): void
+}
+class Encoder
+class Decoder
+class Observable<N> {
+    +on(name: N, f: Function): void
+    +once(name: N, f: Function): void
+    +off(name: N, f: Function): void
+    +emit(name: N, args: any[]): any
+    +destroy(): void
+}
+class DeleteItem
+class DeleteSet
+class Doc {
+    +transact(f: (arg0: Transaction) => void, origin?: any): void
+    +get(name: string, TypeConstructor?: Function): AbstractType<any>
+    +getArray(name: string): YArray<T>
+    +getText(name: string): YText
+    +getMap(name: string): YMap<any>
+    +getXmlFragment(name: string): YXmlFragment
+    +destroy(): void
+    +on(eventName: string, f: Function): void
+    +off(eventName: string, f: Function): void
+}
+class EventHandler<ARG0, ARG1>
+class ID
+class PermanentUserData {
+    +setUserMapping(doc: Doc, clientid: number, userDescription: string): void
+    +getUserByClientId(clientid: number): any
+    +getUserByDeletedId(id: ID): string | null
+}
+class RelativePosition
+class AbsolutePosition
+class Snapshot
+class StructStore
+class Transaction
+class StackItem
+class UndoManager {
+    +stopCapturing(): void
+    +undo(): StackItem | null
+    +redo(): StackItem | null
+}
+class YEvent {
+    +path: (string | number)[]
+    +deletes(struct: AbstractStruct): boolean
+    +adds(struct: AbstractStruct): boolean
+    +changes: { added: Set<Item>; deleted: Set<Item>; delta: ({ insert: any[]; } | { delete: number; } | { retain: number; })[]; }
+}
+class AbstractType<EventType> {
+    +_integrate(y: Doc, item: Item | null): void
+    +_copy(): AbstractType<EventType>
+    +_write(encoder: typeof Encoder): void
+    +_first: Item | null
+    +_callObserver(transaction: Transaction, parentSubs: Set<string | null>): void
+    +observe(f: (arg0: EventType, arg1: Transaction) => void): void
+    +observeDeep(f: (arg0: YEvent[], arg1: Transaction) => void): void
+    +unobserve(f: (arg0: EventType, arg1: Transaction) => void): void
+    +unobserveDeep(f: (arg0: YEvent[], arg1: Transaction) => void): void
+    +toJSON(): any
+}
+class YArrayEvent<T> extends YEvent
+class YArray<T> extends AbstractType {
+    +_integrate(y: Doc, item: Item): void
+    +_copy(): YArray<any>
+    +length: number
+    +_callObserver(transaction: Transaction, parentSubs: Set<string | null>): void
+    +insert(index: number, content: T[]): void
+    +push(content: T[]): void
+    +delete(index: number, length?: number): void
+    +get(index: number): T
+    +toArray(): T[]
+    +toJSON(): any[]
+    +map(f: (arg0: T, arg1: number, arg2: YArray<T>) => M): M[]
+    +forEach(f: (arg0: T, arg1: number, arg2: YArray<T>) => void): void
+    +__@iterator(): IterableIterator<T>
+    +_write(encoder: typeof Encoder): void
+}
+class YMapEvent<T> extends YEvent
+class YMap<T> extends AbstractType {
+    +_integrate(y: Doc, item: Item): void
+    +_copy(): YMap<any>
+    +_callObserver(transaction: Transaction, parentSubs: Set<string | null>): void
+    +toJSON(): { [x: string]: T; }
+    +keys(): IterableIterator<string>
+    +values(): IterableIterator<string>
+    +entries(): IterableIterator<any>
+    +forEach(f: (arg0: T, arg1: string, arg2: YMap<T>) => void): { [x: string]: T; }
+    +__@iterator(): IterableIterator<T>
+    +delete(key: string): void
+    +set(key: string, value: T): T
+    +get(key: string): T | undefined
+    +has(key: string): boolean
+    +_write(encoder: typeof Encoder): void
+}
+class ItemListPosition
+class ItemTextListPosition extends ItemListPosition
+class ItemInsertionResult extends ItemListPosition
+class YTextEvent extends YEvent {
+    +delta: DeltaItem[]
+}
+class YText extends AbstractType {
+    +length: number
+    +_integrate(y: Doc, item: Item): void
+    +_copy(): YText
+    +_callObserver(transaction: Transaction, parentSubs: Set<string | null>): void
+    +toString(): string
+    +applyDelta(delta: any): void
+    +toDelta(snapshot: Snapshot | undefined, prevSnapshot: Snapshot | undefined, computeYChange: ((arg0: "removed" | "added", arg1: ID) => any) | undefined): any
+    +insert(index: number, text: string, attributes: any): void
+    +insertEmbed(index: number, embed: any, attributes?: any): void
+    +delete(index: number, length: number): void
+    +format(index: number, length: number, attributes: any): void
+    +_write(encoder: typeof Encoder): void
+}
+class YXmlTreeWalker {
+    +__@iterator(): this
+    +next(): IteratorResult<YXmlElement | YXmlText | YXmlHook, any>
+}
+class YXmlFragment extends AbstractType {
+    +_integrate(y: Doc, item: Item): void
+    +_copy(): YXmlFragment
+    +length: number
+    +createTreeWalker(filter: (arg0: AbstractType<any>) => boolean): YXmlTreeWalker
+    +querySelector(query: string): YXmlElement | YXmlText | YXmlHook | null
+    +querySelectorAll(query: string): (YXmlElement | YXmlText | YXmlHook | null)[]
+    +_callObserver(transaction: Transaction, parentSubs: Set<string | null>): void
+    +toString(): string
+    +toJSON(): string
+    +toDOM(_document?: Document | undefined, hooks?: { [x: string]: any; } | undefined, binding: any): Node
+    +insert(index: number, content: (YXmlElement | YXmlText)[]): void
+    +delete(index: number, length?: number | undefined): void
+    +toArray(): (YXmlElement | YXmlText | YXmlHook)[]
+    +_write(encoder: typeof Encoder): void
+}
+class YXmlElement extends YXmlFragment {
+    +_integrate(y: Doc, item: Item): void
+    +_copy(): YXmlElement
+    +toString(): string
+    +removeAttribute(attributeName: string): void
+    +setAttribute(attributeName: string, attributeValue: string): void
+    +getAttribute(attributeName: string): string
+    +getAttributes(snapshot: Snapshot | undefined): any
+    +toDOM(_document?: Document | undefined, hooks?: { [x: string]: any; } | undefined, binding: any): Node
+    +_write(encoder: typeof Encoder): void
+}
+class YXmlEvent extends YEvent
+class YXmlHook extends YMap {
+    +_copy(): YXmlHook
+    +toDOM(_document?: Document | undefined, hooks?: { [x: string]: any; } | undefined, binding: any): Element
+    +_write(encoder: typeof Encoder): void
+}
+class YXmlText extends YText {
+    +_copy(): YXmlText
+    +toDOM(_document?: Document | undefined, hooks: { [x: string]: any; } | undefined, binding: any): Text
+    +toString(): any
+    +toJSON(): any
+    +_write(encoder: typeof Encoder): void
+}
+class AbstractStruct {
+    +mergeWith(right: AbstractStruct): boolean
+    +write(encoder: typeof Encoder, offset: number, encodingRef: number): void
+    +integrate(transaction: Transaction): void
+}
+class AbstractStructRef {
+    +getMissing(transaction: Transaction): (ID | null)[]
+    +toStruct(transaction: Transaction, store: StructStore, offset: number): AbstractStruct
+}
+class GC extends AbstractStruct {
+    +delete(): void
+    +mergeWith(right: GC): boolean
+    +integrate(transaction: Transaction): void
+    +write(encoder: typeof Encoder, offset: number): void
+}
+class GCRef extends AbstractStructRef {
+    +toStruct(transaction: Transaction, store: StructStore, offset: number): GC
+}
+class ContentBinary {
+    +getLength(): number
+    +getContent(): any[]
+    +isCountable(): boolean
+    +copy(): ContentBinary
+    +splice(offset: number): ContentBinary
+    +mergeWith(right: ContentBinary): boolean
+    +integrate(transaction: Transaction, item: Item): void
+    +delete(transaction: Transaction): void
+    +gc(store: StructStore): void
+    +write(encoder: typeof Encoder, offset: number): void
+    +getRef(): number
+}
+class ContentDeleted {
+    +getLength(): number
+    +getContent(): any[]
+    +isCountable(): boolean
+    +copy(): ContentDeleted
+    +splice(offset: number): ContentDeleted
+    +mergeWith(right: ContentDeleted): boolean
+    +integrate(transaction: Transaction, item: Item): void
+    +delete(transaction: Transaction): void
+    +gc(store: StructStore): void
+    +write(encoder: typeof Encoder, offset: number): void
+    +getRef(): number
+}
+class ContentEmbed {
+    +getLength(): number
+    +getContent(): any[]
+    +isCountable(): boolean
+    +copy(): ContentEmbed
+    +splice(offset: number): ContentEmbed
+    +mergeWith(right: ContentEmbed): boolean
+    +integrate(transaction: Transaction, item: Item): void
+    +delete(transaction: Transaction): void
+    +gc(store: StructStore): void
+    +write(encoder: typeof Encoder, offset: number): void
+    +getRef(): number
+}
+class ContentFormat {
+    +getLength(): number
+    +getContent(): any[]
+    +isCountable(): boolean
+    +copy(): ContentFormat
+    +splice(offset: number): ContentFormat
+    +mergeWith(right: ContentFormat): boolean
+    +integrate(transaction: Transaction, item: Item): void
+    +delete(transaction: Transaction): void
+    +gc(store: StructStore): void
+    +write(encoder: typeof Encoder, offset: number): void
+    +getRef(): number
+}
+class ContentJSON {
+    +getLength(): number
+    +getContent(): any[]
+    +isCountable(): boolean
+    +copy(): ContentJSON
+    +splice(offset: number): ContentJSON
+    +mergeWith(right: ContentJSON): boolean
+    +integrate(transaction: Transaction, item: Item): void
+    +delete(transaction: Transaction): void
+    +gc(store: StructStore): void
+    +write(encoder: typeof Encoder, offset: number): void
+    +getRef(): number
+}
+class ContentAny {
+    +getLength(): number
+    +getContent(): any[]
+    +isCountable(): boolean
+    +copy(): ContentAny
+    +splice(offset: number): ContentAny
+    +mergeWith(right: ContentAny): boolean
+    +integrate(transaction: Transaction, item: Item): void
+    +delete(transaction: Transaction): void
+    +gc(store: StructStore): void
+    +write(encoder: typeof Encoder, offset: number): void
+    +getRef(): number
+}
+class ContentString {
+    +getLength(): number
+    +getContent(): any[]
+    +isCountable(): boolean
+    +copy(): ContentString
+    +splice(offset: number): ContentString
+    +mergeWith(right: ContentString): boolean
+    +integrate(transaction: Transaction, item: Item): void
+    +delete(transaction: Transaction): void
+    +gc(store: StructStore): void
+    +write(encoder: typeof Encoder, offset: number): void
+    +getRef(): number
+}
+class ContentType {
+    +getLength(): number
+    +getContent(): any[]
+    +isCountable(): boolean
+    +copy(): ContentType
+    +splice(offset: number): ContentType
+    +mergeWith(right: ContentType): boolean
+    +integrate(transaction: Transaction, item: Item): void
+    +delete(transaction: Transaction): void
+    +gc(store: StructStore): void
+    +write(encoder: typeof Encoder, offset: number): void
+    +getRef(): number
+}
+class Item extends AbstractStruct {
+    +integrate(transaction: Transaction): void
+    +next: Item | null
+    +prev: Item | null
+    +lastId: ID
+    +mergeWith(right: Item): boolean
+    +delete(transaction: Transaction): void
+    +gc(store: StructStore, parentGCd: boolean): void
+    +write(encoder: typeof Encoder, offset: number): void
+}
+class ItemRef extends AbstractStructRef {
+    +toStruct(transaction: Transaction, store: StructStore, offset: number): Item | GC
+}
+class Awareness extends Observable {
+    +destroy(): void
+    +getLocalState(): { [x: string]: any; } | null
+    +setLocalState(state: { [x: string]: any; } | null): void
+    +setLocalStateField(field: string, value: any): void
+    +getStates(): Map<number, { [x: string]: any; }>
+}
+class WebrtcConn {
+    +destroy(): void
+}
+class Room {
+    +connect(): void
+    +disconnect(): void
+    +destroy(): void
+}
+class SignalingConn
+class WebrtcProvider extends Observable {
+    +connected: boolean
+    +connect(): void
+    +disconnect(): void
+    +destroy(): void
+}
+interface EventBusInterface {
+    +on(type: EventBusType, listener: (...args: any[]) => void): any
+    +off(type: EventBusType, listener: (...args: any[]) => void): any
+    +onSync(data: any): any
+    +onPlayerConnection(id: string, connected: boolean): any
+    +dispose(): any
+    +addService(service: any): any
+}
+class EventBus implements EventBusInterface {
+    -emitter: EventEmitter
+    +on(type: EventBusType, listener: (...args: any[]) => void): void
+    +off(type: EventBusType, listener: (...args: any[]) => void): void
+    +onPlayerConnection(id: string, connected: boolean): void
+    +onSync(data: any): void
+    +dispose(): void
+    +subs: Subscription[]
+    +addService(service: ServiceInterface<any>): void
+}
+class RandomGenerator {
+    +{static} _chance: Chance
+    +{static} float(__0: { min: any; max: any; }): number
+    +{static} avatarName(): string
+    +{static} uuidv4(): string
+    +{static} uint32(): number
+}
+interface SessionStore {
+    +name: string
+    +id: number
+}
+class PersistentStore {
+    -{static} _clientID: number
+    +{static} chanceName: any
+    +{static} id: number
+    -{static} _localName: string
+    +{static} localName: string
+    +{static} localName: string
+    +{static} dispose(): void
+}
+interface CacheStoreSyncInterface {
+    +yDoc: any
+    +transact: any
+    +dispose(): any
+}
+class CacheStoreSync implements CacheStoreSyncInterface {
+    -_yDoc: Doc
+    +transact: (f: (arg0: Transaction) => void, origin?: any) => void
+    +yDoc: Doc
+    +dispose(): void
+}
+class CommunicationService {
+    -_provider: any
+    +roomID: string
+    +dispose(event?: any): Promise<void>
+}
+interface GameModelProp {
+    +currentMasterID?: number | undefined
+    +codeWordHash?: string | undefined
+    +round?: number | undefined
+    +roundsPerGame?: number | undefined
+    +state?: GameStates | undefined
+    +timePerRound?: number | undefined
+    +time?: number | undefined
+}
+interface GameModel extends GameModelProp {
+    +currentMasterID: number
+    +codeWordHash: string
+    +round: number
+    +roundsPerGame: number
+    +state: GameStates
+    +timePerRound: number
+    +time: number
+}
+enum GameStates {
+    WAITING
+    CHOOSING_WORD
+    STARTED
+    STOPPED
+}
+enum GameEvents {
+    CLOCK_UPDATE
+    ROUND_CHANGE
+    MASTER_CHANGED
+    CHOOSING_WORD
+    GAME_STARTED
+    GAME_PAUSED
+    GAME_STOPPED
+}
+interface GameServiceInterface
+interface GameStorePort {
+    +updateProp(props: GameModelProp): void
+    +onUpdate: (f: (prop: GameModelProp) => void) => void
+    +dispose(): any
+    +get(key: K): GameModel[K] | undefined
+    +set(key: K, value: GameModel[K]): void
+}
+interface GameEvent {
+    +type: GameEvents
+    +value?: any
+}
+class GameService implements ServiceInterface {
+    -_timer: Timeout
+    -_adapter: GameStorePort
+    -_subject: Subject<GameEvent>
+    +subject: Subject<GameEvent>
+    +dispose(): void
+    -_handleGameStateChanged(key: "currentMasterID" | "codeWordHash" | "round" | "roundsPerGame" | "state" | "timePerRound" | "time", value: any): void
+    +setupGame(props: GameModelProp): void
+    +startGame(): void
+    +stopGame(): void
+    +nextRound(): void
+    +setNewGuessWord(value: string): void
+    +time: number
+    +roundsPerGame: number
+    +round: number
+    +gameState: GameStates
+    +isGameRunning(): boolean
+}
+class GameStoreAdapter implements GameStorePort {
+    -_store: YMap<GameModel>
+    -_transact: any
+    +_observer: (event: any, tran: any) => void
+    +dispose(): void
+    +updateProp(props: Partial<GameModelProp>): void
+    +get(key: K): GameModel[K] | undefined
+    +set(key: K, value: GameModel[K]): void
+    -_updateListener: (prop: Partial<GameModelProp>) => void
+    +onUpdate(f: (prop: GameModelProp) => void): void
+}
+interface PlayerProps {
+    +name?: string | undefined
+    +points?: number | undefined
+    +lastOnline?: number | undefined
+}
+interface PlayerModel extends PlayerProps {
+    +id: number
+    +name: string
+    +points: number
+    +lastOnline: number
+}
+class Player implements PlayerModel {
+    +id: number
+    +name: string
+    +points: number
+    +lastOnline: number
+    +online(): boolean
+    +gone(): boolean
+    +{static} timeOutOffline: number
+    +{static} timeOutTotal: number
+}
+interface PlayerServiceInterface extends ServiceInterface {
+    +players: Player[]
+    +create(name: string): void
+    +addPoints(points: number): void
+    +updateName(name: string): void
+    +isLocalPlayer(id: number): boolean
+}
+interface PlayerStorePort {
+    +add(player: PlayerModel): PlayerModel
+    +updateProp(props: PlayerProps): any
+    +onUpdate(handler: (player: Map<string, PlayerModel>) => void): any
+}
+class PlayerService implements PlayerServiceInterface {
+    -_map: Map<string, PlayerModel>
+    -_adapter: PlayerStorePort
+    -_localPlayer: PlayerModel
+    -_subject: Subject<Player[]>
+    -_heartBeat: any
+    +subject: Subject<Player[]>
+    +players: Player[]
+    +isLocalPlayer(id: number): boolean
+    +dispose(): void
+    +create(name: string): void
+    +updateName(name: string): void
+    +addPoints(points: number): void
+}
+class PlayerStoreAdapter implements PlayerStorePort {
+    -_store: YMap<YMap<PlayerModel>>
+    -_transact: any
+    +_observer: (event: any, tran: any) => void
+    +dispose(): void
+    -_updateLister: (p: Map<string, PlayerModel>) => void
+    -_onPlayerUpdate: () => void
+    +add(player: PlayerModel): PlayerModel
+    +updateProp(props: PlayerProps): void
+    +onUpdate(handler: (players: Map<string, PlayerModel>) => void): void
+}
+interface Message {
+    +id: string
+    +ts: number
+    +user: string
+    +message: string
+}
+interface MessageStorePort {
+    +add(msg: Message): void
+    +getCurrentContent(): Message[]
+    +onUpdate(handler: (messages: Message[]) => void): any
+    +clearStore(): void
+    +dispose(): any
+}
+class MessageService implements ServiceInterface {
+    +adapter: MessageStorePort
+    +subject: Subject<Message[]>
+    +messages: Message[]
+    +allMessages: Message[]
+    +isLocal(id: string): boolean
+    +sendMessage(msg: string): void
+    +clearMessages(): void
+    +dispose(): void
+}
+class MessageStoreAdapter implements MessageStorePort {
+    -_store: YArray<Message>
+    +_observer: (event: any, tran: any) => void
+    +getCurrentContent(): Message[]
+    +dispose(): void
+    +clearStore(): void
+    +add(msg: Message): void
+    +_onUpdateListener: (messages: Message[]) => void
+    +onUpdate(handler: (messages: Message[]) => void): void
+}
+enum AppEventType {
+    GAME_START
+    GAME_END
+}
+interface AppStateEvent {
+    +type: AppEventType
+    +value: any
+}
+class AppService {
+    +gameEntered: boolean
+    +roomID: string
+    +subject: Subject<AppStateEvent>
+    +cacheStore: CacheStoreSyncInterface
+    +commService: CommunicationService
+    +eventBus: EventBus
+    +drawingStoreAdapter: DrawingStoreAdapter
+    +gameStoreAdapter: GameStoreAdapter
+    +messageStoreAdapter: MessageStoreAdapter
+    +playerStoreAdapter: PlayerStoreAdapter
+    +drawingService: DrawingService
+    +gameService: GameService
+    +messageService: MessageService
+    +playerService: PlayerService
+    +startGame(): void
+    +stopGame(): void
+    +nextRound(): void
+    +enterGame(roomID?: string): void
+    +exitGame(): void
+}
+class DrawingStoreAdapter implements DrawingStorePort {
+    +store: YArray<any>
+    -currentDrawElement: YMap<any>
+    -currentDrawPath: YArray<Coordinate>
+    +dispose(): void
+    +observer: (event?: any, trans?: any) => void
+    +addNewPath(color: string, origin: Coordinate): void
+    +appendToCurrentPath(coordinates: Coordinate): void
+    +onUpdate(handler: (values: DrawingPath[]) => void): void
+    +_onUpdateHandler: (values: DrawingPath[]) => void
+    +clearStore(): void
+}
+@enduml
