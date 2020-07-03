@@ -1,25 +1,26 @@
+# Disclaimer
+
+This Game is not a real game yet and misses the actual game logic. But you can check it out here [SketchGuessr](https://sketchguessr.netlify.com/)
+
 # SketchGuessr
 
-Dieses Projekt stellt eine unvollständige Implementierung des SketchGuessrs Konzept dar. Momentan ist das Erstellen oder das Beitreten eines Spiels möglich. 
+The game sketchGuesser was a uni project and tries to implement a p2p game setup. It uses [yjs](http://y-js.org/) as the underlaying and concurrent layer. The player communicate via WebRTC, so if WebRTC is not supported player are not able to play this game. 
 
-Der Spieler wird in einem Warteraum gebracht, der alle verbundenen Spiele aufzeigt. Es kann der Name geändert werden. 
-
-Mit dem Controllern oben am Bildschirm, kann eine Spielsession gestartet werden.
-Anschließen öffnet sich die Spielsession.
-
-Momentan ist keine richtige Spiellogik enthalten. So kann jeder eine Nachricht verschicken und auf der Zeichenoberfläche zeichnen.
-
-Das Spiel wird auf Netlify gehostet und kann unter diesem [SketchGuessr](https://sketchguessr.netlify.com/) erreicht werden. 
-
-## Installations des Projekts
-
-1. NodeJS muss mindestens in Version v12.4.0 installiert sein.
-2. `npm install` ausführen
-3. `npm start` ausführen.
-
-## Generierung der PUML Datein
-Ist das Paket `tplant` installiert, kann mit dem Befehl `npm run doc.tplant` eine puml Datei generiert werden, die die Komponenten darstellt. 
-mit dem Befehl '`npm run doc.tplant.svg` wird eine SVG Datei erzeugt. Beide Dateien werden in dem Ordner puml liegen.
+The author of yjs provides some WebRTC signaling Server and this is uses to connect players with each other. It also supports rooms for different game sessions.
 
 
-Eventuel muss die Grafikengine GraphViz installiert werden [GraphViz](https://www.graphviz.org/)
+## Build this project
+
+1. min version of NodeJS `v12.4.0`
+2. `npm install`
+3. `npm start`
+
+
+## Generating PUML Documentation
+
+1. install `tplant` via `npm -D tplant` if not already
+2. generate docs `npm run doc.tplant`
+3. `npm run doc.tplant.svg` to generate the SVGs
+
+**The project documentation can be found under the folder `puml`.
+**[GraphViz](https://www.graphviz.org/) must be installed to generate the SVGs.
