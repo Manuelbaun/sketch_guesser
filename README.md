@@ -1,13 +1,12 @@
 # Disclaimer
 
-This Game is not a real game yet and misses the actual game logic. But you can check it out here [SketchGuessr](https://sketchguessr.netlify.com/)
+This Game is not a real game yet and misses the actual game logic. But you can check it out here [SketchGuessr](https://sketch-guesser.netlify.app/)
 
 # SketchGuessr
 
-The game sketchGuesser was a uni project and tries to implement a p2p game setup. It uses [yjs](http://y-js.org/) as the underlaying and concurrent layer. The player communicate via WebRTC, so if WebRTC is not supported player are not able to play this game. 
+SketchGuesser is a React PWA Game. The was a uni project and tries to implement a p2p game setup. It uses [yjs](http://y-js.org/) as the underlying and concurrent layer. The player communicate via WebRTC, so if WebRTC is not supported player are not able to play this game.
 
 The author of yjs provides some WebRTC signaling Server and this is uses to connect players with each other. It also supports rooms for different game sessions.
-
 
 ## Build this project
 
