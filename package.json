@@ -23,14 +23,14 @@
 		"react-dom": "^16.12.0",
 		"react-full-screen": "^0.2.4",
 		"react-graph-vis": "^1.0.5",
-		"react-scripts": "3.3.0",
+		"react-scripts": "^3.4.1",
 		"rxjs": "^6.5.3",
 		"simple-peer": "^9.6.2",
 		"typescript": "3.7.3",
 		"ulog": "^1.1.0",
 		"y-protocols": "^0.1.0",
-		"y-webrtc": "^10.1.1",
-		"yjs": "^13.0.0-103"
+		"y-webrtc": "^10.1.5",
+		"yjs": "^13.2.0"
 	},
 	"scripts": {
 		"start": "react-scripts start",
@@ -61,11 +61,11 @@
 		]
 	},
 	"devDependencies": {
-		"eslint-plugin-react": "^7.17.0",
+		"eslint-plugin-react": "^7.20.3",
 		"husky": "^3.1.0",
 		"tplant": "^2.3.3",
 		"tsuml": "0.0.1-alpha.8",
 		"tsviz": "^1.0.11",
-		"typedoc": "^0.15.4"
+		"typedoc": "^0.15.8"
 	}
 }

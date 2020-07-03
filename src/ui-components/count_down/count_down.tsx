@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { GameService, GameEvents } from '../../components/game';
+import { GameEvents } from '../../components/game';
 
 import './count_down.css';
 import { AppContext } from '../../App';
@@ -7,8 +7,8 @@ import { AppContext } from '../../App';
 export const CountDown: React.FC = (props) => {
 	const { service: { gameService } } = useContext(AppContext);
 
-	const [ time, setTime ] = useState(gameService.time);
-	const [ currentRound, setCurrentRound ] = useState(gameService.round);
+	const [time, setTime] = useState(gameService.time);
+	const [currentRound, setCurrentRound] = useState(gameService.round);
 
 	useEffect(
 		() => {
@@ -24,7 +24,7 @@ export const CountDown: React.FC = (props) => {
 				sub.unsubscribe();
 			};
 		},
-		[ gameService ]
+		[gameService]
 	);
 
 	return (

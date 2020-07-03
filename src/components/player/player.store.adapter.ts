@@ -3,13 +3,6 @@ import { PlayerStorePort } from './player.store.port';
 import { PlayerModel, PlayerProps } from './player.model';
 import { CacheStoreSyncInterface, PersistentStore } from '../../service';
 
-// workaround to use the YMap as Type for proper intellisense
-// remove when types on yjs exits
-export declare type YMap<T> = {
-	toJSON(): { [P in keyof T]?: T[P] };
-	set(key: string, value: T);
-	get(key: string): T | undefined;
-};
 
 export class PlayerStoreAdapter implements PlayerStorePort {
 	private _store = new YMap<YMap<PlayerModel>>();
@@ -30,7 +23,7 @@ export class PlayerStoreAdapter implements PlayerStorePort {
 	 */
 	_observer = (event, tran) => {
 		// or should just get that key
-		for (const [ key, changeAction ] of event.changes.keys) {
+		for (const [key, changeAction] of event.changes.keys) {
 			const map = this._store.get(key);
 			console.log(key, changeAction.action, map);
 		}
@@ -70,7 +63,7 @@ export class PlayerStoreAdapter implements PlayerStorePort {
 		// update in a batch
 		this._transact(() => {
 			const obj = Object.entries(player);
-			obj.forEach(([ key, value ]) => p.set(key, value));
+			obj.forEach(([key, value]) => p.set(key, value));
 		});
 
 		this._store.set(PersistentStore.id.toString(), p);
@@ -88,7 +81,7 @@ export class PlayerStoreAdapter implements PlayerStorePort {
 			this._transact(() => {
 				const obj = Object.entries(props);
 
-				obj.forEach(([ key, value ]) => {
+				obj.forEach(([key, value]) => {
 					p.set(key, value);
 				});
 			});

@@ -3,11 +3,7 @@ import { GameStorePort } from './game_store.port';
 import { CacheStoreSyncInterface } from '../../service';
 import { GAME_STORE_NAME, GameModelProp, GameModel, GameModelKeys } from './game.model';
 
-export declare type YMap<T> = {
-	toJSON(): { [P in keyof T]?: T[P] };
-	set<P extends keyof T>(key: string, value: T[P]): T;
-	get<P extends keyof T>(key: string): T[P] | undefined;
-};
+
 
 export class GameStoreAdapter implements GameStorePort {
 	private _store = new YMap<GameModel>();
@@ -27,7 +23,7 @@ export class GameStoreAdapter implements GameStorePort {
 	_observer = (event, tran): void => {
 		// console.log(tran);
 		// or should just get that key
-		for (const [ key, changeAction ] of event.changes.keys) {
+		for (const [key] of event.changes.keys) {
 			const value = this._store.get(key);
 			// console.log(key, changeAction.action, value);
 			this._updateListener({ [key]: value });
@@ -42,7 +38,7 @@ export class GameStoreAdapter implements GameStorePort {
 		this._transact(() => {
 			const obj = Object.entries(props);
 			// @ts-ignore
-			obj.forEach(([ key, value ]) => this._store.set(key, value));
+			obj.forEach(([key, value]) => this._store.set(key, value));
 		});
 	}
 

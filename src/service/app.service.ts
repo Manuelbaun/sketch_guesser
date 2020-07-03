@@ -1,4 +1,4 @@
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { GameStoreAdapter, GameService } from '../components/game';
 import { PlayerStoreAdapter, PlayerService } from '../components/player';
 import { MessageStoreAdapter, MessageService } from '../components/messages';
